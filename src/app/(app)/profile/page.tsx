@@ -58,6 +58,10 @@ export default function ProfilePage() {
                     <p className="font-medium">{mockEmployees.find(e => e.id === user.id)?.joiningDate || 'N/A'}</p>
                 </div>
                 <div className="space-y-1">
+                    <p className="text-muted-foreground">Joining Branch/District</p>
+                    <p className="font-medium">{mockEmployees.find(e => e.id === user.id)?.joiningDistrict || 'N/A'}</p>
+                </div>
+                <div className="space-y-1">
                     <p className="text-muted-foreground">Mobile Number</p>
                     <p className="font-medium">{mockEmployees.find(e => e.id === user.id)?.contact || 'N/A'}</p>
                 </div>

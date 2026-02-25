@@ -14,6 +14,7 @@ export interface Employee {
   rank: 'Constable' | 'Head Constable' | 'ASI' | 'SI' | 'Inspector';
   contact: string;
   joiningDate: string;
+  joiningDistrict: string;
   avatarUrl: string;
 }
 

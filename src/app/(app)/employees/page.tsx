@@ -107,6 +107,7 @@ export default function EmployeesPage() {
               <TableHead>PNO</TableHead>
               <TableHead>Employee Name</TableHead>
               <TableHead>Joining Date</TableHead>
+              <TableHead>Joining Branch/District</TableHead>
               <TableHead>Mobile Number</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -127,6 +128,7 @@ export default function EmployeesPage() {
                   </div>
                 </TableCell>
                 <TableCell>{employee.joiningDate}</TableCell>
+                <TableCell>{employee.joiningDistrict}</TableCell>
                 <TableCell>{employee.contact}</TableCell>
                 <TableCell className="text-right">
                    <DropdownMenu>
