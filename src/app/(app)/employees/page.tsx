@@ -42,11 +42,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useAuth } from "@/lib/auth"
 
 export default function EmployeesPage() {
+  const { user } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
+  const [editingEmployee, setEditingEmployee] = useState<Partial<Employee> | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -61,6 +63,7 @@ export default function EmployeesPage() {
     joiningDate: "",
     joiningDistrict: "",
     password: "",
+    role: "employee" as "admin" | "employee",
   }
 
   const [newEmployee, setNewEmployee] = useState(initialNewEmployeeState)
@@ -99,16 +102,13 @@ export default function EmployeesPage() {
     
     let employeeToUpdate = { ...editingEmployee };
 
-    // If password field is empty, don't save an empty string. 
-    // Let the login logic use the DOB default by removing the key.
     if (employeeToUpdate.password === "") {
-        const { password, ...rest } = employeeToUpdate;
-        employeeToUpdate = rest as typeof employeeToUpdate;
+        delete employeeToUpdate.password;
     }
 
     updateEmployees(
       employees.map((emp) =>
-        emp.id === employeeToUpdate.id ? employeeToUpdate : emp
+        emp.id === employeeToUpdate.id ? (employeeToUpdate as Employee) : emp
       )
     )
     setIsEditDialogOpen(false)
@@ -126,6 +126,11 @@ export default function EmployeesPage() {
     setEditingEmployee({ ...editingEmployee, rank: value as EmployeeRank })
   }
 
+  const handleRoleChange = (value: "admin" | "employee") => {
+    if (!editingEmployee) return
+    setEditingEmployee({ ...editingEmployee, role: value })
+  }
+
   const openEditDialog = (employee: Employee) => {
     setEditingEmployee({ ...employee })
     setIsEditDialogOpen(true)
@@ -138,6 +143,10 @@ export default function EmployeesPage() {
 
   const handleNewRankChange = (value: string) => {
     setNewEmployee({ ...newEmployee, rank: value as EmployeeRank })
+  }
+
+  const handleNewRoleChange = (value: "admin" | "employee") => {
+    setNewEmployee({ ...newEmployee, role: value })
   }
 
   const handleAddEmployee = () => {
@@ -153,7 +162,7 @@ export default function EmployeesPage() {
         }
     }
 
-    updateEmployees([...employees, { ...employeeToAdd, id: newId, avatarUrl }])
+    updateEmployees([...employees, { ...employeeToAdd, id: newId, avatarUrl } as Employee])
     setIsAddDialogOpen(false)
     setNewEmployee(initialNewEmployeeState)
   }
@@ -171,6 +180,8 @@ export default function EmployeesPage() {
       setShowPassword(false);
     }
   }
+  
+  const canEdit = user?.rank === 'Administrator';
 
   return (
     <>
@@ -190,7 +201,7 @@ export default function EmployeesPage() {
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={handleAddDialogChange}>
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={!canEdit}>
               <PlusCircle className="mr-2" />
               Add Employee
             </Button>
@@ -259,10 +270,27 @@ export default function EmployeesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {employeeRanks.map((rank) => (
-                      <SelectItem key={rank} value={rank}>
+                      <SelectItem key={rank} value={rank} disabled={rank === 'Administrator'}>
                         {rank}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="role" className="text-right">
+                  Role
+                </Label>
+                <Select
+                  onValueChange={handleNewRoleChange}
+                  value={newEmployee.role}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -355,10 +383,10 @@ export default function EmployeesPage() {
             <TableRow>
               <TableHead>Sr. No.</TableHead>
               <TableHead>Rank</TableHead>
+              <TableHead>Role</TableHead>
               <TableHead>Badge Number</TableHead>
               <TableHead>PNO</TableHead>
               <TableHead>Employee Name</TableHead>
-              <TableHead>Password</TableHead>
               <TableHead>Date of Birth</TableHead>
               <TableHead>Joining Date</TableHead>
               <TableHead>Joining Branch/District</TableHead>
@@ -372,6 +400,9 @@ export default function EmployeesPage() {
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{employee.rank}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>{employee.role}</Badge>
                 </TableCell>
                 <TableCell>{employee.badgeNumber}</TableCell>
                 <TableCell>{employee.pno}</TableCell>
@@ -388,26 +419,26 @@ export default function EmployeesPage() {
                     <div className="font-medium">{employee.name}</div>
                   </div>
                 </TableCell>
-                <TableCell>********</TableCell>
                 <TableCell>{employee.dob ? format(new Date(employee.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
-                <TableCell>{format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
+                <TableCell>{employee.joiningDate ? format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                 <TableCell>{employee.joiningDistrict}</TableCell>
                 <TableCell>{employee.contact}</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
+                      <Button variant="ghost" className="h-8 w-8 p-0" disabled={!canEdit && employee.rank !== 'Administrator'}>
                         <span className="sr-only">Open menu</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => openEditDialog(employee)}>
+                      <DropdownMenuItem onClick={() => openEditDialog(employee)} disabled={!canEdit && employee.rank !== 'Administrator'}>
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-red-500"
                         onClick={() => deleteEmployee(employee.id)}
+                        disabled={!canEdit}
                       >
                         Delete
                       </DropdownMenuItem>
@@ -444,6 +475,7 @@ export default function EmployeesPage() {
                   value={editingEmployee.name ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
+                  disabled={!canEdit && editingEmployee.rank !== 'Administrator'}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -498,16 +530,35 @@ export default function EmployeesPage() {
                 <Select
                   onValueChange={handleRankChange}
                   value={editingEmployee.rank ?? ""}
+                   disabled={!canEdit}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select rank" />
                   </SelectTrigger>
                   <SelectContent>
                      {employeeRanks.map((rank) => (
-                      <SelectItem key={rank} value={rank}>
+                      <SelectItem key={rank} value={rank} disabled={rank === 'Administrator'}>
                         {rank}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="role" className="text-right">
+                  Role
+                </Label>
+                <Select
+                  onValueChange={handleRoleChange}
+                  value={editingEmployee.role ?? "employee"}
+                  disabled={!canEdit}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -520,6 +571,7 @@ export default function EmployeesPage() {
                   value={editingEmployee.badgeNumber ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
+                  disabled={!canEdit}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -531,6 +583,7 @@ export default function EmployeesPage() {
                   value={editingEmployee.pno ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
+                  disabled={!canEdit}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -543,6 +596,7 @@ export default function EmployeesPage() {
                   value={editingEmployee.dob ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
+                  disabled={!canEdit}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -566,6 +620,7 @@ export default function EmployeesPage() {
                   value={editingEmployee.joiningDate ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
+                  disabled={!canEdit}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -577,6 +632,7 @@ export default function EmployeesPage() {
                   value={editingEmployee.joiningDistrict ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
+                  disabled={!canEdit}
                 />
               </div>
             </div>
@@ -595,5 +651,3 @@ export default function EmployeesPage() {
     </>
   )
 }
-
-    

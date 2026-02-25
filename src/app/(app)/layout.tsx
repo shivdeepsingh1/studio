@@ -31,7 +31,7 @@ import { Button } from '@/components/ui/button';
 
 function MainSidebar() {
   const pathname = usePathname();
-  const { role, user, logout } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const { isMobile } = useSidebar();
 
@@ -59,7 +59,7 @@ function MainSidebar() {
       <SidebarContent className="p-2">
         <SidebarMenu>
           {navItems.map((item) => {
-            if (item.adminOnly && role !== 'admin') {
+            if (item.adminOnly && user?.role !== 'admin') {
               return null;
             }
             return (

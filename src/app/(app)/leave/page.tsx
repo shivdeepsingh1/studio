@@ -54,7 +54,7 @@ const leaveTypes: Leave["type"][] = ["Casual", "Sick", "Earned", "Maternity"]
 const leaveStatuses: Leave["status"][] = ["Pending", "Approved", "Rejected"]
 
 export default function LeavePage() {
-  const { role, user } = useAuth()
+  const { user } = useAuth()
   const [leaves, setLeaves] = useState<Leave[]>([])
   const [allEmployees, setAllEmployees] = useState<Employee[]>([])
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false)
@@ -112,7 +112,7 @@ export default function LeavePage() {
   }
 
   const handleSaveLeave = () => {
-    const isEmployeeRequest = role === "employee"
+    const isEmployeeRequest = user?.role === "employee"
     const employeeId = isEmployeeRequest ? user?.id : newLeave.employeeId
 
     if (
@@ -172,7 +172,7 @@ export default function LeavePage() {
       <PageHeader
         title="Leave Management"
         description={
-          role === "admin"
+          user?.role === "admin"
             ? "Update and manage employee leave details."
             : "View your leave status and history."
         }
@@ -196,20 +196,20 @@ export default function LeavePage() {
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2" />
-              {role === "admin" ? "Add Leave" : "Request Leave"}
+              {user?.role === "admin" ? "Add Leave" : "Request Leave"}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {role === "admin" ? "Add Leave Record" : "Request New Leave"}
+                {user?.role === "admin" ? "Add Leave Record" : "Request New Leave"}
               </DialogTitle>
               <DialogDescription>
                 Fill in the details to submit a leave request.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              {role === "admin" && (
+              {user?.role === "admin" && (
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="employeeId" className="text-right">
                     Employee
@@ -288,7 +288,7 @@ export default function LeavePage() {
                   className="col-span-3"
                 />
               </div>
-              {role === "admin" && (
+              {user?.role === "admin" && (
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="status" className="text-right">
                     Status
@@ -334,7 +334,7 @@ export default function LeavePage() {
           <TableHeader>
             <TableRow>
               <TableHead>Sr. No.</TableHead>
-              {role === "admin" && <TableHead>Employee Name</TableHead>}
+              {user?.role === "admin" && <TableHead>Employee Name</TableHead>}
               <TableHead>Type</TableHead>
               <TableHead>Start Date</TableHead>
               <TableHead>End Date</TableHead>
@@ -343,10 +343,10 @@ export default function LeavePage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(role === "admin" ? leaves : employeeLeaves).map((leave, index) => (
+            {(user?.role === "admin" ? leaves : employeeLeaves).map((leave, index) => (
               <TableRow key={leave.id}>
                 <TableCell>{index + 1}</TableCell>
-                {role === "admin" && (
+                {user?.role === "admin" && (
                   <TableCell>{leave.employeeName}</TableCell>
                 )}
                 <TableCell>{leave.type}</TableCell>
@@ -356,7 +356,7 @@ export default function LeavePage() {
                   {leave.reason}
                 </TableCell>
                 <TableCell>
-                  {role === 'admin' ? (
+                  {user?.role === 'admin' ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="p-0 h-auto">
@@ -395,14 +395,14 @@ export default function LeavePage() {
                 </TableCell>
               </TableRow>
             ))}
-            {role === "employee" && employeeLeaves.length === 0 && (
+            {user?.role === "employee" && employeeLeaves.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center">
                   No leave records found.
                 </TableCell>
               </TableRow>
             )}
-             {role === "admin" && leaves.length === 0 && (
+             {user?.role === "admin" && leaves.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center">
                   No leave records found.

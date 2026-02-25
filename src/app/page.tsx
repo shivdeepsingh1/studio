@@ -18,11 +18,9 @@ export default function LoginPage() {
   const { login } = useAuth();
   const { toast } = useToast();
 
-  const handleLogin = (role: 'admin' | 'employee') => {
-    // In a real app, you'd validate credentials against a backend.
-    // Here, we'll just log in a mock user.
+  const handleLogin = () => {
     if (pno && password) {
-      const success = login(pno, password, role);
+      const success = login(pno, password);
       if (success) {
         router.push('/dashboard');
       } else {
@@ -33,7 +31,6 @@ export default function LoginPage() {
         });
       }
     } else {
-      // Handle empty fields error
       toast({
         variant: "destructive",
         title: "Missing Information",
@@ -63,11 +60,8 @@ export default function LoginPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full bg-accent hover:bg-accent/90" onClick={() => handleLogin('admin')}>
-            <Shield className="mr-2 h-4 w-4" /> Login as Admin
-          </Button>
-          <Button variant="outline" className="w-full" onClick={() => handleLogin('employee')}>
-            <User className="mr-2 h-4 w-4" /> Login as Employee
+          <Button className="w-full" onClick={handleLogin}>
+            <User className="mr-2 h-4 w-4" /> Login
           </Button>
         </CardFooter>
       </Card>

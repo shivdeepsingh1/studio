@@ -31,7 +31,7 @@ const chartConfig = {
 };
 
 export default function DashboardPage() {
-  const { user, role } = useAuth();
+  const { user } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [duties, setDuties] = useState<Duty[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
@@ -58,9 +58,9 @@ export default function DashboardPage() {
 
   return (
     <>
-      <PageHeader title={`Welcome, ${user?.name?.split(' ')[0]}!`} description={role === 'admin' ? "Here's your command center overview." : "Here's your daily summary."} />
+      <PageHeader title={`Welcome, ${user?.name?.split(' ')[0]}!`} description={user?.role === 'admin' ? "Here's your command center overview." : "Here's your daily summary."} />
 
-      {role === 'admin' ? (
+      {user?.role === 'admin' ? (
         <div className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>

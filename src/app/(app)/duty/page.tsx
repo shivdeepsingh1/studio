@@ -54,7 +54,7 @@ const generatePdf = (data: any, title: string) => {
 }
 
 export default function DutyPage() {
-  const { role, user } = useAuth()
+  const { user } = useAuth()
   const [duties, setDuties] = useState<Duty[]>([])
   const [allEmployees, setAllEmployees] = useState<Employee[]>([])
   const [date, setDate] = useState<Date | undefined>(new Date())
@@ -195,12 +195,12 @@ export default function DutyPage() {
       <PageHeader
         title="Duty Roster"
         description={
-          role === "admin"
+          user?.role === "admin"
             ? "Assign and manage daily duties for all employees."
             : "View your upcoming and past duty assignments."
         }
       >
-        {role === "admin" && (
+        {user?.role === "admin" && (
           <Dialog
             open={isAssignDialogOpen}
             onOpenChange={(isOpen) => {
@@ -333,7 +333,7 @@ export default function DutyPage() {
         </Button>
       </PageHeader>
 
-      {role === "admin" ? (
+      {user?.role === "admin" ? (
         <Tabs defaultValue="list">
           <TabsList>
             <TabsTrigger value="list">Duty List</TabsTrigger>

@@ -5,9 +5,11 @@ export interface User {
   rank: string;
   avatarUrl: string;
   email: string;
+  role: 'admin' | 'employee';
 }
 
 export type EmployeeRank =
+  | "Administrator"
   | "Inspector"
   | "Lady Inspector"
   | "Sub Inspector"
@@ -21,6 +23,7 @@ export type EmployeeRank =
   | "Other";
 
 export const employeeRanks: EmployeeRank[] = [
+  "Administrator",
   "Inspector",
   "Lady Inspector",
   "Sub Inspector",
@@ -46,6 +49,7 @@ export interface Employee {
   joiningDistrict: string;
   avatarUrl: string;
   password?: string;
+  role: 'admin' | 'employee';
 }
 
 export interface Duty {
