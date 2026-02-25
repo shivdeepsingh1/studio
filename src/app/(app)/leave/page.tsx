@@ -17,14 +17,25 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { mockLeaves } from "@/lib/mock-data"
+import { mockEmployees, mockLeaves } from "@/lib/mock-data"
 import { Leave } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 
 // A mock function for PDF generation
 const generatePdf = (data: any, title: string) => {
@@ -32,9 +43,68 @@ const generatePdf = (data: any, title: string) => {
   alert(`PDF for "${title}" would be generated. Check console for data.`)
 }
 
+const leaveTypes: Leave["type"][] = ["Casual", "Sick", "Earned", "Maternity"]
+const leaveStatuses: Leave["status"][] = ["Pending", "Approved", "Rejected"]
+
 export default function LeavePage() {
   const { role, user } = useAuth()
   const [leaves, setLeaves] = useState<Leave[]>(mockLeaves)
+  const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false)
+
+  const initialNewLeaveState = {
+    employeeId: "",
+    type: "Casual" as Leave["type"],
+    startDate: "",
+    endDate: "",
+    reason: "",
+    status: "Pending" as Leave["status"],
+  }
+
+  const [newLeave, setNewLeave] = useState(initialNewLeaveState)
+
+  const handleNewLeaveInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target
+    setNewLeave({ ...newLeave, [id]: value })
+  }
+
+  const handleNewLeaveSelectChange = (id: string, value: string) => {
+    setNewLeave({ ...newLeave, [id]: value as any })
+  }
+
+  const handleSaveLeave = () => {
+    const isEmployeeRequest = role === "employee"
+    const employeeId = isEmployeeRequest ? user?.id : newLeave.employeeId
+
+    if (
+      !employeeId ||
+      !newLeave.startDate ||
+      !newLeave.endDate ||
+      !newLeave.reason
+    ) {
+      alert("Please fill all required fields.")
+      return
+    }
+    const employee = mockEmployees.find((e) => e.id === employeeId)
+    if (!employee) {
+      alert("Employee not found.")
+      return
+    }
+
+    const leaveToAdd: Leave = {
+      id: Date.now().toString(),
+      employeeId: employeeId,
+      employeeName: employee.name,
+      type: newLeave.type,
+      startDate: newLeave.startDate,
+      endDate: newLeave.endDate,
+      reason: newLeave.reason,
+      status: isEmployeeRequest ? "Pending" : newLeave.status,
+    }
+    setLeaves([...leaves, leaveToAdd])
+    setIsLeaveDialogOpen(false)
+  }
 
   const handleExport = () => {
     generatePdf(leaves, "Leave Records")
@@ -63,33 +133,158 @@ export default function LeavePage() {
             : "View your leave status and history."
         }
       >
-        {role === "admin" && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>
-                <PlusCircle className="mr-2" />
-                Update Leave
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Update Leave Details</DialogTitle>
-                <DialogDescription>
-                  Select an employee and update their leave status. This is a placeholder.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <p>Leave update form would be here.</p>
+        <Dialog
+          open={isLeaveDialogOpen}
+          onOpenChange={(isOpen) => {
+            setIsLeaveDialogOpen(isOpen)
+            if (isOpen) {
+              const today = new Date().toISOString().split("T")[0]
+              setNewLeave({
+                ...initialNewLeaveState,
+                startDate: today,
+                endDate: today,
+              })
+            } else {
+              setNewLeave(initialNewLeaveState)
+            }
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button>
+              <PlusCircle className="mr-2" />
+              {role === "admin" ? "Add Leave" : "Request Leave"}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {role === "admin" ? "Add Leave Record" : "Request New Leave"}
+              </DialogTitle>
+              <DialogDescription>
+                Fill in the details to submit a leave request.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              {role === "admin" && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="employeeId" className="text-right">
+                    Employee
+                  </Label>
+                  <Select
+                    onValueChange={(value) =>
+                      handleNewLeaveSelectChange("employeeId", value)
+                    }
+                    value={newLeave.employeeId}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockEmployees.map((employee) => (
+                        <SelectItem key={employee.id} value={employee.id}>
+                          {employee.name} ({employee.pno})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="type" className="text-right">
+                  Leave Type
+                </Label>
+                <Select
+                  onValueChange={(value) => handleNewLeaveSelectChange("type", value)}
+                  value={newLeave.type}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {leaveTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </DialogContent>
-          </Dialog>
-        )}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="startDate" className="text-right">
+                  Start Date
+                </Label>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={newLeave.startDate}
+                  onChange={handleNewLeaveInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="endDate" className="text-right">
+                  End Date
+                </Label>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={newLeave.endDate}
+                  onChange={handleNewLeaveInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="reason" className="text-right">
+                  Reason
+                </Label>
+                <Textarea
+                  id="reason"
+                  value={newLeave.reason}
+                  onChange={handleNewLeaveInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              {role === "admin" && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="status" className="text-right">
+                    Status
+                  </Label>
+                  <Select
+                    onValueChange={(value) => handleNewLeaveSelectChange("status", value)}
+                    value={newLeave.status}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {leaveStatuses.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsLeaveDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSaveLeave}>Save</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <Button variant="outline" onClick={handleExport}>
           <FileDown className="mr-2" />
           Export PDF
         </Button>
       </PageHeader>
-      
+
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
@@ -103,27 +298,37 @@ export default function LeavePage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(role === 'admin' ? leaves : employeeLeaves).map((leave) => (
+            {(role === "admin" ? leaves : employeeLeaves).map((leave) => (
               <TableRow key={leave.id}>
-                {role === "admin" && <TableCell>{leave.employeeName}</TableCell>}
+                {role === "admin" && (
+                  <TableCell>{leave.employeeName}</TableCell>
+                )}
                 <TableCell>{leave.type}</TableCell>
                 <TableCell>{leave.startDate}</TableCell>
                 <TableCell>{leave.endDate}</TableCell>
-                <TableCell className="max-w-xs truncate">{leave.reason}</TableCell>
+                <TableCell className="max-w-xs truncate">
+                  {leave.reason}
+                </TableCell>
                 <TableCell>
-                  <Badge variant={getStatusBadgeVariant(leave.status)}
-                    className={cn(leave.status === 'Approved' && 'bg-green-500 hover:bg-green-600')}
+                  <Badge
+                    variant={getStatusBadgeVariant(leave.status)}
+                    className={cn(
+                      leave.status === "Approved" &&
+                        "bg-green-500 hover:bg-green-600"
+                    )}
                   >
                     {leave.status}
                   </Badge>
                 </TableCell>
               </TableRow>
             ))}
-             {(role === 'employee' && employeeLeaves.length === 0) && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center">No leave records found.</TableCell>
-                </TableRow>
-              )}
+            {role === "employee" && employeeLeaves.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  No leave records found.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>

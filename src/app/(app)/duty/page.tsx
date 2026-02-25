@@ -126,10 +126,15 @@ export default function DutyPage() {
           <Dialog
             open={isAssignDialogOpen}
             onOpenChange={(isOpen) => {
-              setIsAssignDialogOpen(isOpen)
-              if (!isOpen) {
+              if (isOpen) {
+                setNewDuty({
+                  ...initialNewDutyState,
+                  date: new Date().toISOString().split("T")[0],
+                })
+              } else {
                 setNewDuty(initialNewDutyState)
               }
+              setIsAssignDialogOpen(isOpen)
             }}
           >
             <DialogTrigger asChild>
@@ -307,8 +312,8 @@ export default function DutyPage() {
                   }}
                   numberOfMonths={2}
                   captionLayout="dropdown-buttons"
-                  fromYear={1950}
-                  toYear={new Date().getFullYear() + 50}
+                  fromYear={new Date().getFullYear() - 10}
+                  toYear={new Date().getFullYear() + 10}
                 />
               </CardContent>
             </Card>
