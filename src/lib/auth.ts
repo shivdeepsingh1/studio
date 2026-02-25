@@ -64,15 +64,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           employees = mockEmployees;
         }
-        const employee = employees.find(emp => emp.pno === pno && emp.password === password);
-        if(employee) {
-            foundUser = {
-                id: employee.id,
-                pno: employee.pno,
-                name: employee.name,
-                rank: employee.rank,
-                avatarUrl: employee.avatarUrl,
-                email: `${employee.pno}@police.gov`
+        
+        const employee = employees.find(emp => emp.pno === pno);
+
+        if (employee) {
+            let employeePassword = employee.password;
+            // If password is not set, create a default one from DoB
+            if (!employeePassword && employee.dob) {
+                const [year, month, day] = employee.dob.split('-');
+                employeePassword = `${day}${month}${year}`;
+            }
+
+            if (employeePassword === password) {
+                foundUser = {
+                    id: employee.id,
+                    pno: employee.pno,
+                    name: employee.name,
+                    rank: employee.rank,
+                    avatarUrl: employee.avatarUrl,
+                    email: `${employee.pno}@police.gov`
+                };
             }
         }
     }
