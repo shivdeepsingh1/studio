@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -70,9 +69,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (employee) {
             let employeePassword = employee.password;
             // If password is not set, create a default one from DoB
-            if (!employeePassword && employee.dob) {
-                const [year, month, day] = employee.dob.split('-');
-                employeePassword = `${day}${month}${year}`;
+            if (!employeePassword && employee.dob && employee.dob.includes('-')) {
+                const parts = employee.dob.split('-');
+                if (parts.length === 3) {
+                    const [year, month, day] = parts;
+                    employeePassword = `${day}${month}${year}`;
+                }
             }
 
             if (employeePassword === password) {
