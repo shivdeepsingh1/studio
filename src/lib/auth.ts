@@ -35,10 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateUser = (updatedUserData: User) => {
     setUser(updatedUserData);
     localStorage.setItem('line-command-user', JSON.stringify(updatedUserData));
-  }
+  };
 
-  const login = useCallback((pno: string, password: string): boolean => {
-    // Special case for admin login for robustness
+  const login = (pno: string, password: string): boolean => {
+    // 1. Admin special case login
     if (pno === 'ADMIN' && password === 'admin') {
       const adminUser: User = {
         id: '0',
@@ -53,34 +53,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('line-command-user', JSON.stringify(adminUser));
       return true;
     }
-      
+
+    // 2. Load employees from storage
     let employees: Employee[] = [];
     const storedEmployees = localStorage.getItem("line-command-employees");
     try {
         employees = storedEmployees ? JSON.parse(storedEmployees) : mockEmployees;
     } catch (e) {
+        console.error("Failed to parse employees from localStorage", e);
         employees = mockEmployees;
     }
-
+    
+    // 3. Find the employee
     const employee = employees.find(emp => emp.pno === pno);
     if (!employee) {
         return false;
     }
-    
-    let correctPassword = employee.password;
 
-    // If there is no stored password OR it's an empty string, generate from DOB as a fallback.
-    if (!correctPassword) { 
+    // 4. Determine the correct password
+    // The employee record has an explicit password set (and it's not an empty string).
+    const hasExplicitPassword = employee.password && employee.password.length > 0;
+    
+    let correctPassword;
+    if (hasExplicitPassword) {
+        correctPassword = employee.password;
+    } else {
+        // No explicit password, so use DOB as default.
         if (employee.dob && typeof employee.dob === 'string' && employee.dob.includes('-')) {
-            const parts = employee.dob.split('-');
-            if (parts.length === 3) {
-                const [year, month, day] = parts;
-                correctPassword = `${day}${month}${year}`;
-            }
+            const [year, month, day] = employee.dob.split('-');
+            correctPassword = `${day}${month}${year}`;
         }
     }
-    
-    // If after all checks, there's a password to verify, compare it.
+
+    // 5. Check if passwords match
     if (correctPassword && password === correctPassword) {
       const employeeUser: User = {
           id: employee.id,
@@ -97,12 +102,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return false;
-  }, []);
+  };
 
-  const logout = useCallback(() => {
+  const logout = () => {
     setUser(null);
     localStorage.removeItem('line-command-user');
-  }, []);
+  };
 
   const value = { user, login, logout, loading, updateUser };
 
