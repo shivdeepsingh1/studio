@@ -195,6 +195,9 @@ export default function DutyPage() {
                         }
                         initialFocus
                         numberOfMonths={2}
+                        captionLayout="dropdown-buttons"
+                        fromYear={2020}
+                        toYear={2030}
                       />
                     </PopoverContent>
                   </Popover>
@@ -313,8 +316,8 @@ export default function DutyPage() {
             </div>
           </TabsContent>
           <TabsContent value="calendar">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2">
                 <CardContent className="p-0 flex justify-center">
                   <Calendar
                     mode="single"
@@ -325,6 +328,10 @@ export default function DutyPage() {
                     modifiersClassNames={{
                       hasDuty: "bg-primary/20",
                     }}
+                    numberOfMonths={2}
+                    captionLayout="dropdown-buttons"
+                    fromYear={2020}
+                    toYear={2030}
                   />
                 </CardContent>
               </Card>
