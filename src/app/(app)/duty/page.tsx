@@ -196,6 +196,8 @@ export default function DutyPage() {
                         initialFocus
                         numberOfMonths={2}
                         captionLayout="dropdown-buttons"
+                        fromYear={1970}
+                        toYear={2070}
                       />
                     </PopoverContent>
                   </Popover>
@@ -328,6 +330,8 @@ export default function DutyPage() {
                     }}
                     numberOfMonths={2}
                     captionLayout="dropdown-buttons"
+                    fromYear={1970}
+                    toYear={2070}
                   />
                 </CardContent>
               </Card>
