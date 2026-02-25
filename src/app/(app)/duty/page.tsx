@@ -68,10 +68,26 @@ export default function DutyPage() {
 
   useEffect(() => {
     const storedDuties = localStorage.getItem("line-command-duties");
-    setDuties(storedDuties ? JSON.parse(storedDuties) : mockDuties);
+    if (storedDuties) {
+      try {
+        setDuties(JSON.parse(storedDuties));
+      } catch (e) {
+        setDuties(mockDuties);
+      }
+    } else {
+      setDuties(mockDuties);
+    }
 
     const storedEmployees = localStorage.getItem("line-command-employees");
-    setAllEmployees(storedEmployees ? JSON.parse(storedEmployees) : mockEmployees);
+    if (storedEmployees) {
+      try {
+        setAllEmployees(JSON.parse(storedEmployees));
+      } catch (e) {
+        setAllEmployees(mockEmployees);
+      }
+    } else {
+      setAllEmployees(mockEmployees);
+    }
   }, []);
 
   const updateDuties = (updatedDuties: Duty[]) => {
