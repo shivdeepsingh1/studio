@@ -1,7 +1,7 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
+import { format } from "date-fns"
 import { useAuth } from "@/lib/auth"
 import { PageHeader } from "@/components/page-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -70,7 +70,7 @@ export default function ProfilePage() {
                 </div>
                  <div className="space-y-1">
                     <p className="text-muted-foreground">Joining Date</p>
-                    <p className="font-medium">{employeeDetails?.joiningDate || 'N/A'}</p>
+                    <p className="font-medium">{employeeDetails?.joiningDate ? format(new Date(employeeDetails.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</p>
                 </div>
                 <div className="space-y-1">
                     <p className="text-muted-foreground">Joining Branch/District</p>

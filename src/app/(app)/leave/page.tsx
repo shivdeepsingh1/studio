@@ -1,7 +1,7 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
+import { format } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { FileDown, PlusCircle } from "lucide-react"
@@ -350,8 +350,8 @@ export default function LeavePage() {
                   <TableCell>{leave.employeeName}</TableCell>
                 )}
                 <TableCell>{leave.type}</TableCell>
-                <TableCell>{leave.startDate}</TableCell>
-                <TableCell>{leave.endDate}</TableCell>
+                <TableCell>{format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
+                <TableCell>{format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
                 <TableCell className="max-w-xs truncate">
                   {leave.reason}
                 </TableCell>
@@ -415,5 +415,3 @@ export default function LeavePage() {
     </>
   )
 }
-
-    

@@ -1,7 +1,7 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
+import { format } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, PlusCircle, Search } from "lucide-react"
@@ -304,7 +304,7 @@ export default function EmployeesPage() {
                     <div className="font-medium">{employee.name}</div>
                   </div>
                 </TableCell>
-                <TableCell>{employee.joiningDate}</TableCell>
+                <TableCell>{format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
                 <TableCell>{employee.joiningDistrict}</TableCell>
                 <TableCell>{employee.contact}</TableCell>
                 <TableCell className="text-right">

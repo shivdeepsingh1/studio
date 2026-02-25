@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -368,7 +367,7 @@ export default function DutyPage() {
                         <TableCell>{employee?.pno}</TableCell>
                         <TableCell>{employee?.rank}</TableCell>
                         <TableCell>{duty.employeeName}</TableCell>
-                        <TableCell>{duty.date}</TableCell>
+                        <TableCell>{format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
                         <TableCell>
                           <Badge
                             variant={
@@ -431,7 +430,7 @@ export default function DutyPage() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  Duties for {date ? format(date, "PPP") : "selected date"}
+                  Duties for {date ? format(date, "dd-MM-yyyy") : "selected date"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -491,7 +490,7 @@ export default function DutyPage() {
               {employeeDuties.map((duty, index) => (
                 <TableRow key={duty.id}>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{duty.date}</TableCell>
+                  <TableCell>{format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
                   <TableCell>
                     <Badge
                       variant={
