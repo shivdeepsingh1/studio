@@ -7,8 +7,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown, Search, CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
+import { FileDown, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -23,9 +22,6 @@ import { Input } from "@/components/ui/input";
 import { Employee, Duty } from "@/lib/types";
 import { mockEmployees, mockDuties } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-
 
 export default function DutyReportPage() {
   const { user } = useAuth();
@@ -33,10 +29,10 @@ export default function DutyReportPage() {
   const [duties, setDuties] = useState<Duty[]>([]);
   const [pnoInput, setPnoInput] = useState<string>("");
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(
-    new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  const [dateFrom, setDateFrom] = useState<string>(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]
   );
-  const [dateTo, setDateTo] = useState<Date | undefined>(new Date());
+  const [dateTo, setDateTo] = useState<string>(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     const storedEmployees = localStorage.getItem("line-command-employees");
@@ -59,9 +55,9 @@ export default function DutyReportPage() {
       return false;
     }
     const dutyDate = new Date(duty.date.replace(/-/g, '/'));
-    const startOfDay = new Date(dateFrom);
+    const startOfDay = new Date(dateFrom.replace(/-/g, '/'));
     startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(dateTo);
+    const endOfDay = new Date(dateTo.replace(/-/g, '/'));
     endOfDay.setHours(23, 59, 59, 999);
 
     return (
@@ -78,7 +74,7 @@ export default function DutyReportPage() {
     }
     const doc = new jsPDF();
     doc.text(`Duty Report for ${selectedEmployee.name}`, 14, 16);
-    doc.text(`From: ${format(dateFrom, "dd-MM-yyyy")} To: ${format(dateTo, "dd-MM-yyyy")}`, 14, 22);
+    doc.text(`From: ${format(new Date(dateFrom.replace(/-/g, '/')), "dd-MM-yyyy")} To: ${format(new Date(dateTo.replace(/-/g, '/')), "dd-MM-yyyy")}`, 14, 22);
 
     autoTable(doc, {
       startY: 28,
@@ -143,60 +139,24 @@ export default function DutyReportPage() {
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label>Date From</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full justify-start text-left font-normal",
-                                        !dateFrom && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateFrom ? format(dateFrom, "LLL dd, y") : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={dateFrom}
-                                    onSelect={setDateFrom}
-                                    captionLayout="dropdown-buttons"
-                                    fromYear={new Date().getFullYear() - 100}
-                                    toYear={new Date().getFullYear() + 10}
-                                    numberOfMonths={2}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <Label htmlFor="date-from">Date From</Label>
+                        <Input
+                          id="date-from"
+                          type="date"
+                          value={dateFrom}
+                          onChange={(e) => setDateFrom(e.target.value)}
+                          className="w-full"
+                        />
                     </div>
                     <div className="space-y-2">
-                        <Label>Date To</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full justify-start text-left font-normal",
-                                        !dateTo && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateTo ? format(dateTo, "LLL dd, y") : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={dateTo}
-                                    onSelect={setDateTo}
-                                    captionLayout="dropdown-buttons"
-                                    fromYear={new Date().getFullYear() - 100}
-                                    toYear={new Date().getFullYear() + 10}
-                                    numberOfMonths={2}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <Label htmlFor="date-to">Date To</Label>
+                        <Input
+                          id="date-to"
+                          type="date"
+                          value={dateTo}
+                          onChange={(e) => setDateTo(e.target.value)}
+                          className="w-full"
+                        />
                     </div>
                 </div>
             </CardContent>
