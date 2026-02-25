@@ -3,9 +3,10 @@
 
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
+import * as XLSX from "xlsx"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -53,6 +54,7 @@ export default function EmployeesPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
 
   const initialNewEmployeeState = {
     badgeNumber: "",
@@ -100,16 +102,17 @@ export default function EmployeesPage() {
 
   const handleUpdateEmployee = () => {
     if (!editingEmployee || !editingEmployee.id) return;
-
-    updateEmployees(
-      employees.map((emp) =>
-        emp.id === editingEmployee.id ? { ...emp, ...editingEmployee } : emp
-      )
-    );
-
+  
+    const updatedEmployees = employees.map((emp) =>
+      emp.id === editingEmployee.id ? { ...emp, ...editingEmployee } : emp
+    )
+    
+    updateEmployees(updatedEmployees);
+  
     setIsEditDialogOpen(false);
     setEditingEmployee(null);
   };
+  
 
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!editingEmployee) return
@@ -178,6 +181,83 @@ export default function EmployeesPage() {
   }
   
   const canEdit = user?.role === 'admin';
+  const isCurrentUserAdministrator = user?.rank === 'Administrator';
+
+  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const data = event.target?.result;
+      if (!data) return;
+
+      try {
+        const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(sheet) as any[];
+
+        const importedEmployees: Employee[] = json.map((row: any, index) => {
+          if (!row.pno || !row.name || !row.rank) {
+            throw new Error(`Row ${index + 2}: Missing required fields (pno, name, rank).`);
+          }
+          
+          const formatDate = (date: any): string => {
+             if (date instanceof Date && !isNaN(date.getTime())) {
+                // Adjust for timezone offset
+                const tempDate = new Date(date.valueOf() + date.getTimezoneOffset() * 60000);
+                return tempDate.toISOString().split('T')[0];
+             }
+             return "";
+          }
+
+          const newId = Date.now().toString() + index;
+          const avatarUrl = `https://picsum.photos/seed/${newId}/100/100`;
+          
+          return {
+            id: newId,
+            badgeNumber: row.badgeNumber?.toString() || '',
+            pno: row.pno.toString(),
+            name: row.name,
+            rank: row.rank as EmployeeRank,
+            dob: formatDate(row.dob),
+            contact: row.contact?.toString() || '',
+            joiningDate: formatDate(row.joiningDate),
+            joiningDistrict: row.joiningDistrict || '',
+            avatarUrl,
+            password: row.password?.toString() || '',
+            role: row.role === 'admin' ? 'admin' : 'employee',
+          };
+        });
+
+        const existingPnos = new Set(employees.map(e => e.pno));
+        const newUniqueEmployees = importedEmployees.filter(e => !existingPnos.has(e.pno));
+        
+        const importedPnos = new Set();
+        const trulyUniqueNewEmployees = newUniqueEmployees.filter(e => {
+            if (importedPnos.has(e.pno)) return false;
+            importedPnos.add(e.pno);
+            return true;
+        });
+
+        if (trulyUniqueNewEmployees.length > 0) {
+            updateEmployees([...employees, ...trulyUniqueNewEmployees]);
+            alert(`${trulyUniqueNewEmployees.length} new employees imported successfully!`);
+        } else {
+            alert('No new unique employees to import.');
+        }
+        setIsImportDialogOpen(false);
+        // Reset file input
+        e.target.value = '';
+
+      } catch (error: any) {
+        alert(`Error importing file: ${error.message}`);
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
 
   return (
     <>
@@ -195,6 +275,33 @@ export default function EmployeesPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" disabled={!canEdit}>
+              <FileUp className="mr-2 h-4 w-4" />
+              Import Excel
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Import Employees from Excel</DialogTitle>
+              <DialogDescription>
+                Upload an .xlsx or .csv file. The file must contain columns with headers: `badgeNumber`, `pno`, `name`, `rank`, `dob`, `contact`, `joiningDate`, `joiningDistrict`, `password`, `role`.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <Input
+                id="file"
+                type="file"
+                accept=".xlsx, .csv"
+                onChange={handleFileImport}
+              />
+            </div>
+            <DialogFooter>
+               <Button variant="secondary" onClick={() => setIsImportDialogOpen(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <Dialog open={isAddDialogOpen} onOpenChange={handleAddDialogChange}>
           <DialogTrigger asChild>
             <Button disabled={!canEdit}>
@@ -396,8 +503,8 @@ export default function EmployeesPage() {
             {filteredEmployees.map((employee, index) => {
               const dobValid = employee.dob && !isNaN(new Date(employee.dob.replace(/-/g, '/')).getTime());
               const joiningDateValid = employee.joiningDate && !isNaN(new Date(employee.joiningDate.replace(/-/g, '/')).getTime());
-              const isCurrentUserAdministrator = user?.rank === 'Administrator';
-              const canEditThisRow = canEdit && (isCurrentUserAdministrator || employee.rank !== 'Administrator');
+              
+              const canEditThisRow = canEdit;
 
               return (
                 <TableRow key={employee.id}>
@@ -442,7 +549,7 @@ export default function EmployeesPage() {
                         <DropdownMenuItem
                           className="text-red-500"
                           onClick={() => deleteEmployee(employee.id)}
-                          disabled={!isCurrentUserAdministrator || employee.rank === 'Administrator'}
+                          disabled={!canEditThisRow || employee.rank === 'Administrator'}
                         >
                           Delete
                         </DropdownMenuItem>
@@ -537,14 +644,14 @@ export default function EmployeesPage() {
                   <Select
                     onValueChange={handleRankChange}
                     value={editingEmployee.rank ?? ""}
-                     disabled={!canEdit || user?.rank !== 'Administrator'}
+                     disabled={!canEdit || (!isCurrentUserAdministrator && editingEmployee.rank === 'Administrator')}
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select rank" />
                     </SelectTrigger>
                     <SelectContent>
                        {employeeRanks.map((rank) => (
-                        <SelectItem key={rank} value={rank} disabled={rank === 'Administrator'}>
+                        <SelectItem key={rank} value={rank} disabled={!isCurrentUserAdministrator && rank === 'Administrator'}>
                           {rank}
                         </SelectItem>
                       ))}
@@ -558,7 +665,7 @@ export default function EmployeesPage() {
                   <Select
                     onValueChange={handleRoleChange}
                     value={editingEmployee.role ?? "employee"}
-                    disabled={!canEdit || user?.rank !== 'Administrator' || editingEmployee.rank === 'Administrator'}
+                    disabled={!canEdit || (!isCurrentUserAdministrator && editingEmployee.rank === 'Administrator')}
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select role" />
