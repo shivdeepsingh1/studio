@@ -235,6 +235,7 @@ export default function DutyPage() {
                   <TableRow>
                     <TableHead>Badge Number</TableHead>
                     <TableHead>PNO</TableHead>
+                    <TableHead>Rank</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Shift</TableHead>
@@ -250,6 +251,7 @@ export default function DutyPage() {
                       <TableRow key={duty.id}>
                         <TableCell>{employee?.pno}</TableCell>
                         <TableCell>{employee?.pno}</TableCell>
+                        <TableCell>{employee?.rank}</TableCell>
                         <TableCell>{duty.employeeName}</TableCell>
                         <TableCell>{duty.date}</TableCell>
                         <TableCell>
