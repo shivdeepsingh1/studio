@@ -28,6 +28,7 @@ import {
 import { SidebarLogo } from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 function MainSidebar() {
   const pathname = usePathname();
@@ -101,7 +102,6 @@ function MainSidebar() {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { isMobile } = useIsMobile();
 
   useEffect(() => {
     if (!loading && !user) {
