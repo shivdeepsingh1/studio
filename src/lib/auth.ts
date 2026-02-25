@@ -7,7 +7,7 @@ import { mockEmployees } from './mock-data';
 interface AuthContextType {
   user: User | null;
   role: 'admin' | 'employee' | null;
-  login: (pno: string, role: 'admin' | 'employee') => void;
+  login: (pno: string, role: 'admin' | 'employee') => boolean;
   logout: () => void;
   loading: boolean;
 }
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = useCallback((pno: string, role: 'admin' | 'employee') => {
+  const login = useCallback((pno: string, role: 'admin' | 'employee'): boolean => {
     // This is a mock login. In a real app, you'd fetch user data.
     // For admin, we create a generic admin user.
     // For employee, we find them in the mock data.
@@ -71,9 +71,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRole(role);
         localStorage.setItem('line-command-user', JSON.stringify(foundUser));
         localStorage.setItem('line-command-role', role);
+        return true;
     } else {
         // Handle failed login
         console.error("Login failed: User not found");
+        return false;
     }
   }, []);
 

@@ -9,22 +9,36 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth';
 import { Shield, User } from 'lucide-react';
 import { Logo } from '@/components/logo';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
   const [pno, setPno] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
   const { login } = useAuth();
+  const { toast } = useToast();
 
   const handleLogin = (role: 'admin' | 'employee') => {
     // In a real app, you'd validate credentials against a backend.
     // Here, we'll just log in a mock user.
     if (pno && password) {
-      login(pno, role);
-      router.push('/dashboard');
+      const success = login(pno, role);
+      if (success) {
+        router.push('/dashboard');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: "Invalid PNO or password. Please try again.",
+        });
+      }
     } else {
       // Handle empty fields error
-      console.error('PNO and password are required');
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "PNO and password are required.",
+      });
     }
   };
 
