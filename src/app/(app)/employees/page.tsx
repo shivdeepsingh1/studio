@@ -57,6 +57,7 @@ export default function EmployeesPage() {
     contact: "",
     joiningDate: "",
     joiningDistrict: "",
+    password: "",
   }
 
   const [newEmployee, setNewEmployee] = useState(initialNewEmployeeState)
@@ -177,6 +178,18 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="password-add" className="text-right">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={newEmployee.password}
+                  onChange={handleNewInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="rank" className="text-right">
                   Rank
                 </Label>
@@ -276,6 +289,7 @@ export default function EmployeesPage() {
               <TableHead>Badge Number</TableHead>
               <TableHead>PNO</TableHead>
               <TableHead>Employee Name</TableHead>
+              <TableHead>Password</TableHead>
               <TableHead>Joining Date</TableHead>
               <TableHead>Joining Branch/District</TableHead>
               <TableHead>Mobile Number</TableHead>
@@ -304,6 +318,7 @@ export default function EmployeesPage() {
                     <div className="font-medium">{employee.name}</div>
                   </div>
                 </TableCell>
+                <TableCell>********</TableCell>
                 <TableCell>{format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
                 <TableCell>{employee.joiningDistrict}</TableCell>
                 <TableCell>{employee.contact}</TableCell>
@@ -356,6 +371,18 @@ export default function EmployeesPage() {
                 <Input
                   id="name"
                   value={editingEmployee.name ?? ""}
+                  onChange={handleEditInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="password-edit" className="text-right">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={editingEmployee.password ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
                 />

@@ -22,7 +22,7 @@ export default function LoginPage() {
     // In a real app, you'd validate credentials against a backend.
     // Here, we'll just log in a mock user.
     if (pno && password) {
-      const success = login(pno, role);
+      const success = login(pno, password, role);
       if (success) {
         router.push('/dashboard');
       } else {

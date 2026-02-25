@@ -44,6 +44,7 @@ export interface Employee {
   joiningDate: string;
   joiningDistrict: string;
   avatarUrl: string;
+  password?: string;
 }
 
 export interface Duty {

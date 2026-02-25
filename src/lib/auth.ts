@@ -8,7 +8,7 @@ import { mockEmployees } from './mock-data';
 interface AuthContextType {
   user: User | null;
   role: 'admin' | 'employee' | null;
-  login: (pno: string, role: 'admin' | 'employee') => boolean;
+  login: (pno: string, password: string, role: 'admin' | 'employee') => boolean;
   logout: () => void;
   loading: boolean;
 }
@@ -38,18 +38,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = useCallback((pno: string, role: 'admin' | 'employee'): boolean => {
+  const login = useCallback((pno: string, password: string, role: 'admin' | 'employee'): boolean => {
     let foundUser: User | null = null;
     
     if (role === 'admin') {
-      foundUser = {
-        id: 'admin01',
-        pno: 'ADMIN',
-        name: 'Admin User',
-        rank: 'Administrator',
-        avatarUrl: 'https://picsum.photos/seed/admin/100/100',
-        email: 'admin@police.gov'
-      };
+      if (pno === 'ADMIN' && password === 'admin') {
+        foundUser = {
+          id: 'admin01',
+          pno: 'ADMIN',
+          name: 'Admin User',
+          rank: 'Administrator',
+          avatarUrl: 'https://picsum.photos/seed/admin/100/100',
+          email: 'admin@police.gov'
+        };
+      }
     } else {
         let employees: Employee[] = [];
         const storedEmployees = localStorage.getItem("line-command-employees");
@@ -62,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           employees = mockEmployees;
         }
-        const employee = employees.find(emp => emp.pno === pno);
+        const employee = employees.find(emp => emp.pno === pno && emp.password === password);
         if(employee) {
             foundUser = {
                 id: employee.id,
@@ -83,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return true;
     } else {
         // Handle failed login
-        console.error("Login failed: User not found");
+        console.error("Login failed: User not found or password incorrect");
         return false;
     }
   }, []);
