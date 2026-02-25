@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { format } from "date-fns"
+import { format, parseISO } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { FileDown, PlusCircle } from "lucide-react"
+import { FileDown, PlusCircle, CalendarIcon } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import {
   Table,
@@ -39,6 +39,8 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
 
 // A mock function for PDF generation
 const generatePdf = (data: any, title: string) => {
@@ -163,13 +165,39 @@ export default function DutyPage() {
                   <Label htmlFor="date" className="text-right">
                     Date
                   </Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={newDuty.date}
-                    onChange={handleNewDutyInputChange}
-                    className="col-span-3"
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "col-span-3 justify-start text-left font-normal",
+                          !newDuty.date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {newDuty.date ? (
+                          format(parseISO(newDuty.date), "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          newDuty.date ? parseISO(newDuty.date) : undefined
+                        }
+                        onSelect={(date) =>
+                          handleNewDutySelectChange(
+                            "date",
+                            date ? format(date, "yyyy-MM-dd") : ""
+                          )
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="shift" className="text-right">
