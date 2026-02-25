@@ -1,10 +1,11 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -96,12 +97,13 @@ export default function EmployeesPage() {
   const handleUpdateEmployee = () => {
     if (!editingEmployee) return
     
-    const employeeToUpdate = { ...editingEmployee };
+    let employeeToUpdate = { ...editingEmployee };
 
     // If password field is empty, don't save an empty string. 
-    // Let the login logic use the DOB default.
+    // Let the login logic use the DOB default by removing the key.
     if (employeeToUpdate.password === "") {
-      delete (employeeToUpdate as Partial<typeof employeeToUpdate>).password;
+        const { password, ...rest } = employeeToUpdate;
+        employeeToUpdate = rest as typeof employeeToUpdate;
     }
 
     updateEmployees(
@@ -223,7 +225,7 @@ export default function EmployeesPage() {
                     value={newEmployee.password}
                     onChange={handleNewInputChange}
                     className="pr-10"
-                    placeholder="Default: DoB (ddmmyyyy)"
+                    placeholder="Leave blank for default"
                   />
                   <Button
                     type="button"
@@ -235,6 +237,13 @@ export default function EmployeesPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                      <span className="sr-only">Toggle password visibility</span>
                   </Button>
+                </div>
+              </div>
+               <div className="grid grid-cols-4 items-center gap-4">
+                <div className="col-start-2 col-span-3">
+                  <p className="text-xs text-muted-foreground -mt-2">
+                    Default password is the date of birth in <strong>ddmmyyyy</strong> format.
+                  </p>
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -448,7 +457,7 @@ export default function EmployeesPage() {
                     value={editingEmployee.password ?? ""}
                     onChange={handleEditInputChange}
                     className="pr-10"
-                    placeholder="Default: DoB (ddmmyyyy)"
+                    placeholder="Leave blank for default"
                   />
                   <Button
                     type="button"
@@ -459,6 +468,26 @@ export default function EmployeesPage() {
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                      <span className="sr-only">Toggle password visibility</span>
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="col-start-2 col-span-3 flex flex-col items-start gap-2">
+                  <p className="text-xs text-muted-foreground -mt-2">
+                    Default password is the date of birth in <strong>ddmmyyyy</strong> format.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        if (editingEmployee) {
+                            setEditingEmployee({ ...editingEmployee, password: "" });
+                        }
+                    }}
+                  >
+                    <RotateCcw className="mr-2 h-3 w-3" />
+                    Reset to Default
                   </Button>
                 </div>
               </div>
@@ -566,3 +595,5 @@ export default function EmployeesPage() {
     </>
   )
 }
+
+    
