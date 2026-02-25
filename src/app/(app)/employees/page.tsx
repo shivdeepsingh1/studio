@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, PlusCircle, Search } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -48,6 +48,7 @@ export default function EmployeesPage() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const initialNewEmployeeState = {
     badgeNumber: "",
@@ -134,6 +135,20 @@ export default function EmployeesPage() {
     setIsAddDialogOpen(false)
     setNewEmployee(initialNewEmployeeState)
   }
+  
+  const handleAddDialogChange = (isOpen: boolean) => {
+    setIsAddDialogOpen(isOpen);
+    if (!isOpen) {
+      setShowPassword(false);
+    }
+  }
+
+  const handleEditDialogChange = (isOpen: boolean) => {
+    setIsEditDialogOpen(isOpen);
+     if (!isOpen) {
+      setShowPassword(false);
+    }
+  }
 
   return (
     <>
@@ -151,7 +166,7 @@ export default function EmployeesPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog open={isAddDialogOpen} onOpenChange={handleAddDialogChange}>
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2" />
@@ -178,16 +193,28 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="password-add" className="text-right">
+                <Label htmlFor="password" className="text-right">
                   Password
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={newEmployee.password}
-                  onChange={handleNewInputChange}
-                  className="col-span-3"
-                />
+                <div className="col-span-3 relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={newEmployee.password}
+                    onChange={handleNewInputChange}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute inset-y-0 right-0 h-full w-10 flex items-center justify-center text-muted-foreground"
+                    onClick={() => setShowPassword(p => !p)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                     <span className="sr-only">Toggle password visibility</span>
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="rank" className="text-right">
@@ -354,7 +381,7 @@ export default function EmployeesPage() {
         </div>
       )}
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog open={isEditDialogOpen} onOpenChange={handleEditDialogChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Employee Details</DialogTitle>
@@ -376,16 +403,28 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="password-edit" className="text-right">
+                <Label htmlFor="password" className="text-right">
                   Password
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={editingEmployee.password ?? ""}
-                  onChange={handleEditInputChange}
-                  className="col-span-3"
-                />
+                <div className="col-span-3 relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={editingEmployee.password ?? ""}
+                    onChange={handleEditInputChange}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute inset-y-0 right-0 h-full w-10 flex items-center justify-center text-muted-foreground"
+                    onClick={() => setShowPassword(p => !p)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                     <span className="sr-only">Toggle password visibility</span>
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="rank" className="text-right">
