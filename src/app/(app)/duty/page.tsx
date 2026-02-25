@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { format } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { FileDown, PlusCircle } from "lucide-react"
@@ -37,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 // A mock function for PDF generation
 const generatePdf = (data: any, title: string) => {
@@ -96,6 +98,15 @@ export default function DutyPage() {
   }
 
   const employeeDuties = duties.filter((d) => d.employeeId === user?.id)
+
+  const dutiesForSelectedDate = date
+    ? duties.filter((duty) => duty.date === format(date, "yyyy-MM-dd"))
+    : []
+
+  const dutyDates = [...new Set(duties.map((d) => d.date))].map((dateStr) => {
+    const [year, month, day] = dateStr.split("-").map(Number)
+    return new Date(year, month - 1, day)
+  })
 
   return (
     <>
@@ -274,13 +285,64 @@ export default function DutyPage() {
             </div>
           </TabsContent>
           <TabsContent value="calendar">
-            <div className="flex justify-center p-4 border rounded-lg bg-card">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardContent className="p-0 flex justify-center">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    className="p-4"
+                    modifiers={{ hasDuty: dutyDates }}
+                    modifiersClassNames={{
+                      hasDuty: "bg-primary/20",
+                    }}
+                  />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Duties for {date ? format(date, "PPP") : "selected date"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dutiesForSelectedDate.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Employee</TableHead>
+                          <TableHead>Shift</TableHead>
+                          <TableHead>Location</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {dutiesForSelectedDate.map((duty) => (
+                          <TableRow key={duty.id}>
+                            <TableCell>{duty.employeeName}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  duty.shift === "Night"
+                                    ? "destructive"
+                                    : "secondary"
+                                }
+                              >
+                                {duty.shift}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{duty.location}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No duties assigned for this date.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
