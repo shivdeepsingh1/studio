@@ -1,5 +1,7 @@
+
 "use client";
 
+import { useState, useEffect } from 'react';
 import { Users, ClipboardList, CalendarOff, Send, Plus } from 'lucide-react';
 import Link from 'next/link';
 
@@ -10,6 +12,7 @@ import { PageHeader } from '@/components/page-header';
 import { mockEmployees, mockDuties, mockLeaves } from '@/lib/mock-data';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis } from 'recharts';
+import { Employee, Duty, Leave } from '@/lib/types';
 
 const chartData = [
   { month: 'January', desktop: 186 },
@@ -29,14 +32,28 @@ const chartConfig = {
 
 export default function DashboardPage() {
   const { user, role } = useAuth();
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [duties, setDuties] = useState<Duty[]>([]);
+  const [leaves, setLeaves] = useState<Leave[]>([]);
+
+  useEffect(() => {
+    const storedEmployees = localStorage.getItem("line-command-employees");
+    setEmployees(storedEmployees ? JSON.parse(storedEmployees) : mockEmployees);
+
+    const storedDuties = localStorage.getItem("line-command-duties");
+    setDuties(storedDuties ? JSON.parse(storedDuties) : mockDuties);
+
+    const storedLeaves = localStorage.getItem("line-command-leaves");
+    setLeaves(storedLeaves ? JSON.parse(storedLeaves) : mockLeaves);
+  }, []);
   
   const stats = {
-    totalEmployees: mockEmployees.length,
-    onDuty: mockDuties.filter(d => d.date === new Date().toISOString().split('T')[0]).length,
-    onLeave: mockLeaves.filter(l => l.status === 'Approved' && new Date() >= new Date(l.startDate) && new Date() <= new Date(l.endDate)).length,
+    totalEmployees: employees.length,
+    onDuty: duties.filter(d => d.date === new Date().toISOString().split('T')[0]).length,
+    onLeave: leaves.filter(l => l.status === 'Approved' && new Date() >= new Date(l.startDate) && new Date() <= new Date(l.endDate)).length,
   };
 
-  const employeeDuty = mockDuties.find(d => d.employeeId === user?.id && d.date === new Date().toISOString().split('T')[0])
+  const employeeDuty = duties.find(d => d.employeeId === user?.id && d.date === new Date().toISOString().split('T')[0])
   const employeeLeaveBalance = 12; // Mock data
 
   return (

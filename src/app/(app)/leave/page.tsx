@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { FileDown, PlusCircle } from "lucide-react"
@@ -23,7 +24,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { mockEmployees, mockLeaves } from "@/lib/mock-data"
-import { Leave } from "@/lib/types"
+import { Employee, Leave } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
@@ -48,7 +49,8 @@ const leaveStatuses: Leave["status"][] = ["Pending", "Approved", "Rejected"]
 
 export default function LeavePage() {
   const { role, user } = useAuth()
-  const [leaves, setLeaves] = useState<Leave[]>(mockLeaves)
+  const [leaves, setLeaves] = useState<Leave[]>([])
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([])
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false)
 
   const initialNewLeaveState = {
@@ -61,6 +63,19 @@ export default function LeavePage() {
   }
 
   const [newLeave, setNewLeave] = useState(initialNewLeaveState)
+
+  useEffect(() => {
+    const storedLeaves = localStorage.getItem("line-command-leaves");
+    setLeaves(storedLeaves ? JSON.parse(storedLeaves) : mockLeaves);
+
+    const storedEmployees = localStorage.getItem("line-command-employees");
+    setAllEmployees(storedEmployees ? JSON.parse(storedEmployees) : mockEmployees);
+  }, []);
+
+  const updateLeaves = (updatedLeaves: Leave[]) => {
+    setLeaves(updatedLeaves);
+    localStorage.setItem("line-command-leaves", JSON.stringify(updatedLeaves));
+  }
 
   const handleNewLeaveInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -86,7 +101,7 @@ export default function LeavePage() {
       alert("Please fill all required fields.")
       return
     }
-    const employee = mockEmployees.find((e) => e.id === employeeId)
+    const employee = allEmployees.find((e) => e.id === employeeId)
     if (!employee) {
       alert("Employee not found.")
       return
@@ -102,7 +117,7 @@ export default function LeavePage() {
       reason: newLeave.reason,
       status: isEmployeeRequest ? "Pending" : newLeave.status,
     }
-    setLeaves([...leaves, leaveToAdd])
+    updateLeaves([...leaves, leaveToAdd])
     setIsLeaveDialogOpen(false)
   }
 
@@ -180,7 +195,7 @@ export default function LeavePage() {
                       <SelectValue placeholder="Select employee" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockEmployees.map((employee) => (
+                      {allEmployees.map((employee) => (
                         <SelectItem key={employee.id} value={employee.id}>
                           {employee.name} ({employee.pno})
                         </SelectItem>

@@ -1,7 +1,8 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { User } from './types';
+import { User, Employee } from './types';
 import { mockEmployees } from './mock-data';
 
 interface AuthContextType {
@@ -38,9 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback((pno: string, role: 'admin' | 'employee'): boolean => {
-    // This is a mock login. In a real app, you'd fetch user data.
-    // For admin, we create a generic admin user.
-    // For employee, we find them in the mock data.
     let foundUser: User | null = null;
     
     if (role === 'admin') {
@@ -53,7 +51,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: 'admin@police.gov'
       };
     } else {
-        const employee = mockEmployees.find(emp => emp.pno === pno);
+        let employees: Employee[] = [];
+        const storedEmployees = localStorage.getItem("line-command-employees");
+        if (storedEmployees) {
+          try {
+            employees = JSON.parse(storedEmployees);
+          } catch (e) {
+            employees = mockEmployees;
+          }
+        } else {
+          employees = mockEmployees;
+        }
+        const employee = employees.find(emp => emp.pno === pno);
         if(employee) {
             foundUser = {
                 id: employee.id,

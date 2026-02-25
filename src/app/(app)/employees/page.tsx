@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, PlusCircle, Search } from "lucide-react"
@@ -42,7 +43,7 @@ import {
 } from "@/components/ui/select"
 
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState<Employee[]>(mockEmployees)
+  const [employees, setEmployees] = useState<Employee[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -59,6 +60,24 @@ export default function EmployeesPage() {
 
   const [newEmployee, setNewEmployee] = useState(initialNewEmployeeState)
 
+  useEffect(() => {
+    const storedEmployees = localStorage.getItem("line-command-employees");
+    if (storedEmployees) {
+      try {
+        setEmployees(JSON.parse(storedEmployees));
+      } catch (e) {
+        setEmployees(mockEmployees);
+      }
+    } else {
+      setEmployees(mockEmployees);
+    }
+  }, []);
+
+  const updateEmployees = (updatedEmployees: Employee[]) => {
+    setEmployees(updatedEmployees);
+    localStorage.setItem("line-command-employees", JSON.stringify(updatedEmployees));
+  };
+
   const filteredEmployees = employees.filter(
     (employee) =>
       employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -66,12 +85,12 @@ export default function EmployeesPage() {
   )
 
   const deleteEmployee = (id: string) => {
-    setEmployees(employees.filter((e) => e.id !== id))
+    updateEmployees(employees.filter((e) => e.id !== id))
   }
 
   const handleUpdateEmployee = () => {
     if (!editingEmployee) return
-    setEmployees(
+    updateEmployees(
       employees.map((emp) =>
         emp.id === editingEmployee.id ? editingEmployee : emp
       )
@@ -108,7 +127,7 @@ export default function EmployeesPage() {
   const handleAddEmployee = () => {
     const newId = Date.now().toString()
     const avatarUrl = `https://picsum.photos/seed/${newId}/100/100`
-    setEmployees([...employees, { ...newEmployee, id: newId, avatarUrl }])
+    updateEmployees([...employees, { ...newEmployee, id: newId, avatarUrl }])
     setIsAddDialogOpen(false)
     setNewEmployee(initialNewEmployeeState)
   }

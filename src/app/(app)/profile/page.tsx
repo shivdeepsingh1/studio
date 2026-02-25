@@ -1,5 +1,7 @@
+
 "use client"
 
+import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth"
 import { PageHeader } from "@/components/page-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -8,10 +10,23 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { LogOut, Pencil } from "lucide-react"
 import { mockEmployees } from "@/lib/mock-data"
+import { Employee } from "@/lib/types"
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
   const router = useRouter()
+  const [employeeDetails, setEmployeeDetails] = useState<Employee | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      const storedEmployees = localStorage.getItem("line-command-employees");
+      const employees: Employee[] = storedEmployees ? JSON.parse(storedEmployees) : mockEmployees;
+      const details = employees.find((e: Employee) => e.id === user.id);
+      if (details) {
+        setEmployeeDetails(details);
+      }
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout()
@@ -55,15 +70,15 @@ export default function ProfilePage() {
                 </div>
                  <div className="space-y-1">
                     <p className="text-muted-foreground">Joining Date</p>
-                    <p className="font-medium">{mockEmployees.find(e => e.id === user.id)?.joiningDate || 'N/A'}</p>
+                    <p className="font-medium">{employeeDetails?.joiningDate || 'N/A'}</p>
                 </div>
                 <div className="space-y-1">
                     <p className="text-muted-foreground">Joining Branch/District</p>
-                    <p className="font-medium">{mockEmployees.find(e => e.id === user.id)?.joiningDistrict || 'N/A'}</p>
+                    <p className="font-medium">{employeeDetails?.joiningDistrict || 'N/A'}</p>
                 </div>
                 <div className="space-y-1">
                     <p className="text-muted-foreground">Mobile Number</p>
-                    <p className="font-medium">{mockEmployees.find(e => e.id === user.id)?.contact || 'N/A'}</p>
+                    <p className="font-medium">{employeeDetails?.contact || 'N/A'}</p>
                 </div>
             </div>
              <div className="mt-8 flex justify-end">

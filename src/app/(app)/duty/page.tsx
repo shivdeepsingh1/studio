@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -49,7 +50,8 @@ const generatePdf = (data: any, title: string) => {
 
 export default function DutyPage() {
   const { role, user } = useAuth()
-  const [duties, setDuties] = useState<Duty[]>(mockDuties)
+  const [duties, setDuties] = useState<Duty[]>([])
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([])
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
 
@@ -64,10 +66,23 @@ export default function DutyPage() {
   const [pnoInput, setPnoInput] = useState("")
   const [foundEmployee, setFoundEmployee] = useState<Employee | null>(null)
 
+  useEffect(() => {
+    const storedDuties = localStorage.getItem("line-command-duties");
+    setDuties(storedDuties ? JSON.parse(storedDuties) : mockDuties);
+
+    const storedEmployees = localStorage.getItem("line-command-employees");
+    setAllEmployees(storedEmployees ? JSON.parse(storedEmployees) : mockEmployees);
+  }, []);
+
+  const updateDuties = (updatedDuties: Duty[]) => {
+    setDuties(updatedDuties);
+    localStorage.setItem("line-command-duties", JSON.stringify(updatedDuties));
+  }
+
   const handlePnoSearch = (pno: string) => {
     setPnoInput(pno)
     if (pno) {
-      const employee = mockEmployees.find((e) => e.pno === pno)
+      const employee = allEmployees.find((e) => e.pno === pno)
       if (employee) {
         setFoundEmployee(employee)
         setNewDuty((prev) => ({ ...prev, employeeId: employee.id }))
@@ -97,7 +112,7 @@ export default function DutyPage() {
       alert("Please fill all required fields.")
       return
     }
-    const employee = mockEmployees.find((e) => e.id === newDuty.employeeId)
+    const employee = allEmployees.find((e) => e.id === newDuty.employeeId)
     if (!employee) {
       alert("Employee not found. Please verify PNO.")
       return
@@ -112,7 +127,7 @@ export default function DutyPage() {
       location: newDuty.location,
       details: newDuty.details,
     }
-    setDuties([...duties, dutyToAdd])
+    updateDuties([...duties, dutyToAdd])
     setIsAssignDialogOpen(false)
   }
 
@@ -296,7 +311,7 @@ export default function DutyPage() {
                 </TableHeader>
                 <TableBody>
                   {duties.map((duty) => {
-                    const employee = mockEmployees.find(
+                    const employee = allEmployees.find(
                       (e) => e.id === duty.employeeId
                     )
                     return (
