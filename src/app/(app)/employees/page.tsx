@@ -104,8 +104,8 @@ export default function EmployeesPage() {
             <TableRow>
               <TableHead>Employee</TableHead>
               <TableHead>Rank</TableHead>
-              <TableHead>Contact</TableHead>
               <TableHead>Joining Date</TableHead>
+              <TableHead>Mobile Number</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -125,8 +125,8 @@ export default function EmployeesPage() {
                   </div>
                 </TableCell>
                 <TableCell><Badge variant="outline">{employee.rank}</Badge></TableCell>
-                <TableCell>{employee.contact}</TableCell>
                 <TableCell>{employee.joiningDate}</TableCell>
+                <TableCell>{employee.contact}</TableCell>
                 <TableCell className="text-right">
                    <DropdownMenu>
                     <DropdownMenuTrigger asChild>

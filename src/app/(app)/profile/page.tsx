@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { LogOut, Pencil } from "lucide-react"
+import { mockEmployees } from "@/lib/mock-data"
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
@@ -52,13 +53,13 @@ export default function ProfilePage() {
                     <p className="text-muted-foreground">Email Address</p>
                     <p className="font-medium">{user.email}</p>
                 </div>
-                <div className="space-y-1">
-                    <p className="text-muted-foreground">Contact</p>
-                    <p className="font-medium">{mockEmployees.find(e => e.id === user.id)?.contact || 'N/A'}</p>
-                </div>
                  <div className="space-y-1">
                     <p className="text-muted-foreground">Joining Date</p>
                     <p className="font-medium">{mockEmployees.find(e => e.id === user.id)?.joiningDate || 'N/A'}</p>
+                </div>
+                <div className="space-y-1">
+                    <p className="text-muted-foreground">Mobile Number</p>
+                    <p className="font-medium">{mockEmployees.find(e => e.id === user.id)?.contact || 'N/A'}</p>
                 </div>
             </div>
              <div className="mt-8 flex justify-end">
@@ -73,13 +74,3 @@ export default function ProfilePage() {
     </>
   )
 }
-
-// Simple mock find since we don't have a real DB
-const mockEmployees = [
-  { id: '1', pno: '12345', name: 'Ravi Kumar', rank: 'Constable', contact: '9876543210', joiningDate: '2020-01-15', avatarUrl: '...' },
-  { id: '2', pno: '12346', name: 'Sita Sharma', rank: 'Head Constable', contact: '9876543211', joiningDate: '2018-05-20', avatarUrl: '...' },
-  { id: '3', pno: '12347', name: 'Amit Singh', rank: 'ASI', contact: '9876543212', joiningDate: '2015-11-30', avatarUrl: '...' },
-  { id: '4', pno: '12348', name: 'Priya Patel', rank: 'SI', contact: '9876543213', joiningDate: '2012-02-10', avatarUrl: '...' },
-  { id: '5', pno: '12349', name: 'Vikram Rathore', rank: 'Inspector', contact: '9876543214', joiningDate: '2008-07-22', avatarUrl: '...' },
-  { id: '6', pno: '12350', name: 'Anjali Gupta', rank: 'Constable', contact: '9876543215', joiningDate: '2021-08-01', avatarUrl: '...' },
-];
