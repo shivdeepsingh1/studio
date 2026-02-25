@@ -7,6 +7,7 @@ export interface User {
   avatarUrl: string;
   email: string;
   role: 'admin' | 'employee';
+  status?: 'Active' | 'Suspended';
 }
 
 export type EmployeeRank =

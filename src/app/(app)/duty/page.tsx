@@ -140,6 +140,11 @@ export default function DutyPage() {
       return
     }
 
+    if (employee.status === 'Suspended') {
+        alert("Cannot assign duty to a suspended employee.");
+        return;
+    }
+
     const dutyToAdd: Duty = {
       id: Date.now().toString(),
       employeeName: employee.name,
@@ -293,6 +298,11 @@ export default function DutyPage() {
                     <div className="col-span-4">
                         <p className="font-semibold">{foundEmployee.name}</p>
                         <p className="text-sm text-muted-foreground">{foundEmployee.rank}</p>
+                        {foundEmployee.status === 'Suspended' && (
+                           <p className="text-sm text-white bg-destructive/80 p-2 rounded-md mt-2">
+                               This employee is suspended and cannot be assigned a duty.
+                           </p>
+                        )}
                     </div>
                   </div>
                 ) : pnoInput && (
@@ -364,7 +374,7 @@ export default function DutyPage() {
                 >
                   Cancel
                 </Button>
-                <Button onClick={handleAssignDuty} disabled={!foundEmployee}>Save</Button>
+                <Button onClick={handleAssignDuty} disabled={!foundEmployee || foundEmployee.status === 'Suspended'}>Save</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

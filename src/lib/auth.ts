@@ -47,7 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         rank: 'Administrator',
         avatarUrl: 'https://picsum.photos/seed/admin/100/100',
         email: 'admin@police.gov',
-        role: 'admin'
+        role: 'admin',
+        status: 'Active',
       };
       setUser(adminUser);
       localStorage.setItem('line-command-user', JSON.stringify(adminUser));
@@ -94,7 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           rank: employee.rank,
           avatarUrl: employee.avatarUrl,
           email: `${employee.pno}@police.gov`,
-          role: employee.role || 'employee'
+          role: employee.role || 'employee',
+          status: employee.status || 'Active',
       };
       setUser(employeeUser);
       localStorage.setItem('line-command-user', JSON.stringify(employeeUser));

@@ -124,6 +124,12 @@ export default function LeavePage() {
       return
     }
 
+    if (employee.status === 'Suspended') {
+        alert("Cannot process leave for a suspended employee.");
+        setIsLeaveDialogOpen(false);
+        return;
+    }
+
     const leaveToAdd: Leave = {
       id: Date.now().toString(),
       employeeId: employeeId,
@@ -225,7 +231,7 @@ export default function LeavePage() {
           }}
         >
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={user?.status === 'Suspended'}>
               <PlusCircle className="mr-2" />
               {user?.role === "admin" ? "Add Leave" : "Request Leave"}
             </Button>
@@ -255,7 +261,7 @@ export default function LeavePage() {
                       <SelectValue placeholder="Select employee" />
                     </SelectTrigger>
                     <SelectContent>
-                      {allEmployees.map((employee) => (
+                      {allEmployees.filter(emp => emp.status !== 'Suspended').map((employee) => (
                         <SelectItem key={employee.id} value={employee.id}>
                           {employee.name} ({employee.pno})
                         </SelectItem>
@@ -360,6 +366,12 @@ export default function LeavePage() {
           Export PDF
         </Button>
       </PageHeader>
+
+      {user?.status === 'Suspended' && (
+        <div className="mb-4 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-center text-destructive">
+            Your account is currently suspended. You cannot apply for new leave. Please contact an administrator.
+        </div>
+      )}
 
       <div className="border rounded-lg">
         <Table>
