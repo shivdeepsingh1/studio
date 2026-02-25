@@ -65,7 +65,7 @@ export default function DutyPage() {
     employeeId: "",
     date: "",
     shift: "Morning" as "Morning" | "Afternoon" | "Night",
-    location: "",
+    location: "Reserve",
     details: "",
   }
   const [newDuty, setNewDuty] = useState(initialNewDutyState)
@@ -154,18 +154,20 @@ export default function DutyPage() {
   }
 
   const openEditDialog = (duty: Duty) => {
+    if (user?.rank !== 'Administrator') return;
     setEditingDuty(duty);
     setIsEditDialogOpen(true);
   };
 
   const handleUpdateDuty = () => {
-    if (!editingDuty) return;
+    if (!editingDuty || user?.rank !== 'Administrator') return;
     updateDuties(duties.map(d => d.id === editingDuty.id ? editingDuty : d));
     setIsEditDialogOpen(false);
     setEditingDuty(null);
   };
 
   const handleDeleteDuty = (id: string) => {
+    if (user?.rank !== 'Administrator') return;
     if(window.confirm("Are you sure you want to delete this duty record?")){
       updateDuties(duties.filter(d => d.id !== id));
     }
@@ -425,7 +427,7 @@ export default function DutyPage() {
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                <Button variant="ghost" className="h-8 w-8 p-0" disabled={user?.rank !== 'Administrator'}>
                                   <span className="sr-only">Open menu</span>
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
