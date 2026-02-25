@@ -8,7 +8,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown, Search } from "lucide-react";
+import { FileDown, Search, CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Table,
@@ -24,6 +24,9 @@ import { Input } from "@/components/ui/input";
 import { Employee, Duty } from "@/lib/types";
 import { mockEmployees, mockDuties } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+
 
 export default function DutyReportPage() {
   const { user } = useAuth();
@@ -141,12 +144,42 @@ export default function DutyReportPage() {
             </div>
             <div className="space-y-2">
               <Label>Date Range</Label>
-              <Calendar
-                mode="range"
-                selected={date}
-                onSelect={setDate}
-                className="p-0 rounded-md border"
-              />
+               <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="date"
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date?.from ? (
+                      date.to ? (
+                        <>
+                          {format(date.from, "LLL dd, y")} -{" "}
+                          {format(date.to, "LLL dd, y")}
+                        </>
+                      ) : (
+                        format(date.from, "LLL dd, y")
+                      )
+                    ) : (
+                      <span>Pick a date range</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={date?.from}
+                    selected={date}
+                    onSelect={setDate}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </CardContent>
         </Card>
