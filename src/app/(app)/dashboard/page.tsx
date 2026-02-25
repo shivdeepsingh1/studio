@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart, FileDown, Plus, Send } from 'lucide-react';
+import { Users, ClipboardList, CalendarOff, Send, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -99,9 +99,9 @@ export default function DashboardPage() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
-                <Link href="/duty" passHref legacyBehavior><Button><Send className="mr-2"/>Assign Duty</Button></Link>
-                <Link href="/employees" passHref legacyBehavior><Button variant="secondary"><Plus className="mr-2"/>Add New Employee</Button></Link>
-                <Link href="/leave" passHref legacyBehavior><Button variant="secondary"><CalendarOff className="mr-2"/>Update Leave Details</Button></Link>
+                <Link href="/duty"><Button><Send className="mr-2"/>Assign Duty</Button></Link>
+                <Link href="/employees"><Button variant="secondary"><Plus className="mr-2"/>Add New Employee</Button></Link>
+                <Link href="/leave"><Button variant="secondary"><CalendarOff className="mr-2"/>Update Leave Details</Button></Link>
               </CardContent>
             </Card>
           </div>
