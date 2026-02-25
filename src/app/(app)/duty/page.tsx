@@ -23,8 +23,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { mockDuties, mockEmployees } from "@/lib/mock-data"
-import { Duty } from "@/lib/types"
+import { mockEmployees } from "@/lib/mock-data"
+import { Duty, Employee } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
@@ -61,6 +61,25 @@ export default function DutyPage() {
     details: "",
   }
   const [newDuty, setNewDuty] = useState(initialNewDutyState)
+  const [pnoInput, setPnoInput] = useState("")
+  const [foundEmployee, setFoundEmployee] = useState<Employee | null>(null)
+
+  const handlePnoSearch = (pno: string) => {
+    setPnoInput(pno)
+    if (pno) {
+      const employee = mockEmployees.find((e) => e.pno === pno)
+      if (employee) {
+        setFoundEmployee(employee)
+        setNewDuty((prev) => ({ ...prev, employeeId: employee.id }))
+      } else {
+        setFoundEmployee(null)
+        setNewDuty((prev) => ({ ...prev, employeeId: "" }))
+      }
+    } else {
+      setFoundEmployee(null)
+      setNewDuty((prev) => ({ ...prev, employeeId: "" }))
+    }
+  }
 
   const handleNewDutyInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -80,7 +99,7 @@ export default function DutyPage() {
     }
     const employee = mockEmployees.find((e) => e.id === newDuty.employeeId)
     if (!employee) {
-      alert("Selected employee not found.")
+      alert("Employee not found. Please verify PNO.")
       return
     }
 
@@ -131,8 +150,12 @@ export default function DutyPage() {
                   ...initialNewDutyState,
                   date: new Date().toISOString().split("T")[0],
                 })
+                setPnoInput("")
+                setFoundEmployee(null)
               } else {
                 setNewDuty(initialNewDutyState)
+                setPnoInput("")
+                setFoundEmployee(null)
               }
               setIsAssignDialogOpen(isOpen)
             }}
@@ -147,32 +170,36 @@ export default function DutyPage() {
               <DialogHeader>
                 <DialogTitle>Assign New Duty</DialogTitle>
                 <DialogDescription>
-                  Fill in the details to assign a new duty.
+                  Enter an employee's PNO to find them and assign a duty.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="employeeId" className="text-right">
-                    Employee
+                  <Label htmlFor="pno" className="text-right">
+                    PNO
                   </Label>
-                  <Select
-                    onValueChange={(value) =>
-                      handleNewDutySelectChange("employeeId", value)
-                    }
-                    value={newDuty.employeeId}
-                  >
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select employee" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mockEmployees.map((employee) => (
-                        <SelectItem key={employee.id} value={employee.id}>
-                          {employee.name} ({employee.pno})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="pno"
+                    value={pnoInput}
+                    onChange={(e) => handlePnoSearch(e.target.value)}
+                    className="col-span-3"
+                    placeholder="Enter employee PNO"
+                  />
                 </div>
+
+                {foundEmployee ? (
+                  <div className="col-span-4 rounded-md border bg-muted p-3 grid grid-cols-4 items-center gap-4 -mt-2">
+                    <div className="col-span-4">
+                        <p className="font-semibold">{foundEmployee.name}</p>
+                        <p className="text-sm text-muted-foreground">{foundEmployee.rank}</p>
+                    </div>
+                  </div>
+                ) : pnoInput && (
+                    <div className="col-span-4 text-center text-sm text-white bg-destructive/80 p-2 rounded-md -mt-2">
+                        <p>Employee not found.</p>
+                    </div>
+                )}
+                
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="date" className="text-right">
                     Date
@@ -236,7 +263,7 @@ export default function DutyPage() {
                 >
                   Cancel
                 </Button>
-                <Button onClick={handleAssignDuty}>Save</Button>
+                <Button onClick={handleAssignDuty} disabled={!foundEmployee}>Save</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -312,7 +339,7 @@ export default function DutyPage() {
                   }}
                   numberOfMonths={2}
                   captionLayout="dropdown-buttons"
-                  fromYear={new Date().getFullYear() - 10}
+                  fromYear={new Date().getFullYear() - 100}
                   toYear={new Date().getFullYear() + 10}
                 />
               </CardContent>
