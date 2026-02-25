@@ -4,7 +4,7 @@ import { useState } from "react"
 import { format } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { FileDown, PlusCircle, CalendarIcon } from "lucide-react"
+import { FileDown, PlusCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import {
   Table,
@@ -39,7 +39,6 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 
 // A mock function for PDF generation
@@ -53,10 +52,10 @@ export default function DutyPage() {
   const [duties, setDuties] = useState<Duty[]>(mockDuties)
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
-  const [newDutyDate, setNewDutyDate] = useState<Date | undefined>()
 
   const initialNewDutyState = {
     employeeId: "",
+    date: "",
     shift: "Morning" as "Morning" | "Afternoon" | "Night",
     location: "",
     details: "",
@@ -75,7 +74,7 @@ export default function DutyPage() {
   }
 
   const handleAssignDuty = () => {
-    if (!newDuty.employeeId || !newDutyDate || !newDuty.location) {
+    if (!newDuty.employeeId || !newDuty.date || !newDuty.location) {
       alert("Please fill all required fields.")
       return
     }
@@ -89,7 +88,7 @@ export default function DutyPage() {
       id: Date.now().toString(),
       employeeName: employee.name,
       employeeId: newDuty.employeeId,
-      date: format(newDutyDate, "yyyy-MM-dd"),
+      date: newDuty.date,
       shift: newDuty.shift,
       location: newDuty.location,
       details: newDuty.details,
@@ -130,7 +129,6 @@ export default function DutyPage() {
               setIsAssignDialogOpen(isOpen)
               if (!isOpen) {
                 setNewDuty(initialNewDutyState)
-                setNewDutyDate(undefined)
               }
             }}
           >
@@ -174,36 +172,13 @@ export default function DutyPage() {
                   <Label htmlFor="date" className="text-right">
                     Date
                   </Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "col-span-3 justify-start text-left font-normal",
-                          !newDutyDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newDutyDate ? (
-                          format(newDutyDate, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={newDutyDate}
-                        onSelect={setNewDutyDate}
-                        initialFocus
-                        numberOfMonths={2}
-                        captionLayout="dropdown-buttons"
-                        fromYear={1950}
-                        toYear={new Date().getFullYear() + 50}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={newDuty.date}
+                    onChange={handleNewDutyInputChange}
+                    className="col-span-3"
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="shift" className="text-right">
@@ -318,70 +293,68 @@ export default function DutyPage() {
               </Table>
             </div>
           </TabsContent>
-          <TabsContent value="calendar">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2">
-                <CardContent className="p-0 flex justify-center">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    className="p-4"
-                    modifiers={{ hasDuty: dutyDates }}
-                    modifiersClassNames={{
-                      hasDuty: "bg-primary/20",
-                    }}
-                    numberOfMonths={2}
-                    captionLayout="dropdown-buttons"
-                    fromYear={1950}
-                    toYear={new Date().getFullYear() + 50}
-                  />
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    Duties for {date ? format(date, "PPP") : "selected date"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {dutiesForSelectedDate.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Employee</TableHead>
-                          <TableHead>Shift</TableHead>
-                          <TableHead>Location</TableHead>
+          <TabsContent value="calendar" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="lg:col-span-2">
+              <CardContent className="p-0 flex justify-center">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="p-4"
+                  modifiers={{ hasDuty: dutyDates }}
+                  modifiersClassNames={{
+                    hasDuty: "bg-primary/20",
+                  }}
+                  numberOfMonths={2}
+                  captionLayout="dropdown-buttons"
+                  fromYear={1950}
+                  toYear={new Date().getFullYear() + 50}
+                />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  Duties for {date ? format(date, "PPP") : "selected date"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {dutiesForSelectedDate.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Shift</TableHead>
+                        <TableHead>Location</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dutiesForSelectedDate.map((duty) => (
+                        <TableRow key={duty.id}>
+                          <TableCell>{duty.employeeName}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                duty.shift === "Night"
+                                  ? "destructive"
+                                  : "secondary"
+                              }
+                            >
+                              {duty.shift}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{duty.location}</TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {dutiesForSelectedDate.map((duty) => (
-                          <TableRow key={duty.id}>
-                            <TableCell>{duty.employeeName}</TableCell>
-                            <TableCell>
-                              <Badge
-                                variant={
-                                  duty.shift === "Night"
-                                    ? "destructive"
-                                    : "secondary"
-                                }
-                              >
-                                {duty.shift}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{duty.location}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      No duties assigned for this date.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <p className="text-muted-foreground">
+                    No duties assigned for this date.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       ) : (
