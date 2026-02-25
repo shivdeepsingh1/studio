@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -296,6 +297,7 @@ export default function LeavePage() {
                   <Select
                     onValueChange={(value) => handleNewLeaveSelectChange("status", value)}
                     value={newLeave.status}
+                    disabled={user.rank !== 'Administrator'}
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select status" />
@@ -359,7 +361,7 @@ export default function LeavePage() {
                     {leave.reason}
                   </TableCell>
                   <TableCell>
-                    {user?.role === 'admin' ? (
+                    {user?.rank === 'Administrator' ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="p-0 h-auto">

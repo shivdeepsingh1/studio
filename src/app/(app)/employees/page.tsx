@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -176,7 +177,7 @@ export default function EmployeesPage() {
     }
   }
   
-  const canEdit = user?.rank === 'Administrator';
+  const canEdit = user?.role === 'admin';
 
   return (
     <>
@@ -395,6 +396,9 @@ export default function EmployeesPage() {
             {filteredEmployees.map((employee, index) => {
               const dobValid = employee.dob && !isNaN(new Date(employee.dob.replace(/-/g, '/')).getTime());
               const joiningDateValid = employee.joiningDate && !isNaN(new Date(employee.joiningDate.replace(/-/g, '/')).getTime());
+              const isCurrentUserAdministrator = user?.rank === 'Administrator';
+              const canEditThisRow = canEdit && (isCurrentUserAdministrator || employee.rank !== 'Administrator');
+
               return (
                 <TableRow key={employee.id}>
                   <TableCell>{index + 1}</TableCell>
@@ -426,19 +430,19 @@ export default function EmployeesPage() {
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0" disabled={!canEdit}>
+                        <Button variant="ghost" className="h-8 w-8 p-0" disabled={!canEditThisRow}>
                           <span className="sr-only">Open menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEditDialog(employee)} disabled={!canEdit}>
+                        <DropdownMenuItem onClick={() => openEditDialog(employee)} disabled={!canEditThisRow}>
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-red-500"
                           onClick={() => deleteEmployee(employee.id)}
-                          disabled={!canEdit}
+                          disabled={!isCurrentUserAdministrator || employee.rank === 'Administrator'}
                         >
                           Delete
                         </DropdownMenuItem>
@@ -533,7 +537,7 @@ export default function EmployeesPage() {
                   <Select
                     onValueChange={handleRankChange}
                     value={editingEmployee.rank ?? ""}
-                     disabled={!canEdit}
+                     disabled={!canEdit || user?.rank !== 'Administrator'}
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select rank" />
@@ -554,7 +558,7 @@ export default function EmployeesPage() {
                   <Select
                     onValueChange={handleRoleChange}
                     value={editingEmployee.role ?? "employee"}
-                    disabled={!canEdit}
+                    disabled={!canEdit || user?.rank !== 'Administrator' || editingEmployee.rank === 'Administrator'}
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select role" />
