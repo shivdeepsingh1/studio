@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { FileDown, MoreHorizontal, PlusCircle, Search } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Search } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -34,10 +34,19 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>(mockEmployees)
   const [searchQuery, setSearchQuery] = useState("")
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const filteredEmployees = employees.filter((employee) =>
     employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -46,6 +55,29 @@ export default function EmployeesPage() {
 
   const deleteEmployee = (id: string) => {
     setEmployees(employees.filter(e => e.id !== id));
+  }
+
+  const handleUpdateEmployee = () => {
+    if (!editingEmployee) return;
+    setEmployees(employees.map(emp => emp.id === editingEmployee.id ? editingEmployee : emp));
+    setIsEditDialogOpen(false);
+    setEditingEmployee(null);
+  }
+
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editingEmployee) return;
+    const { id, value } = e.target;
+    setEditingEmployee({ ...editingEmployee, [id]: value });
+  }
+
+  const handleRankChange = (value: string) => {
+     if (!editingEmployee) return;
+     setEditingEmployee({ ...editingEmployee, rank: value as Employee['rank'] });
+  }
+
+  const openEditDialog = (employee: Employee) => {
+    setEditingEmployee({ ...employee });
+    setIsEditDialogOpen(true);
   }
 
   return (
@@ -139,7 +171,7 @@ export default function EmployeesPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => openEditDialog(employee)}>Edit</DropdownMenuItem>
                       <DropdownMenuItem className="text-red-500" onClick={() => deleteEmployee(employee.id)}>Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -152,6 +184,60 @@ export default function EmployeesPage() {
       {filteredEmployees.length === 0 && (
         <div className="text-center p-8 text-muted-foreground">No employees found.</div>
       )}
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Edit Employee Details</DialogTitle>
+                <DialogDescription>
+                    Update the employee's information and click save.
+                </DialogDescription>
+            </DialogHeader>
+            {editingEmployee && (
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">Name</Label>
+                        <Input id="name" value={editingEmployee.name} onChange={handleEditInputChange} className="col-span-3" />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="rank" className="text-right">Rank</Label>
+                        <Select onValueChange={handleRankChange} value={editingEmployee.rank}>
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Select rank" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Constable">Constable</SelectItem>
+                                <SelectItem value="Head Constable">Head Constable</SelectItem>
+                                <SelectItem value="ASI">ASI</SelectItem>
+                                <SelectItem value="SI">SI</SelectItem>
+                                <SelectItem value="Inspector">Inspector</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="pno" className="text-right">PNO</Label>
+                        <Input id="pno" value={editingEmployee.pno} onChange={handleEditInputChange} className="col-span-3" />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="contact" className="text-right">Mobile No.</Label>
+                        <Input id="contact" value={editingEmployee.contact} onChange={handleEditInputChange} className="col-span-3" />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="joiningDate" className="text-right">Joining Date</Label>
+                        <Input id="joiningDate" type="date" value={editingEmployee.joiningDate} onChange={handleEditInputChange} className="col-span-3" />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="joiningDistrict" className="text-right">Joining District</Label>
+                        <Input id="joiningDistrict" value={editingEmployee.joiningDistrict} onChange={handleEditInputChange} className="col-span-3" />
+                    </div>
+                </div>
+            )}
+            <DialogFooter>
+                 <Button variant="secondary" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+                <Button onClick={handleUpdateEmployee}>Save Changes</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
