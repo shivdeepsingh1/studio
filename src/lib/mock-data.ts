@@ -5,6 +5,7 @@ const avatarUrls = PlaceHolderImages.filter(img => img.id.startsWith('avatar')).
 
 
 export const mockEmployees: Employee[] = [
+  { id: '0', badgeNumber: 'A0001', pno: 'ADMIN', name: 'Chief Administrator', rank: 'Administrator', dob: '1970-01-01', contact: '9999999999', joiningDate: '2000-01-01', joiningDistrict: 'Headquarters', avatarUrl: 'https://picsum.photos/seed/admin/100/100', password: 'admin', role: 'admin' },
   { id: '1', badgeNumber: 'B12345', pno: '12345', name: 'Ravi Kumar', rank: 'Constable', dob: '1995-03-10', contact: '9876543210', joiningDate: '2020-01-15', joiningDistrict: 'North District', avatarUrl: avatarUrls[0] || 'https://picsum.photos/seed/1/100/100', password: '10031995', role: 'employee' },
   { id: '2', badgeNumber: 'B12346', pno: '12346', name: 'Sita Sharma', rank: 'Lady Head Constable', dob: '1993-07-25', contact: '9876543211', joiningDate: '2018-05-20', joiningDistrict: 'South District', avatarUrl: avatarUrls[1] || 'https://picsum.photos/seed/2/100/100', password: '25071993', role: 'employee' },
   { id: '3', badgeNumber: 'B12347', pno: '12347', name: 'Amit Singh', rank: 'Sub Inspector', dob: '1990-11-15', contact: '9876543212', joiningDate: '2015-11-30', joiningDistrict: 'West District', avatarUrl: avatarUrls[2] || 'https://picsum.photos/seed/3/100/100', password: '15111990', role: 'admin' },

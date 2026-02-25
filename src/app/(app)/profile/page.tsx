@@ -14,6 +14,7 @@ import { Employee, User } from "@/lib/types"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth()
@@ -22,6 +23,7 @@ export default function ProfilePage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<Partial<User & Employee> | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [adminList, setAdminList] = useState<Employee[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -30,6 +32,11 @@ export default function ProfilePage() {
       const details = employees.find((e: Employee) => e.id === user.id);
       setEmployeeDetails(details || null);
       setEditingProfile({ ...user, ...details });
+      
+      if (user.rank === 'Administrator') {
+        const otherAdmins = employees.filter(e => e.role === 'admin' && e.id !== user.id);
+        setAdminList(otherAdmins);
+      }
     }
   }, [user]);
 
@@ -45,22 +52,24 @@ export default function ProfilePage() {
   };
   
   const handleUpdateProfile = () => {
-    if (!editingProfile) return;
+    if (!editingProfile || !editingProfile.id) return;
 
     // Update user context
     updateUser(editingProfile as User);
 
     // Update employee list in local storage
-    if (editingProfile.id !== 'admin01') {
-      const storedEmployees = localStorage.getItem("line-command-employees");
-      let employees: Employee[] = storedEmployees ? JSON.parse(storedEmployees) : mockEmployees;
-      
-      const updatedEmployees = employees.map(emp => 
-        emp.id === editingProfile.id ? { ...emp, ...editingProfile } : emp
-      );
-      localStorage.setItem("line-command-employees", JSON.stringify(updatedEmployees));
-      setEmployeeDetails(editingProfile as Employee);
-    }
+    const storedEmployees = localStorage.getItem("line-command-employees");
+    let employees: Employee[] = storedEmployees ? JSON.parse(storedEmployees) : mockEmployees;
+    
+    const updatedEmployees = employees.map(emp => {
+      if (emp.id === editingProfile.id) {
+        return { ...emp, ...editingProfile } as Employee;
+      }
+      return emp;
+    });
+
+    localStorage.setItem("line-command-employees", JSON.stringify(updatedEmployees));
+    setEmployeeDetails(updatedEmployees.find(e => e.id === editingProfile.id) || null);
     
     setIsEditDialogOpen(false);
   };
@@ -123,46 +132,42 @@ export default function ProfilePage() {
                               className="col-span-3"
                             />
                           </div>
-                          {user.id !== 'admin01' && (
-                            <>
-                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="contact" className="text-right">
-                                  Mobile No.
-                                </Label>
-                                <Input
-                                  id="contact"
-                                  value={editingProfile.contact ?? ""}
-                                  onChange={handleEditInputChange}
-                                  className="col-span-3"
-                                />
-                              </div>
-                               <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="password" className="text-right">
-                                  Password
-                                </Label>
-                                <div className="col-span-3 relative">
-                                  <Input
-                                    id="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={editingProfile.password ?? ""}
-                                    onChange={handleEditInputChange}
-                                    className="pr-10"
-                                    placeholder="Leave blank for default"
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute inset-y-0 right-0 h-full w-10 flex items-center justify-center text-muted-foreground"
-                                    onClick={() => setShowPassword(p => !p)}
-                                  >
-                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                     <span className="sr-only">Toggle password visibility</span>
-                                  </Button>
-                                </div>
-                              </div>
-                            </>
-                          )}
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="contact" className="text-right">
+                              Mobile No.
+                            </Label>
+                            <Input
+                              id="contact"
+                              value={editingProfile.contact ?? ""}
+                              onChange={handleEditInputChange}
+                              className="col-span-3"
+                            />
+                          </div>
+                           <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="password" className="text-right">
+                              Password
+                            </Label>
+                            <div className="col-span-3 relative">
+                              <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={editingProfile.password ?? ""}
+                                onChange={handleEditInputChange}
+                                className="pr-10"
+                                placeholder="Leave blank for default"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute inset-y-0 right-0 h-full w-10 flex items-center justify-center text-muted-foreground"
+                                onClick={() => setShowPassword(p => !p)}
+                              >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                 <span className="sr-only">Toggle password visibility</span>
+                              </Button>
+                            </div>
+                          </div>
                        </div>
                     )}
                      <DialogFooter>
@@ -218,6 +223,42 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
+        
+        {user.rank === 'Administrator' && adminList.length > 0 && (
+          <Card className="mt-8">
+              <CardHeader>
+                  <CardTitle>Other Administrators</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <Table>
+                      <TableHeader>
+                          <TableRow>
+                              <TableHead>Name</TableHead>
+                              <TableHead>PNO</TableHead>
+                              <TableHead>Rank</TableHead>
+                          </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                          {adminList.map(admin => (
+                              <TableRow key={admin.id}>
+                                  <TableCell>
+                                      <div className="flex items-center gap-3">
+                                          <Avatar>
+                                              <AvatarImage src={admin.avatarUrl} alt={admin.name} />
+                                              <AvatarFallback>{admin.name.charAt(0)}</AvatarFallback>
+                                          </Avatar>
+                                          <div className="font-medium">{admin.name}</div>
+                                      </div>
+                                  </TableCell>
+                                  <TableCell>{admin.pno}</TableCell>
+                                  <TableCell>{admin.rank}</TableCell>
+                              </TableRow>
+                          ))}
+                      </TableBody>
+                  </Table>
+              </CardContent>
+          </Card>
+        )}
       </div>
     </>
   )

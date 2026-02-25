@@ -426,13 +426,13 @@ export default function EmployeesPage() {
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0" disabled={!canEdit && employee.rank !== 'Administrator'}>
+                      <Button variant="ghost" className="h-8 w-8 p-0" disabled={!canEdit}>
                         <span className="sr-only">Open menu</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => openEditDialog(employee)} disabled={!canEdit && employee.rank !== 'Administrator'}>
+                      <DropdownMenuItem onClick={() => openEditDialog(employee)} disabled={!canEdit}>
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -475,7 +475,7 @@ export default function EmployeesPage() {
                   value={editingEmployee.name ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
-                  disabled={!canEdit && editingEmployee.rank !== 'Administrator'}
+                  disabled={!canEdit}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -517,6 +517,7 @@ export default function EmployeesPage() {
                             setEditingEmployee({ ...editingEmployee, password: "" });
                         }
                     }}
+                    disabled={!canEdit}
                   >
                     <RotateCcw className="mr-2 h-3 w-3" />
                     Reset to Default
