@@ -132,7 +132,14 @@ export default function EmployeesPage() {
   const handleAddEmployee = () => {
     const newId = Date.now().toString()
     const avatarUrl = `https://picsum.photos/seed/${newId}/100/100`
-    updateEmployees([...employees, { ...newEmployee, id: newId, avatarUrl }])
+
+    let employeeToAdd = { ...newEmployee };
+    if (!employeeToAdd.password && employeeToAdd.dob) {
+      const [year, month, day] = employeeToAdd.dob.split('-');
+      employeeToAdd.password = `${day}${month}${year}`;
+    }
+
+    updateEmployees([...employees, { ...employeeToAdd, id: newId, avatarUrl }])
     setIsAddDialogOpen(false)
     setNewEmployee(initialNewEmployeeState)
   }
@@ -204,6 +211,7 @@ export default function EmployeesPage() {
                     value={newEmployee.password}
                     onChange={handleNewInputChange}
                     className="pr-10"
+                    placeholder="Default: DoB (ddmmyyyy)"
                   />
                   <Button
                     type="button"
