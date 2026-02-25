@@ -304,6 +304,7 @@ export default function LeavePage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Sr. No.</TableHead>
               {role === "admin" && <TableHead>Employee Name</TableHead>}
               <TableHead>Type</TableHead>
               <TableHead>Start Date</TableHead>
@@ -313,8 +314,9 @@ export default function LeavePage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(role === "admin" ? leaves : employeeLeaves).map((leave) => (
+            {(role === "admin" ? leaves : employeeLeaves).map((leave, index) => (
               <TableRow key={leave.id}>
+                <TableCell>{index + 1}</TableCell>
                 {role === "admin" && (
                   <TableCell>{leave.employeeName}</TableCell>
                 )}
@@ -339,7 +341,14 @@ export default function LeavePage() {
             ))}
             {role === "employee" && employeeLeaves.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center">
+                <TableCell colSpan={6} className="text-center">
+                  No leave records found.
+                </TableCell>
+              </TableRow>
+            )}
+             {role === "admin" && leaves.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center">
                   No leave records found.
                 </TableCell>
               </TableRow>

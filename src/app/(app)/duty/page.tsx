@@ -345,6 +345,7 @@ export default function DutyPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Sr. No.</TableHead>
                     <TableHead>Badge Number</TableHead>
                     <TableHead>PNO</TableHead>
                     <TableHead>Rank</TableHead>
@@ -356,12 +357,13 @@ export default function DutyPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {duties.map((duty) => {
+                  {duties.map((duty, index) => {
                     const employee = allEmployees.find(
                       (e) => e.id === duty.employeeId
                     )
                     return (
                       <TableRow key={duty.id}>
+                        <TableCell>{index + 1}</TableCell>
                         <TableCell>{employee?.badgeNumber}</TableCell>
                         <TableCell>{employee?.pno}</TableCell>
                         <TableCell>{employee?.rank}</TableCell>
@@ -437,14 +439,16 @@ export default function DutyPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead>Sr. No.</TableHead>
                         <TableHead>Employee</TableHead>
                         <TableHead>Shift</TableHead>
                         <TableHead>Location</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {dutiesForSelectedDate.map((duty) => (
+                      {dutiesForSelectedDate.map((duty, index) => (
                         <TableRow key={duty.id}>
+                          <TableCell>{index + 1}</TableCell>
                           <TableCell>{duty.employeeName}</TableCell>
                           <TableCell>
                             <Badge
@@ -476,6 +480,7 @@ export default function DutyPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Sr. No.</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Shift</TableHead>
                 <TableHead>Location</TableHead>
@@ -483,8 +488,9 @@ export default function DutyPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {employeeDuties.map((duty) => (
+              {employeeDuties.map((duty, index) => (
                 <TableRow key={duty.id}>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>{duty.date}</TableCell>
                   <TableCell>
                     <Badge
@@ -501,7 +507,7 @@ export default function DutyPage() {
               ))}
               {employeeDuties.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">
+                  <TableCell colSpan={5} className="text-center">
                     No duties assigned.
                   </TableCell>
                 </TableRow>

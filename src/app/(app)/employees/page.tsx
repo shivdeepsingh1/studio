@@ -271,6 +271,7 @@ export default function EmployeesPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Sr. No.</TableHead>
               <TableHead>Rank</TableHead>
               <TableHead>Badge Number</TableHead>
               <TableHead>PNO</TableHead>
@@ -282,8 +283,9 @@ export default function EmployeesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredEmployees.map((employee) => (
+            {filteredEmployees.map((employee, index) => (
               <TableRow key={employee.id}>
+                <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{employee.rank}</Badge>
                 </TableCell>
