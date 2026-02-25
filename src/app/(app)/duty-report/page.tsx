@@ -165,7 +165,6 @@ export default function DutyReportPage() {
                                     captionLayout="dropdown-buttons"
                                     fromYear={new Date().getFullYear() - 100}
                                     toYear={new Date().getFullYear() + 10}
-                                    initialFocus
                                 />
                             </PopoverContent>
                         </Popover>
@@ -193,7 +192,6 @@ export default function DutyReportPage() {
                                     captionLayout="dropdown-buttons"
                                     fromYear={new Date().getFullYear() - 100}
                                     toYear={new Date().getFullYear() + 10}
-                                    initialFocus
                                 />
                             </PopoverContent>
                         </Popover>
