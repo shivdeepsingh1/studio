@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { FileDown, PlusCircle, MoreHorizontal } from "lucide-react"
@@ -47,12 +49,6 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-
-// A mock function for PDF generation
-const generatePdf = (data: any, title: string) => {
-  console.log(`Generating PDF for ${title}:`, data)
-  alert(`PDF for "${title}" would be generated. Check console for data.`)
-}
 
 export default function DutyPage() {
   const { user } = useAuth()
@@ -177,7 +173,50 @@ export default function DutyPage() {
 
 
   const handleExport = () => {
-    generatePdf(duties, "Duty Roster")
+    const doc = new jsPDF();
+    doc.text("Duty Roster", 14, 16);
+
+    const isEmployee = user?.role !== 'admin';
+    
+    let head;
+    let body;
+
+    if (isEmployee) {
+      head = [['Sr. No.', 'Date', 'Shift', 'Location', 'Details']];
+      body = employeeDuties.map((duty, index) => {
+        const dutyDateValid = duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime());
+        return [
+            index + 1,
+            dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+            duty.shift,
+            duty.location,
+            duty.details
+        ]
+      });
+    } else {
+      head = [['Sr. No.', 'Badge Number', 'PNO', 'Rank', 'Name', 'Date', 'Shift', 'Location']];
+      body = duties.map((duty, index) => {
+        const employee = allEmployees.find(e => e.id === duty.employeeId);
+        const dutyDateValid = duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime());
+        return [
+          index + 1,
+          employee?.badgeNumber || 'N/A',
+          employee?.pno || 'N/A',
+          employee?.rank || 'N/A',
+          duty.employeeName,
+          dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+          duty.shift,
+          duty.location
+        ];
+      });
+    }
+
+    autoTable(doc, {
+      startY: 20,
+      head: head,
+      body: body as any,
+    });
+    doc.save("duty_roster.pdf");
   }
 
   const employeeDuties = duties.filter((d) => d.employeeId === user?.id)

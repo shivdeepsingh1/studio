@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { FileDown, PlusCircle } from "lucide-react"
@@ -44,12 +46,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-
-// A mock function for PDF generation
-const generatePdf = (data: any, title: string) => {
-  console.log(`Generating PDF for ${title}:`, data)
-  alert(`PDF for "${title}" would be generated. Check console for data.`)
-}
 
 const leaveTypes: Leave["type"][] = ["Casual", "Sick", "Earned", "Maternity"]
 const leaveStatuses: Leave["status"][] = ["Pending", "Approved", "Rejected"]
@@ -146,13 +142,50 @@ export default function LeavePage() {
   }
 
   const handleStatusUpdate = (leaveId: string, status: Leave["status"]) => {
+    if (user?.rank !== 'Administrator') return;
     updateLeaves(
       leaves.map((l) => (l.id === leaveId ? { ...l, status } : l))
     );
   };
 
   const handleExport = () => {
-    generatePdf(leaves, "Leave Records")
+    const doc = new jsPDF()
+    doc.text("Leave Records", 14, 16)
+    
+    const isEmployeeView = user?.role !== "admin"
+    const data = isEmployeeView ? employeeLeaves : leaves
+    
+    const head = isEmployeeView 
+      ? [['Sr. No.', 'Type', 'Start Date', 'End Date', 'Reason', 'Status']]
+      : [['Sr. No.', 'Employee Name', 'Type', 'Start Date', 'End Date', 'Reason', 'Status']]
+
+    const body = data.map((leave, index) => {
+        const startDateValid = leave.startDate && !isNaN(new Date(leave.startDate.replace(/-/g, '/')).getTime());
+        const endDateValid = leave.endDate && !isNaN(new Date(leave.endDate.replace(/-/g, '/')).getTime());
+        
+        const row: (string | number)[] = [
+            index + 1,
+            leave.type,
+            startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+            endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+            leave.reason,
+            leave.status
+        ];
+
+        if (!isEmployeeView) {
+            row.splice(1, 0, leave.employeeName)
+        }
+
+        return row
+    });
+
+    autoTable(doc, {
+      startY: 20,
+      head: head,
+      body: body as any,
+    })
+
+    doc.save("leave_records.pdf")
   }
 
   const employeeLeaves = leaves.filter((l) => l.employeeId === user?.id)
@@ -364,7 +397,7 @@ export default function LeavePage() {
                     {user?.rank === 'Administrator' ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="p-0 h-auto">
+                          <Button variant="ghost" className="p-0 h-auto" disabled={user?.rank !== 'Administrator'}>
                             <Badge
                               variant={getStatusBadgeVariant(leave.status)}
                               className={cn("cursor-pointer",

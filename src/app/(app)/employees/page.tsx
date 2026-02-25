@@ -4,9 +4,11 @@
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import * as XLSX from "xlsx"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp, FileDown } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -97,14 +99,16 @@ export default function EmployeesPage() {
   )
 
   const deleteEmployee = (id: string) => {
+    if (user?.rank !== 'Administrator') return;
     updateEmployees(employees.filter((e) => e.id !== id))
   }
 
   const handleUpdateEmployee = () => {
     if (!editingEmployee || !editingEmployee.id) return;
+    if (user?.role !== 'admin') return;
   
     const updatedEmployees = employees.map((emp) =>
-      emp.id === editingEmployee.id ? { ...emp, ...editingEmployee } : emp
+      emp.id === editingEmployee.id ? { ...emp, ...editingEmployee } as Employee : emp
     )
     
     updateEmployees(updatedEmployees);
@@ -257,6 +261,31 @@ export default function EmployeesPage() {
     };
     reader.readAsBinaryString(file);
   };
+  
+  const handleExportPdf = () => {
+    const doc = new jsPDF()
+    doc.text("Employee List", 14, 16)
+    autoTable(doc, {
+      startY: 20,
+      head: [['Sr. No.', 'Rank', 'Badge No.', 'PNO', 'Name', 'DOB', 'Joining Date', 'Joining District', 'Mobile No.']],
+      body: filteredEmployees.map((employee, index) => {
+        const dobValid = employee.dob && !isNaN(new Date(employee.dob.replace(/-/g, '/')).getTime());
+        const joiningDateValid = employee.joiningDate && !isNaN(new Date(employee.joiningDate.replace(/-/g, '/')).getTime());
+        return [
+            index + 1,
+            employee.rank,
+            employee.badgeNumber,
+            employee.pno,
+            employee.name,
+            dobValid ? format(new Date(employee.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+            joiningDateValid ? format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+            employee.joiningDistrict,
+            employee.contact
+        ]
+      }),
+    })
+    doc.save("employees.pdf")
+  }
 
 
   return (
@@ -302,6 +331,10 @@ export default function EmployeesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        <Button variant="outline" onClick={handleExportPdf}>
+          <FileDown className="mr-2 h-4 w-4" />
+          Export PDF
+        </Button>
         <Dialog open={isAddDialogOpen} onOpenChange={handleAddDialogChange}>
           <DialogTrigger asChild>
             <Button disabled={!canEdit}>
@@ -549,7 +582,7 @@ export default function EmployeesPage() {
                         <DropdownMenuItem
                           className="text-red-500"
                           onClick={() => deleteEmployee(employee.id)}
-                          disabled={!canEditThisRow || employee.rank === 'Administrator'}
+                          disabled={!isCurrentUserAdministrator || employee.rank === 'Administrator'}
                         >
                           Delete
                         </DropdownMenuItem>
