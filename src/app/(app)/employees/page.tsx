@@ -50,6 +50,7 @@ export default function EmployeesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   const initialNewEmployeeState = {
+    badgeNumber: "",
     pno: "",
     name: "",
     rank: "Constable" as EmployeeRank,
@@ -81,7 +82,8 @@ export default function EmployeesPage() {
   const filteredEmployees = employees.filter(
     (employee) =>
       employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.pno.includes(searchQuery)
+      employee.pno.includes(searchQuery) ||
+      employee.badgeNumber.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const deleteEmployee = (id: string) => {
@@ -142,7 +144,7 @@ export default function EmployeesPage() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search by PNO or name..."
+            placeholder="Search by PNO, Badge No. or name..."
             className="pl-8 sm:w-[300px]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -193,6 +195,17 @@ export default function EmployeesPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="badgeNumber" className="text-right">
+                  Badge Number
+                </Label>
+                <Input
+                  id="badgeNumber"
+                  value={newEmployee.badgeNumber}
+                  onChange={handleNewInputChange}
+                  className="col-span-3"
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="pno" className="text-right">
@@ -274,7 +287,7 @@ export default function EmployeesPage() {
                 <TableCell>
                   <Badge variant="outline">{employee.rank}</Badge>
                 </TableCell>
-                <TableCell>{employee.pno}</TableCell>
+                <TableCell>{employee.badgeNumber}</TableCell>
                 <TableCell>{employee.pno}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-3">
@@ -364,6 +377,17 @@ export default function EmployeesPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="badgeNumber" className="text-right">
+                  Badge Number
+                </Label>
+                <Input
+                  id="badgeNumber"
+                  value={editingEmployee.badgeNumber}
+                  onChange={handleEditInputChange}
+                  className="col-span-3"
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="pno" className="text-right">

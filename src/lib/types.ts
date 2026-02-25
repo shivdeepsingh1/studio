@@ -36,6 +36,7 @@ export const employeeRanks: EmployeeRank[] = [
 
 export interface Employee {
   id: string;
+  badgeNumber: string;
   pno: string;
   name: string;
   rank: EmployeeRank;

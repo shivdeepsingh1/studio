@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { FileDown, PlusCircle } from "lucide-react"
+import { FileDown, PlusCircle, MoreHorizontal } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import {
   Table,
@@ -15,6 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -54,6 +60,10 @@ export default function DutyPage() {
   const [allEmployees, setAllEmployees] = useState<Employee[]>([])
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
+  
+  const [editingDuty, setEditingDuty] = useState<Duty | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
 
   const initialNewDutyState = {
     employeeId: "",
@@ -146,6 +156,25 @@ export default function DutyPage() {
     updateDuties([...duties, dutyToAdd])
     setIsAssignDialogOpen(false)
   }
+
+  const openEditDialog = (duty: Duty) => {
+    setEditingDuty(duty);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateDuty = () => {
+    if (!editingDuty) return;
+    updateDuties(duties.map(d => d.id === editingDuty.id ? editingDuty : d));
+    setIsEditDialogOpen(false);
+    setEditingDuty(null);
+  };
+
+  const handleDeleteDuty = (id: string) => {
+    if(window.confirm("Are you sure you want to delete this duty record?")){
+      updateDuties(duties.filter(d => d.id !== id));
+    }
+  };
+
 
   const handleExport = () => {
     generatePdf(duties, "Duty Roster")
@@ -323,6 +352,7 @@ export default function DutyPage() {
                     <TableHead>Date</TableHead>
                     <TableHead>Shift</TableHead>
                     <TableHead>Location</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -332,7 +362,7 @@ export default function DutyPage() {
                     )
                     return (
                       <TableRow key={duty.id}>
-                        <TableCell>{employee?.pno}</TableCell>
+                        <TableCell>{employee?.badgeNumber}</TableCell>
                         <TableCell>{employee?.pno}</TableCell>
                         <TableCell>{employee?.rank}</TableCell>
                         <TableCell>{duty.employeeName}</TableCell>
@@ -349,6 +379,27 @@ export default function DutyPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>{duty.location}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openEditDialog(duty)}>
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-red-500"
+                                onClick={() => handleDeleteDuty(duty.id)}
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                       </TableRow>
                     )
                   })}
@@ -459,6 +510,93 @@ export default function DutyPage() {
           </Table>
         </div>
       )}
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Duty</DialogTitle>
+            <DialogDescription>
+              Update the details for this duty assignment.
+            </DialogDescription>
+          </DialogHeader>
+          {editingDuty && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Employee</Label>
+                  <Input
+                    value={editingDuty.employeeName}
+                    disabled
+                    className="col-span-3"
+                  />
+                </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="date-edit" className="text-right">
+                  Date
+                </Label>
+                <Input
+                  id="date-edit"
+                  type="date"
+                  value={editingDuty.date}
+                  onChange={(e) => setEditingDuty({ ...editingDuty, date: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="shift-edit" className="text-right">
+                  Shift
+                </Label>
+                <Select
+                  onValueChange={(value) =>
+                    setEditingDuty({ ...editingDuty, shift: value as Duty['shift'] })
+                  }
+                  value={editingDuty.shift}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select shift" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Morning">Morning</SelectItem>
+                    <SelectItem value="Afternoon">Afternoon</SelectItem>
+                    <SelectItem value="Night">Night</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="location-edit" className="text-right">
+                  Location
+                </Label>
+                <Input
+                  id="location-edit"
+                  value={editingDuty.location}
+                  onChange={(e) => setEditingDuty({ ...editingDuty, location: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="details-edit" className="text-right">
+                  Details
+                </Label>
+                <Textarea
+                  id="details-edit"
+                  value={editingDuty.details}
+                  onChange={(e) => setEditingDuty({ ...editingDuty, details: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateDuty}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
