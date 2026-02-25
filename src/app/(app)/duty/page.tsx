@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { mockEmployees } from "@/lib/mock-data"
+import { mockEmployees, mockDuties } from "@/lib/mock-data"
 import { Duty, Employee } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
