@@ -9,11 +9,11 @@ const getRandomAvatar = () => {
 
 export const mockEmployees: Employee[] = [
   { id: '1', pno: '12345', name: 'Ravi Kumar', rank: 'Constable', contact: '9876543210', joiningDate: '2020-01-15', joiningDistrict: 'North District', avatarUrl: getRandomAvatar() },
-  { id: '2', pno: '12346', name: 'Sita Sharma', rank: 'Head Constable', contact: '9876543211', joiningDate: '2018-05-20', joiningDistrict: 'South District', avatarUrl: getRandomAvatar() },
-  { id: '3', pno: '12347', name: 'Amit Singh', rank: 'ASI', contact: '9876543212', joiningDate: '2015-11-30', joiningDistrict: 'West District', avatarUrl: getRandomAvatar() },
-  { id: '4', pno: '12348', name: 'Priya Patel', rank: 'SI', contact: '9876543213', joiningDate: '2012-02-10', joiningDistrict: 'East District', avatarUrl: getRandomAvatar() },
+  { id: '2', pno: '12346', name: 'Sita Sharma', rank: 'Lady Head Constable', contact: '9876543211', joiningDate: '2018-05-20', joiningDistrict: 'South District', avatarUrl: getRandomAvatar() },
+  { id: '3', pno: '12347', name: 'Amit Singh', rank: 'Sub Inspector', contact: '9876543212', joiningDate: '2015-11-30', joiningDistrict: 'West District', avatarUrl: getRandomAvatar() },
+  { id: '4', pno: '12348', name: 'Priya Patel', rank: 'Lady Sub Inspector', contact: '9876543213', joiningDate: '2012-02-10', joiningDistrict: 'East District', avatarUrl: getRandomAvatar() },
   { id: '5', pno: '12349', name: 'Vikram Rathore', rank: 'Inspector', contact: '9876543214', joiningDate: '2008-07-22', joiningDistrict: 'Central District', avatarUrl: getRandomAvatar() },
-  { id: '6', pno: '12350', name: 'Anjali Gupta', rank: 'Constable', contact: '9876543215', joiningDate: '2021-08-01', joiningDistrict: 'North District', avatarUrl: getRandomAvatar() },
+  { id: '6', pno: '12350', name: 'Anjali Gupta', rank: 'Lady Constable', contact: '9876543215', joiningDate: '2021-08-01', joiningDistrict: 'North District', avatarUrl: getRandomAvatar() },
 ];
 
 export const mockDuties: Duty[] = [

@@ -7,11 +7,38 @@ export interface User {
   email: string;
 }
 
+export type EmployeeRank =
+  | "Inspector"
+  | "Lady Inspector"
+  | "Sub Inspector"
+  | "Lady Sub Inspector"
+  | "Head Constable"
+  | "Lady Head Constable"
+  | "Constable"
+  | "Lady Constable"
+  | "Computer Operator"
+  | "Fourth Class"
+  | "Other";
+
+export const employeeRanks: EmployeeRank[] = [
+  "Inspector",
+  "Lady Inspector",
+  "Sub Inspector",
+  "Lady Sub Inspector",
+  "Head Constable",
+  "Lady Head Constable",
+  "Constable",
+  "Lady Constable",
+  "Computer Operator",
+  "Fourth Class",
+  "Other",
+];
+
 export interface Employee {
   id: string;
   pno: string;
   name: string;
-  rank: 'Constable' | 'Head Constable' | 'ASI' | 'SI' | 'Inspector';
+  rank: EmployeeRank;
   contact: string;
   joiningDate: string;
   joiningDistrict: string;

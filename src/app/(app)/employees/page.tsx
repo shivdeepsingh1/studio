@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { mockEmployees } from "@/lib/mock-data"
-import { Employee } from "@/lib/types"
+import { Employee, EmployeeRank, employeeRanks } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -51,7 +51,7 @@ export default function EmployeesPage() {
   const initialNewEmployeeState = {
     pno: "",
     name: "",
-    rank: "Constable" as Employee["rank"],
+    rank: "Constable" as EmployeeRank,
     contact: "",
     joiningDate: "",
     joiningDistrict: "",
@@ -88,7 +88,7 @@ export default function EmployeesPage() {
 
   const handleRankChange = (value: string) => {
     if (!editingEmployee) return
-    setEditingEmployee({ ...editingEmployee, rank: value as Employee["rank"] })
+    setEditingEmployee({ ...editingEmployee, rank: value as EmployeeRank })
   }
 
   const openEditDialog = (employee: Employee) => {
@@ -102,7 +102,7 @@ export default function EmployeesPage() {
   }
 
   const handleNewRankChange = (value: string) => {
-    setNewEmployee({ ...newEmployee, rank: value as Employee["rank"] })
+    setNewEmployee({ ...newEmployee, rank: value as EmployeeRank })
   }
 
   const handleAddEmployee = () => {
@@ -167,11 +167,11 @@ export default function EmployeesPage() {
                     <SelectValue placeholder="Select rank" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Constable">Constable</SelectItem>
-                    <SelectItem value="Head Constable">Head Constable</SelectItem>
-                    <SelectItem value="ASI">ASI</SelectItem>
-                    <SelectItem value="SI">SI</SelectItem>
-                    <SelectItem value="Inspector">Inspector</SelectItem>
+                    {employeeRanks.map((rank) => (
+                      <SelectItem key={rank} value={rank}>
+                        {rank}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -338,11 +338,11 @@ export default function EmployeesPage() {
                     <SelectValue placeholder="Select rank" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Constable">Constable</SelectItem>
-                    <SelectItem value="Head Constable">Head Constable</SelectItem>
-                    <SelectItem value="ASI">ASI</SelectItem>
-                    <SelectItem value="SI">SI</SelectItem>
-                    <SelectItem value="Inspector">Inspector</SelectItem>
+                     {employeeRanks.map((rank) => (
+                      <SelectItem key={rank} value={rank}>
+                        {rank}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
