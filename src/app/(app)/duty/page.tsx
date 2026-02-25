@@ -53,10 +53,10 @@ export default function DutyPage() {
   const [duties, setDuties] = useState<Duty[]>(mockDuties)
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
+  const [newDutyDate, setNewDutyDate] = useState<Date | undefined>()
 
   const initialNewDutyState = {
     employeeId: "",
-    date: undefined as Date | undefined,
     shift: "Morning" as "Morning" | "Afternoon" | "Night",
     location: "",
     details: "",
@@ -70,12 +70,12 @@ export default function DutyPage() {
     setNewDuty({ ...newDuty, [id]: value })
   }
 
-  const handleNewDutySelectChange = (id: string, value: string | Date | undefined) => {
+  const handleNewDutySelectChange = (id: string, value: string) => {
     setNewDuty({ ...newDuty, [id]: value as any })
   }
 
   const handleAssignDuty = () => {
-    if (!newDuty.employeeId || !newDuty.date || !newDuty.location) {
+    if (!newDuty.employeeId || !newDutyDate || !newDuty.location) {
       alert("Please fill all required fields.")
       return
     }
@@ -89,14 +89,13 @@ export default function DutyPage() {
       id: Date.now().toString(),
       employeeName: employee.name,
       employeeId: newDuty.employeeId,
-      date: format(newDuty.date, "yyyy-MM-dd"),
+      date: format(newDutyDate, "yyyy-MM-dd"),
       shift: newDuty.shift,
       location: newDuty.location,
       details: newDuty.details,
     }
     setDuties([...duties, dutyToAdd])
     setIsAssignDialogOpen(false)
-    setNewDuty(initialNewDutyState)
   }
 
   const handleExport = () => {
@@ -127,7 +126,13 @@ export default function DutyPage() {
         {role === "admin" && (
           <Dialog
             open={isAssignDialogOpen}
-            onOpenChange={setIsAssignDialogOpen}
+            onOpenChange={(isOpen) => {
+              setIsAssignDialogOpen(isOpen)
+              if (!isOpen) {
+                setNewDuty(initialNewDutyState)
+                setNewDutyDate(undefined)
+              }
+            }}
           >
             <DialogTrigger asChild>
               <Button>
@@ -175,12 +180,12 @@ export default function DutyPage() {
                         variant={"outline"}
                         className={cn(
                           "col-span-3 justify-start text-left font-normal",
-                          !newDuty.date && "text-muted-foreground"
+                          !newDutyDate && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newDuty.date ? (
-                          format(newDuty.date, "PPP")
+                        {newDutyDate ? (
+                          format(newDutyDate, "PPP")
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -189,15 +194,13 @@ export default function DutyPage() {
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={newDuty.date}
-                        onSelect={(date) =>
-                          handleNewDutySelectChange("date", date)
-                        }
+                        selected={newDutyDate}
+                        onSelect={setNewDutyDate}
                         initialFocus
                         numberOfMonths={2}
                         captionLayout="dropdown-buttons"
-                        fromYear={1970}
-                        toYear={2070}
+                        fromYear={1950}
+                        toYear={new Date().getFullYear() + 50}
                       />
                     </PopoverContent>
                   </Popover>
@@ -330,8 +333,8 @@ export default function DutyPage() {
                     }}
                     numberOfMonths={2}
                     captionLayout="dropdown-buttons"
-                    fromYear={1970}
-                    toYear={2070}
+                    fromYear={1950}
+                    toYear={new Date().getFullYear() + 50}
                   />
                 </CardContent>
               </Card>
