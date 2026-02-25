@@ -69,6 +69,7 @@ export default function EmployeesPage() {
     joiningDistrict: "",
     password: "",
     role: "employee" as "admin" | "employee",
+    status: "Active" as "Active" | "Suspended",
   }
 
   const [newEmployee, setNewEmployee] = useState(initialNewEmployeeState)
@@ -124,15 +125,11 @@ export default function EmployeesPage() {
     setEditingEmployee({ ...editingEmployee, [id]: value })
   }
 
-  const handleRankChange = (value: string) => {
-    if (!editingEmployee) return
-    setEditingEmployee({ ...editingEmployee, rank: value as EmployeeRank })
-  }
+  const handleEditSelectChange = (field: keyof Employee, value: string) => {
+    if (!editingEmployee) return;
+    setEditingEmployee({ ...editingEmployee, [field]: value });
+  };
 
-  const handleRoleChange = (value: "admin" | "employee") => {
-    if (!editingEmployee) return
-    setEditingEmployee({ ...editingEmployee, role: value })
-  }
 
   const openEditDialog = (employee: Employee) => {
     setEditingEmployee({ ...employee, password: employee.password ?? "" })
@@ -143,14 +140,10 @@ export default function EmployeesPage() {
     const { id, value } = e.target
     setNewEmployee({ ...newEmployee, [id]: value })
   }
-
-  const handleNewRankChange = (value: string) => {
-    setNewEmployee({ ...newEmployee, rank: value as EmployeeRank })
-  }
-
-  const handleNewRoleChange = (value: "admin" | "employee") => {
-    setNewEmployee({ ...newEmployee, role: value })
-  }
+  
+  const handleNewSelectChange = (field: keyof typeof initialNewEmployeeState, value: string) => {
+    setNewEmployee({ ...newEmployee, [field]: value });
+  };
 
   const handleAddEmployee = () => {
     const newId = Date.now().toString()
@@ -232,6 +225,7 @@ export default function EmployeesPage() {
             avatarUrl,
             password: row.password?.toString() || '',
             role: row.role === 'admin' ? 'admin' : 'employee',
+            status: row.status === 'Suspended' ? 'Suspended' : 'Active',
           };
         });
 
@@ -267,7 +261,7 @@ export default function EmployeesPage() {
     doc.text("Employee List", 14, 16)
     autoTable(doc, {
       startY: 20,
-      head: [['Sr. No.', 'Rank', 'Badge No.', 'PNO', 'Name', 'DOB', 'Joining Date', 'Joining District', 'Mobile No.']],
+      head: [['Sr. No.', 'Rank', 'Badge No.', 'PNO', 'Name', 'DOB', 'Joining Date', 'Joining District', 'Mobile No.', 'Status']],
       body: filteredEmployees.map((employee, index) => {
         const dobValid = employee.dob && !isNaN(new Date(employee.dob.replace(/-/g, '/')).getTime());
         const joiningDateValid = employee.joiningDate && !isNaN(new Date(employee.joiningDate.replace(/-/g, '/')).getTime());
@@ -280,7 +274,8 @@ export default function EmployeesPage() {
             dobValid ? format(new Date(employee.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
             joiningDateValid ? format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
             employee.joiningDistrict,
-            employee.contact
+            employee.contact,
+            employee.status || 'Active'
         ]
       }),
     })
@@ -315,7 +310,7 @@ export default function EmployeesPage() {
             <DialogHeader>
               <DialogTitle>Import Employees from Excel</DialogTitle>
               <DialogDescription>
-                Upload an .xlsx or .csv file. The file must contain columns with headers: `badgeNumber`, `pno`, `name`, `rank`, `dob`, `contact`, `joiningDate`, `joiningDistrict`, `password`, `role`.
+                Upload an .xlsx or .csv file. The file must contain columns with headers: `badgeNumber`, `pno`, `name`, `rank`, `dob`, `contact`, `joiningDate`, `joiningDistrict`, `password`, `role`, `status`.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -399,7 +394,7 @@ export default function EmployeesPage() {
                     Rank
                   </Label>
                   <Select
-                    onValueChange={handleNewRankChange}
+                    onValueChange={(value) => handleNewSelectChange('rank', value)}
                     value={newEmployee.rank}
                   >
                     <SelectTrigger className="col-span-3">
@@ -419,7 +414,7 @@ export default function EmployeesPage() {
                     Role
                   </Label>
                   <Select
-                    onValueChange={handleNewRoleChange}
+                    onValueChange={(value) => handleNewSelectChange('role', value)}
                     value={newEmployee.role}
                   >
                     <SelectTrigger className="col-span-3">
@@ -428,6 +423,23 @@ export default function EmployeesPage() {
                     <SelectContent>
                       <SelectItem value="employee">Employee</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="status" className="text-right">
+                    Status
+                  </Label>
+                  <Select
+                    onValueChange={(value) => handleNewSelectChange('status', value)}
+                    value={newEmployee.status}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Suspended">Suspended</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -522,6 +534,7 @@ export default function EmployeesPage() {
               <TableHead>Sr. No.</TableHead>
               <TableHead>Rank</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Badge Number</TableHead>
               <TableHead>PNO</TableHead>
               <TableHead>Employee Name</TableHead>
@@ -547,6 +560,9 @@ export default function EmployeesPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>{employee.role}</Badge>
+                  </TableCell>
+                   <TableCell>
+                    <Badge variant={employee.status === 'Suspended' ? 'destructive' : 'default'}>{employee.status || 'Active'}</Badge>
                   </TableCell>
                   <TableCell>{employee.badgeNumber}</TableCell>
                   <TableCell>{employee.pno}</TableCell>
@@ -675,7 +691,7 @@ export default function EmployeesPage() {
                     Rank
                   </Label>
                   <Select
-                    onValueChange={handleRankChange}
+                    onValueChange={(value) => handleEditSelectChange('rank', value)}
                     value={editingEmployee.rank ?? ""}
                      disabled={!canEdit || (!isCurrentUserAdministrator && editingEmployee.rank === 'Administrator')}
                   >
@@ -696,7 +712,7 @@ export default function EmployeesPage() {
                     Role
                   </Label>
                   <Select
-                    onValueChange={handleRoleChange}
+                    onValueChange={(value) => handleEditSelectChange('role', value)}
                     value={editingEmployee.role ?? "employee"}
                     disabled={!canEdit || (!isCurrentUserAdministrator && editingEmployee.rank === 'Administrator')}
                   >
@@ -706,6 +722,24 @@ export default function EmployeesPage() {
                     <SelectContent>
                       <SelectItem value="employee">Employee</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="status" className="text-right">
+                    Status
+                  </Label>
+                  <Select
+                    onValueChange={(value) => handleEditSelectChange('status', value)}
+                    value={editingEmployee.status ?? "Active"}
+                    disabled={!canEdit || (!isCurrentUserAdministrator && editingEmployee.rank === 'Administrator')}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Suspended">Suspended</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

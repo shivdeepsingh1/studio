@@ -33,7 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { mockEmployees, mockLeaves } from "@/lib/mock-data"
-import { Employee, Leave } from "@/lib/types"
+import { Employee, Leave, leaveTypes, leaveStatuses } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
@@ -46,9 +46,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-
-const leaveTypes: Leave["type"][] = ["Casual", "Sick", "Earned", "Maternity"]
-const leaveStatuses: Leave["status"][] = ["Pending", "Approved", "Rejected"]
 
 export default function LeavePage() {
   const { user } = useAuth()

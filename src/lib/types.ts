@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   pno: string;
@@ -50,6 +51,7 @@ export interface Employee {
   avatarUrl: string;
   password?: string;
   role: 'admin' | 'employee';
+  status?: 'Active' | 'Suspended';
 }
 
 export interface Duty {
@@ -72,3 +74,6 @@ export interface Leave {
   reason: string;
   status: 'Approved' | 'Pending' | 'Rejected';
 }
+
+export const leaveTypes: Leave['type'][] = ["Casual", "Sick", "Earned", "Maternity"];
+export const leaveStatuses: Leave['status'][] = ["Pending", "Approved", "Rejected"];
