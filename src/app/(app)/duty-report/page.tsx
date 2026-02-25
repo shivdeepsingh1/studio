@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -28,7 +29,6 @@ import { Employee, Duty } from "@/lib/types";
 import { mockEmployees, mockDuties } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import { DateRange } from "react-day-picker";
 
 export default function DutyReportPage() {
   const { user } = useAuth();
@@ -36,10 +36,10 @@ export default function DutyReportPage() {
   const [duties, setDuties] = useState<Duty[]>([]);
   const [pnoInput, setPnoInput] = useState<string>("");
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    to: new Date(),
-  });
+  const [fromDate, setFromDate] = useState<Date | undefined>(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  );
+  const [toDate, setToDate] = useState<Date | undefined>(new Date());
 
   useEffect(() => {
     const storedEmployees = localStorage.getItem("line-command-employees");
@@ -55,25 +55,33 @@ export default function DutyReportPage() {
   };
   
   const filteredDuties = duties.filter((duty) => {
-    if (!selectedEmployee || !dateRange?.from || !dateRange?.to) {
+    if (!selectedEmployee || !fromDate || !toDate) {
       return false;
     }
-    const dutyDate = new Date(duty.date);
+    if (!duty.date || isNaN(new Date(duty.date.replace(/-/g, '/')).getTime())) {
+      return false;
+    }
+    const dutyDate = new Date(duty.date.replace(/-/g, '/'));
+    const startOfDay = new Date(fromDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(toDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
     return (
       duty.employeeId === selectedEmployee.id &&
-      dutyDate >= dateRange.from &&
-      dutyDate <= dateRange.to
+      dutyDate >= startOfDay &&
+      dutyDate <= endOfDay
     );
   });
 
   const handleExportPdf = () => {
-    if (!selectedEmployee || filteredDuties.length === 0) {
+    if (!selectedEmployee || filteredDuties.length === 0 || !fromDate || !toDate) {
       alert("No data to export.");
       return;
     }
     const doc = new jsPDF();
     doc.text(`Duty Report for ${selectedEmployee.name}`, 14, 16);
-    doc.text(`From: ${format(dateRange!.from!, "dd-MM-yyyy")} To: ${format(dateRange!.to!, "dd-MM-yyyy")}`, 14, 22);
+    doc.text(`From: ${format(fromDate, "dd-MM-yyyy")} To: ${format(toDate, "dd-MM-yyyy")}`, 14, 22);
 
     autoTable(doc, {
       startY: 28,
@@ -108,7 +116,7 @@ export default function DutyReportPage() {
         <Button
           variant="outline"
           onClick={handleExportPdf}
-          disabled={!selectedEmployee || filteredDuties.length === 0}
+          disabled={!selectedEmployee || filteredDuties.length === 0 || !fromDate || !toDate}
         >
           <FileDown className="mr-2" />
           Export PDF
@@ -118,7 +126,7 @@ export default function DutyReportPage() {
       <Card>
         <CardHeader>
           <CardTitle>Filters</CardTitle>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
             <div className="space-y-2">
               <Label htmlFor="pno-search">Employee PNO</Label>
               <div className="flex items-center gap-2">
@@ -135,40 +143,63 @@ export default function DutyReportPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="date-range">Select Date Range</Label>
+              <Label htmlFor="from-date">From Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
-                    id="date-range"
+                    id="from-date"
                     variant={"outline"}
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !dateRange && "text-muted-foreground"
+                      !fromDate && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateRange?.from ? (
-                      dateRange.to ? (
-                        <>
-                          {format(dateRange.from, "LLL dd, y")} -{" "}
-                          {format(dateRange.to, "LLL dd, y")}
-                        </>
-                      ) : (
-                        format(dateRange.from, "LLL dd, y")
-                      )
+                    {fromDate ? (
+                      format(fromDate, "dd-MM-yyyy")
                     ) : (
-                      <span>Pick a date range</span>
+                      <span>Pick a date</span>
                     )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
+                    mode="single"
+                    selected={fromDate}
+                    onSelect={setFromDate}
+                    disabled={(date) => toDate ? date > toDate : false}
                     initialFocus
-                    mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={dateRange}
-                    onSelect={setDateRange}
-                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="to-date">To Date</Label>
+               <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="to-date"
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !toDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {toDate ? (
+                      format(toDate, "dd-MM-yyyy")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={toDate}
+                    onSelect={setToDate}
+                    disabled={(date) => fromDate ? date < fromDate : false}
+                    initialFocus
                   />
                 </PopoverContent>
               </Popover>
@@ -209,7 +240,7 @@ export default function DutyReportPage() {
                             <TableCell>{index + 1}</TableCell>
                             <TableCell>{selectedEmployee.badgeNumber}</TableCell>
                             <TableCell>{selectedEmployee.name}</TableCell>
-                            <TableCell>{format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
+                            <TableCell>{duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime()) ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                             <TableCell>{duty.shift}</TableCell>
                             <TableCell>{duty.location}</TableCell>
                             <TableCell>{duty.details}</TableCell>
