@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { type DateRange } from "react-day-picker";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
@@ -34,10 +33,10 @@ export default function DutyReportPage() {
   const [duties, setDuties] = useState<Duty[]>([]);
   const [pnoInput, setPnoInput] = useState<string>("");
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    to: new Date(),
-  });
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  );
+  const [dateTo, setDateTo] = useState<Date | undefined>(new Date());
 
   useEffect(() => {
     const storedEmployees = localStorage.getItem("line-command-employees");
@@ -53,16 +52,16 @@ export default function DutyReportPage() {
   };
   
   const filteredDuties = duties.filter((duty) => {
-    if (!selectedEmployee || !date?.from || !date?.to) {
+    if (!selectedEmployee || !dateFrom || !dateTo) {
       return false;
     }
     if (!duty.date || isNaN(new Date(duty.date.replace(/-/g, '/')).getTime())) {
       return false;
     }
     const dutyDate = new Date(duty.date.replace(/-/g, '/'));
-    const startOfDay = new Date(date.from);
+    const startOfDay = new Date(dateFrom);
     startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date.to);
+    const endOfDay = new Date(dateTo);
     endOfDay.setHours(23, 59, 59, 999);
 
     return (
@@ -73,13 +72,13 @@ export default function DutyReportPage() {
   });
 
   const handleExportPdf = () => {
-    if (!selectedEmployee || filteredDuties.length === 0 || !date?.from || !date?.to) {
+    if (!selectedEmployee || filteredDuties.length === 0 || !dateFrom || !dateTo) {
       alert("No data to export.");
       return;
     }
     const doc = new jsPDF();
     doc.text(`Duty Report for ${selectedEmployee.name}`, 14, 16);
-    doc.text(`From: ${format(date.from, "dd-MM-yyyy")} To: ${format(date.to, "dd-MM-yyyy")}`, 14, 22);
+    doc.text(`From: ${format(dateFrom, "dd-MM-yyyy")} To: ${format(dateTo, "dd-MM-yyyy")}`, 14, 22);
 
     autoTable(doc, {
       startY: 28,
@@ -114,88 +113,119 @@ export default function DutyReportPage() {
         <Button
           variant="outline"
           onClick={handleExportPdf}
-          disabled={!selectedEmployee || filteredDuties.length === 0 || !date?.from || !date?.to}
+          disabled={!selectedEmployee || filteredDuties.length === 0 || !dateFrom || !dateTo}
         >
           <FileDown className="mr-2" />
           Export PDF
         </Button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="pno-search">Employee PNO</Label>
-              <div className="flex items-center gap-2">
-                  <Input
-                    id="pno-search"
-                    placeholder="Enter employee PNO"
-                    value={pnoInput}
-                    onChange={(e) => setPnoInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handlePnoSearch()}
-                  />
-                  <Button onClick={handlePnoSearch}>
-                      <Search className="mr-2 h-4 w-4" /> Search
-                  </Button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Date Range</Label>
-               <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="date"
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date?.from ? (
-                      date.to ? (
-                        <>
-                          {format(date.from, "LLL dd, y")} -{" "}
-                          {format(date.to, "LLL dd, y")}
-                        </>
-                      ) : (
-                        format(date.from, "LLL dd, y")
-                      )
-                    ) : (
-                      <span>Pick a date range</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={setDate}
-                    numberOfMonths={2}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </CardContent>
+      <div className="space-y-6">
+        <Card>
+            <CardHeader>
+                <CardTitle>Filters</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                    <div className="space-y-2">
+                        <Label htmlFor="pno-search">Employee PNO</Label>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                id="pno-search"
+                                placeholder="Enter employee PNO"
+                                value={pnoInput}
+                                onChange={(e) => setPnoInput(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handlePnoSearch()}
+                            />
+                            <Button onClick={handlePnoSearch}>
+                                <Search className="mr-2 h-4 w-4" /> Search
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Date From</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full justify-start text-left font-normal",
+                                        !dateFrom && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {dateFrom ? format(dateFrom, "LLL dd, y") : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={dateFrom}
+                                    onSelect={setDateFrom}
+                                    captionLayout="dropdown-buttons"
+                                    fromYear={new Date().getFullYear() - 100}
+                                    toYear={new Date().getFullYear() + 10}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Date To</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full justify-start text-left font-normal",
+                                        !dateTo && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {dateTo ? format(dateTo, "LLL dd, y") : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={dateTo}
+                                    onSelect={setDateTo}
+                                    captionLayout="dropdown-buttons"
+                                    fromYear={new Date().getFullYear() - 100}
+                                    toYear={new Date().getFullYear() + 10}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                </div>
+            </CardContent>
         </Card>
         
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6">
             {selectedEmployee ? (
                 <>
                 <Card>
                     <CardHeader>
                         <CardTitle>Employee Details</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-4 pt-6">
-                        <p><strong>Name:</strong> {selectedEmployee.name}</p>
-                        <p><strong>PNO:</strong> {selectedEmployee.pno}</p>
-                        <p><strong>Rank:</strong> {selectedEmployee.rank}</p>
-                        <p><strong>Badge Number:</strong> {selectedEmployee.badgeNumber}</p>
+                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-6">
+                        <div>
+                            <p className="text-sm font-medium">Name</p>
+                            <p className="text-muted-foreground">{selectedEmployee.name}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium">PNO</p>
+                            <p className="text-muted-foreground">{selectedEmployee.pno}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium">Rank</p>
+                            <p className="text-muted-foreground">{selectedEmployee.rank}</p>
+                        </div>
+                         <div>
+                            <p className="text-sm font-medium">Badge Number</p>
+                            <p className="text-muted-foreground">{selectedEmployee.badgeNumber}</p>
+                        </div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -243,7 +273,7 @@ export default function DutyReportPage() {
                 </Card>
                 </>
             ) : (
-                <Card className="flex items-center justify-center h-full">
+                <Card className="flex items-center justify-center min-h-48">
                   <CardContent className="text-center p-8 text-muted-foreground">
                       <p>Please search for an employee by PNO to view their duty report.</p>
                   </CardContent>
