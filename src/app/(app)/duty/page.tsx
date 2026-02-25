@@ -360,6 +360,7 @@ export default function DutyPage() {
                     const employee = allEmployees.find(
                       (e) => e.id === duty.employeeId
                     )
+                    const dutyDateValid = duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime());
                     return (
                       <TableRow key={duty.id}>
                         <TableCell>{index + 1}</TableCell>
@@ -367,7 +368,7 @@ export default function DutyPage() {
                         <TableCell>{employee?.pno}</TableCell>
                         <TableCell>{employee?.rank}</TableCell>
                         <TableCell>{duty.employeeName}</TableCell>
-                        <TableCell>{format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
+                        <TableCell>{dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                         <TableCell>
                           <Badge
                             variant={
@@ -487,23 +488,26 @@ export default function DutyPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {employeeDuties.map((duty, index) => (
-                <TableRow key={duty.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        duty.shift === "Night" ? "destructive" : "secondary"
-                      }
-                    >
-                      {duty.shift}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{duty.location}</TableCell>
-                  <TableCell>{duty.details}</TableCell>
-                </TableRow>
-              ))}
+              {employeeDuties.map((duty, index) => {
+                const dutyDateValid = duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime());
+                return (
+                  <TableRow key={duty.id}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          duty.shift === "Night" ? "destructive" : "secondary"
+                        }
+                      >
+                        {duty.shift}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{duty.location}</TableCell>
+                    <TableCell>{duty.details}</TableCell>
+                  </TableRow>
+                )
+              })}
               {employeeDuties.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center">

@@ -98,17 +98,11 @@ export default function EmployeesPage() {
   }
 
   const handleUpdateEmployee = () => {
-    if (!editingEmployee) return;
-
-    let employeeToUpdate = { ...editingEmployee };
-
-    if (employeeToUpdate.password === "") {
-      delete employeeToUpdate.password;
-    }
+    if (!editingEmployee || !editingEmployee.id) return;
 
     updateEmployees(
       employees.map((emp) =>
-        emp.id === employeeToUpdate.id ? { ...emp, ...employeeToUpdate } : emp
+        emp.id === editingEmployee.id ? { ...emp, ...editingEmployee } : emp
       )
     );
 
@@ -133,7 +127,7 @@ export default function EmployeesPage() {
   }
 
   const openEditDialog = (employee: Employee) => {
-    setEditingEmployee({ ...employee })
+    setEditingEmployee({ ...employee, password: employee.password ?? "" })
     setIsEditDialogOpen(true)
   }
 
@@ -398,58 +392,62 @@ export default function EmployeesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredEmployees.map((employee, index) => (
-              <TableRow key={employee.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{employee.rank}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>{employee.role}</Badge>
-                </TableCell>
-                <TableCell>{employee.badgeNumber}</TableCell>
-                <TableCell>{employee.pno}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage
-                        src={employee.avatarUrl}
-                        alt={employee.name}
-                        data-ai-hint="person portrait"
-                      />
-                      <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="font-medium">{employee.name}</div>
-                  </div>
-                </TableCell>
-                <TableCell>{employee.dob ? format(new Date(employee.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
-                <TableCell>{employee.joiningDate ? format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
-                <TableCell>{employee.joiningDistrict}</TableCell>
-                <TableCell>{employee.contact}</TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0" disabled={!canEdit}>
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => openEditDialog(employee)} disabled={!canEdit}>
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-500"
-                        onClick={() => deleteEmployee(employee.id)}
-                        disabled={!canEdit}
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+            {filteredEmployees.map((employee, index) => {
+              const dobValid = employee.dob && !isNaN(new Date(employee.dob.replace(/-/g, '/')).getTime());
+              const joiningDateValid = employee.joiningDate && !isNaN(new Date(employee.joiningDate.replace(/-/g, '/')).getTime());
+              return (
+                <TableRow key={employee.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{employee.rank}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>{employee.role}</Badge>
+                  </TableCell>
+                  <TableCell>{employee.badgeNumber}</TableCell>
+                  <TableCell>{employee.pno}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage
+                          src={employee.avatarUrl}
+                          alt={employee.name}
+                          data-ai-hint="person portrait"
+                        />
+                        <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="font-medium">{employee.name}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{dobValid ? format(new Date(employee.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                  <TableCell>{joiningDateValid ? format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                  <TableCell>{employee.joiningDistrict}</TableCell>
+                  <TableCell>{employee.contact}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0" disabled={!canEdit}>
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEditDialog(employee)} disabled={!canEdit}>
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-500"
+                          onClick={() => deleteEmployee(employee.id)}
+                          disabled={!canEdit}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </div>

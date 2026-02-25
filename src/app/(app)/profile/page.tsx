@@ -198,11 +198,11 @@ export default function ProfilePage() {
                   <>
                     <div className="space-y-1">
                         <p className="text-muted-foreground">Date of Birth</p>
-                        <p className="font-medium">{employeeDetails?.dob ? format(new Date(employeeDetails.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</p>
+                        <p className="font-medium">{employeeDetails?.dob && !isNaN(new Date(employeeDetails.dob.replace(/-/g, '/')).getTime()) ? format(new Date(employeeDetails.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</p>
                     </div>
                      <div className="space-y-1">
                         <p className="text-muted-foreground">Joining Date</p>
-                        <p className="font-medium">{employeeDetails?.joiningDate ? format(new Date(employeeDetails.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</p>
+                        <p className="font-medium">{employeeDetails?.joiningDate && !isNaN(new Date(employeeDetails.joiningDate.replace(/-/g, '/')).getTime()) ? format(new Date(employeeDetails.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</p>
                     </div>
                     <div className="space-y-1">
                         <p className="text-muted-foreground">Joining Branch/District</p>

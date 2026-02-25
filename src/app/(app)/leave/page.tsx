@@ -343,58 +343,62 @@ export default function LeavePage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(user?.role === "admin" ? leaves : employeeLeaves).map((leave, index) => (
-              <TableRow key={leave.id}>
-                <TableCell>{index + 1}</TableCell>
-                {user?.role === "admin" && (
-                  <TableCell>{leave.employeeName}</TableCell>
-                )}
-                <TableCell>{leave.type}</TableCell>
-                <TableCell>{format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
-                <TableCell>{format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
-                <TableCell className="max-w-xs truncate">
-                  {leave.reason}
-                </TableCell>
-                <TableCell>
-                  {user?.role === 'admin' ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="p-0 h-auto">
-                           <Badge
-                            variant={getStatusBadgeVariant(leave.status)}
-                            className={cn("cursor-pointer",
-                              leave.status === "Approved" && "bg-green-500 hover:bg-green-600"
-                            )}
-                          >
-                            {leave.status}
-                          </Badge>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Approved')}>
-                          Approve
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Rejected')}>
-                          Reject
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Pending')}>
-                          Set as Pending
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  ) : (
-                    <Badge
-                      variant={getStatusBadgeVariant(leave.status)}
-                      className={cn(
-                        leave.status === "Approved" && "bg-green-500"
-                      )}
-                    >
-                      {leave.status}
-                    </Badge>
+            {(user?.role === "admin" ? leaves : employeeLeaves).map((leave, index) => {
+              const startDateValid = leave.startDate && !isNaN(new Date(leave.startDate.replace(/-/g, '/')).getTime());
+              const endDateValid = leave.endDate && !isNaN(new Date(leave.endDate.replace(/-/g, '/')).getTime());
+              return (
+                <TableRow key={leave.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  {user?.role === "admin" && (
+                    <TableCell>{leave.employeeName}</TableCell>
                   )}
-                </TableCell>
-              </TableRow>
-            ))}
+                  <TableCell>{leave.type}</TableCell>
+                  <TableCell>{startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                  <TableCell>{endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {leave.reason}
+                  </TableCell>
+                  <TableCell>
+                    {user?.role === 'admin' ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="p-0 h-auto">
+                            <Badge
+                              variant={getStatusBadgeVariant(leave.status)}
+                              className={cn("cursor-pointer",
+                                leave.status === "Approved" && "bg-green-500 hover:bg-green-600"
+                              )}
+                            >
+                              {leave.status}
+                            </Badge>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Approved')}>
+                            Approve
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Rejected')}>
+                            Reject
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Pending')}>
+                            Set as Pending
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <Badge
+                        variant={getStatusBadgeVariant(leave.status)}
+                        className={cn(
+                          leave.status === "Approved" && "bg-green-500"
+                        )}
+                      >
+                        {leave.status}
+                      </Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
             {user?.role === "employee" && employeeLeaves.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center">
