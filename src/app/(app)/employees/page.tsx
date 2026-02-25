@@ -98,22 +98,23 @@ export default function EmployeesPage() {
   }
 
   const handleUpdateEmployee = () => {
-    if (!editingEmployee) return
-    
+    if (!editingEmployee) return;
+
     let employeeToUpdate = { ...editingEmployee };
 
     if (employeeToUpdate.password === "") {
-        delete employeeToUpdate.password;
+      delete employeeToUpdate.password;
     }
 
     updateEmployees(
       employees.map((emp) =>
-        emp.id === employeeToUpdate.id ? (employeeToUpdate as Employee) : emp
+        emp.id === employeeToUpdate.id ? { ...emp, ...employeeToUpdate } : emp
       )
-    )
-    setIsEditDialogOpen(false)
-    setEditingEmployee(null)
-  }
+    );
+
+    setIsEditDialogOpen(false);
+    setEditingEmployee(null);
+  };
 
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!editingEmployee) return
@@ -213,8 +214,8 @@ export default function EmployeesPage() {
                 Fill in the form to add a new employee to the system.
               </DialogDescription>
             </DialogHeader>
-            <ScrollArea className="max-h-[70vh]">
-              <div className="grid gap-4 py-4 pr-6">
+            <ScrollArea className="max-h-[70vh] pr-6">
+              <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">
                     Name
@@ -467,8 +468,8 @@ export default function EmployeesPage() {
             </DialogDescription>
           </DialogHeader>
           {editingEmployee && (
-            <ScrollArea className="max-h-[70vh]">
-              <div className="grid gap-4 py-4 pr-6">
+            <ScrollArea className="max-h-[70vh] pr-6">
+              <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">
                     Name
@@ -656,5 +657,3 @@ export default function EmployeesPage() {
     </>
   )
 }
-
-    
