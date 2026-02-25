@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Users, ClipboardList, CalendarOff, Send, Plus } from 'lucide-react';
+import { Users, CalendarOff, Send, Plus, Anchor, Globe, Calendar, CalendarPlus, CalendarHeart } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -47,13 +47,22 @@ export default function DashboardPage() {
     setLeaves(storedLeaves ? JSON.parse(storedLeaves) : mockLeaves);
   }, []);
   
+  const today = new Date();
+  const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+
+  const dutiesToday = duties.filter(d => d.date === todayString);
+  const leavesToday = leaves.filter(l => l.status === 'Approved' && l.startDate <= todayString && l.endDate >= todayString);
+
   const stats = {
     totalEmployees: employees.length,
-    onDuty: duties.filter(d => d.date === new Date().toISOString().split('T')[0]).length,
-    onLeave: leaves.filter(l => l.status === 'Approved' && new Date() >= new Date(l.startDate) && new Date() <= new Date(l.endDate)).length,
+    reserve: dutiesToday.filter(d => d.location.toLowerCase() === 'reserve').length,
+    outOfDistrict: dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length,
+    casualLeave: leavesToday.filter(l => l.type === 'Casual').length,
+    earnedLeave: leavesToday.filter(l => l.type === 'Earned').length,
+    otherLeave: leavesToday.filter(l => l.type !== 'Casual' && l.type !== 'Earned').length,
   };
 
-  const employeeDuty = duties.find(d => d.employeeId === user?.id && d.date === new Date().toISOString().split('T')[0])
+  const employeeDuty = duties.find(d => d.employeeId === user?.id && d.date === todayString)
   const employeeLeaveBalance = 12; // Mock data
 
   return (
@@ -70,27 +79,57 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalEmployees}</div>
-                <p className="text-xs text-muted-foreground">+2 since last month</p>
+                <p className="text-xs text-muted-foreground">Total strength</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Currently On Duty</CardTitle>
-                <ClipboardList className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Reserve</CardTitle>
+                <Anchor className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.onDuty}</div>
-                 <p className="text-xs text-muted-foreground">As of today</p>
+                <div className="text-2xl font-bold">{stats.reserve}</div>
+                <p className="text-xs text-muted-foreground">On reserve duty today</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Currently On Leave</CardTitle>
-                <CalendarOff className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Out of District Duty</CardTitle>
+                <Globe className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.onLeave}</div>
-                <p className="text-xs text-muted-foreground">As of today</p>
+                <div className="text-2xl font-bold">{stats.outOfDistrict}</div>
+                <p className="text-xs text-muted-foreground">Deployed outside district</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Casual Leave</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.casualLeave}</div>
+                <p className="text-xs text-muted-foreground">On casual leave today</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Earned Leave</CardTitle>
+                <CalendarPlus className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.earnedLeave}</div>
+                <p className="text-xs text-muted-foreground">On earned leave today</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Other Leave</CardTitle>
+                <CalendarHeart className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.otherLeave}</div>
+                <p className="text-xs text-muted-foreground">Sick, Maternity, etc.</p>
               </CardContent>
             </Card>
           </div>
