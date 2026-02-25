@@ -40,6 +40,7 @@ export interface Employee {
   pno: string;
   name: string;
   rank: EmployeeRank;
+  dob: string;
   contact: string;
   joiningDate: string;
   joiningDistrict: string;

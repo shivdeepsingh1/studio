@@ -55,6 +55,7 @@ export default function EmployeesPage() {
     pno: "",
     name: "",
     rank: "Constable" as EmployeeRank,
+    dob: "",
     contact: "",
     joiningDate: "",
     joiningDistrict: "",
@@ -259,6 +260,18 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="dob" className="text-right">
+                  Date of Birth
+                </Label>
+                <Input
+                  id="dob"
+                  type="date"
+                  value={newEmployee.dob}
+                  onChange={handleNewInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="contact" className="text-right">
                   Mobile No.
                 </Label>
@@ -317,6 +330,7 @@ export default function EmployeesPage() {
               <TableHead>PNO</TableHead>
               <TableHead>Employee Name</TableHead>
               <TableHead>Password</TableHead>
+              <TableHead>Date of Birth</TableHead>
               <TableHead>Joining Date</TableHead>
               <TableHead>Joining Branch/District</TableHead>
               <TableHead>Mobile Number</TableHead>
@@ -346,6 +360,7 @@ export default function EmployeesPage() {
                   </div>
                 </TableCell>
                 <TableCell>********</TableCell>
+                <TableCell>{employee.dob ? format(new Date(employee.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                 <TableCell>{format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
                 <TableCell>{employee.joiningDistrict}</TableCell>
                 <TableCell>{employee.contact}</TableCell>
@@ -464,6 +479,18 @@ export default function EmployeesPage() {
                 <Input
                   id="pno"
                   value={editingEmployee.pno ?? ""}
+                  onChange={handleEditInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="dob" className="text-right">
+                  Date of Birth
+                </Label>
+                <Input
+                  id="dob"
+                  type="date"
+                  value={editingEmployee.dob ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
                 />

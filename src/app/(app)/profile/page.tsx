@@ -68,6 +68,10 @@ export default function ProfilePage() {
                     <p className="text-muted-foreground">Email Address</p>
                     <p className="font-medium">{user.email}</p>
                 </div>
+                <div className="space-y-1">
+                    <p className="text-muted-foreground">Date of Birth</p>
+                    <p className="font-medium">{employeeDetails?.dob ? format(new Date(employeeDetails.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</p>
+                </div>
                  <div className="space-y-1">
                     <p className="text-muted-foreground">Joining Date</p>
                     <p className="font-medium">{employeeDetails?.joiningDate ? format(new Date(employeeDetails.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</p>
