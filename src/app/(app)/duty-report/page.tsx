@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,14 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown, Calendar as CalendarIcon } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FileDown, Calendar as CalendarIcon, Search } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -31,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Employee, Duty } from "@/lib/types";
 import { mockEmployees, mockDuties } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
@@ -41,7 +34,8 @@ export default function DutyReportPage() {
   const { user } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [duties, setDuties] = useState<Duty[]>([]);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [pnoInput, setPnoInput] = useState<string>("");
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     to: new Date(),
@@ -55,19 +49,22 @@ export default function DutyReportPage() {
     setDuties(storedDuties ? JSON.parse(storedDuties) : mockDuties);
   }, []);
 
+  const handlePnoSearch = () => {
+    const employee = employees.find(e => e.pno === pnoInput);
+    setSelectedEmployee(employee || null);
+  };
+  
   const filteredDuties = duties.filter((duty) => {
-    if (!selectedEmployeeId || !dateRange?.from || !dateRange?.to) {
+    if (!selectedEmployee || !dateRange?.from || !dateRange?.to) {
       return false;
     }
     const dutyDate = new Date(duty.date);
     return (
-      duty.employeeId === selectedEmployeeId &&
+      duty.employeeId === selectedEmployee.id &&
       dutyDate >= dateRange.from &&
       dutyDate <= dateRange.to
     );
   });
-  
-  const selectedEmployee = employees.find(e => e.id === selectedEmployeeId);
 
   const handleExportPdf = () => {
     if (!selectedEmployee || filteredDuties.length === 0) {
@@ -80,9 +77,11 @@ export default function DutyReportPage() {
 
     autoTable(doc, {
       startY: 28,
-      head: [['Sr. No.', 'Date', 'Shift', 'Location', 'Details']],
+      head: [['Sr. No.', 'Badge No.', 'Name', 'Date', 'Shift', 'Location', 'Details']],
       body: filteredDuties.map((duty, index) => [
         index + 1,
+        selectedEmployee.badgeNumber,
+        selectedEmployee.name,
         format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy'),
         duty.shift,
         duty.location,
@@ -109,7 +108,7 @@ export default function DutyReportPage() {
         <Button
           variant="outline"
           onClick={handleExportPdf}
-          disabled={!selectedEmployeeId || filteredDuties.length === 0}
+          disabled={!selectedEmployee || filteredDuties.length === 0}
         >
           <FileDown className="mr-2" />
           Export PDF
@@ -121,22 +120,19 @@ export default function DutyReportPage() {
           <CardTitle>Filters</CardTitle>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="employee-select">Select Employee</Label>
-              <Select
-                value={selectedEmployeeId}
-                onValueChange={setSelectedEmployeeId}
-              >
-                <SelectTrigger id="employee-select">
-                  <SelectValue placeholder="Select an employee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map((employee) => (
-                    <SelectItem key={employee.id} value={employee.id}>
-                      {employee.name} ({employee.pno})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="pno-search">Employee PNO</Label>
+              <div className="flex items-center gap-2">
+                  <Input
+                    id="pno-search"
+                    placeholder="Enter employee PNO"
+                    value={pnoInput}
+                    onChange={(e) => setPnoInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePnoSearch()}
+                  />
+                  <Button onClick={handlePnoSearch}>
+                      <Search className="mr-2 h-4 w-4" /> Search
+                  </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="date-range">Select Date Range</Label>
@@ -180,12 +176,26 @@ export default function DutyReportPage() {
           </div>
         </CardHeader>
         <CardContent>
-            {selectedEmployeeId ? (
+            {selectedEmployee ? (
+                <>
+                <Card className="mt-4">
+                    <CardHeader>
+                        <CardTitle>Employee Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 gap-4 pt-6">
+                        <p><strong>Name:</strong> {selectedEmployee.name}</p>
+                        <p><strong>PNO:</strong> {selectedEmployee.pno}</p>
+                        <p><strong>Rank:</strong> {selectedEmployee.rank}</p>
+                        <p><strong>Badge Number:</strong> {selectedEmployee.badgeNumber}</p>
+                    </CardContent>
+                </Card>
                 <div className="border rounded-lg mt-4">
                     <Table>
                     <TableHeader>
                         <TableRow>
                         <TableHead>Sr. No.</TableHead>
+                        <TableHead>Badge No.</TableHead>
+                        <TableHead>Name</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Shift</TableHead>
                         <TableHead>Location</TableHead>
@@ -197,6 +207,8 @@ export default function DutyReportPage() {
                         filteredDuties.map((duty, index) => (
                             <TableRow key={duty.id}>
                             <TableCell>{index + 1}</TableCell>
+                            <TableCell>{selectedEmployee.badgeNumber}</TableCell>
+                            <TableCell>{selectedEmployee.name}</TableCell>
                             <TableCell>{format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')}</TableCell>
                             <TableCell>{duty.shift}</TableCell>
                             <TableCell>{duty.location}</TableCell>
@@ -205,7 +217,7 @@ export default function DutyReportPage() {
                         ))
                         ) : (
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center">
+                            <TableCell colSpan={7} className="text-center">
                             No duties found for the selected employee and date range.
                             </TableCell>
                         </TableRow>
@@ -213,9 +225,10 @@ export default function DutyReportPage() {
                     </TableBody>
                     </Table>
                 </div>
+                </>
             ) : (
                 <div className="text-center p-8 text-muted-foreground">
-                    <p>Please select an employee to view their duty report.</p>
+                    <p>Please search for an employee by PNO to view their duty report.</p>
                 </div>
             )}
         </CardContent>
