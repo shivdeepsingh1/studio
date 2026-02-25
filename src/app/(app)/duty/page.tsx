@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { format, parseISO } from "date-fns"
+import { format } from "date-fns"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { FileDown, PlusCircle, CalendarIcon } from "lucide-react"
@@ -56,7 +56,7 @@ export default function DutyPage() {
 
   const initialNewDutyState = {
     employeeId: "",
-    date: "",
+    date: undefined as Date | undefined,
     shift: "Morning" as "Morning" | "Afternoon" | "Night",
     location: "",
     details: "",
@@ -70,7 +70,7 @@ export default function DutyPage() {
     setNewDuty({ ...newDuty, [id]: value })
   }
 
-  const handleNewDutySelectChange = (id: string, value: string) => {
+  const handleNewDutySelectChange = (id: string, value: string | Date | undefined) => {
     setNewDuty({ ...newDuty, [id]: value as any })
   }
 
@@ -88,7 +88,11 @@ export default function DutyPage() {
     const dutyToAdd: Duty = {
       id: Date.now().toString(),
       employeeName: employee.name,
-      ...newDuty,
+      employeeId: newDuty.employeeId,
+      date: format(newDuty.date, "yyyy-MM-dd"),
+      shift: newDuty.shift,
+      location: newDuty.location,
+      details: newDuty.details,
     }
     setDuties([...duties, dutyToAdd])
     setIsAssignDialogOpen(false)
@@ -176,7 +180,7 @@ export default function DutyPage() {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {newDuty.date ? (
-                          format(parseISO(newDuty.date), "PPP")
+                          format(newDuty.date, "PPP")
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -185,16 +189,12 @@ export default function DutyPage() {
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={
-                          newDuty.date ? parseISO(newDuty.date) : undefined
-                        }
+                        selected={newDuty.date}
                         onSelect={(date) =>
-                          handleNewDutySelectChange(
-                            "date",
-                            date ? format(date, "yyyy-MM-dd") : ""
-                          )
+                          handleNewDutySelectChange("date", date)
                         }
                         initialFocus
+                        numberOfMonths={2}
                       />
                     </PopoverContent>
                   </Popover>
