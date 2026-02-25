@@ -23,6 +23,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { mockEmployees, mockLeaves } from "@/lib/mock-data"
 import { Employee, Leave } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
@@ -66,10 +72,27 @@ export default function LeavePage() {
 
   useEffect(() => {
     const storedLeaves = localStorage.getItem("line-command-leaves");
-    setLeaves(storedLeaves ? JSON.parse(storedLeaves) : mockLeaves);
+    if (storedLeaves) {
+        try {
+            setLeaves(JSON.parse(storedLeaves));
+        } catch(e) {
+            setLeaves(mockLeaves);
+        }
+    } else {
+        setLeaves(mockLeaves);
+    }
+    
 
     const storedEmployees = localStorage.getItem("line-command-employees");
-    setAllEmployees(storedEmployees ? JSON.parse(storedEmployees) : mockEmployees);
+     if (storedEmployees) {
+        try {
+            setAllEmployees(JSON.parse(storedEmployees));
+        } catch(e) {
+            setAllEmployees(mockEmployees);
+        }
+    } else {
+        setAllEmployees(mockEmployees);
+    }
   }, []);
 
   const updateLeaves = (updatedLeaves: Leave[]) => {
@@ -120,6 +143,12 @@ export default function LeavePage() {
     updateLeaves([...leaves, leaveToAdd])
     setIsLeaveDialogOpen(false)
   }
+
+  const handleStatusUpdate = (leaveId: string, status: Leave["status"]) => {
+    updateLeaves(
+      leaves.map((l) => (l.id === leaveId ? { ...l, status } : l))
+    );
+  };
 
   const handleExport = () => {
     generatePdf(leaves, "Leave Records")
@@ -327,15 +356,42 @@ export default function LeavePage() {
                   {leave.reason}
                 </TableCell>
                 <TableCell>
-                  <Badge
-                    variant={getStatusBadgeVariant(leave.status)}
-                    className={cn(
-                      leave.status === "Approved" &&
-                        "bg-green-500 hover:bg-green-600"
-                    )}
-                  >
-                    {leave.status}
-                  </Badge>
+                  {role === 'admin' ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="p-0 h-auto">
+                           <Badge
+                            variant={getStatusBadgeVariant(leave.status)}
+                            className={cn("cursor-pointer",
+                              leave.status === "Approved" && "bg-green-500 hover:bg-green-600"
+                            )}
+                          >
+                            {leave.status}
+                          </Badge>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Approved')}>
+                          Approve
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Rejected')}>
+                          Reject
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Pending')}>
+                          Set as Pending
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <Badge
+                      variant={getStatusBadgeVariant(leave.status)}
+                      className={cn(
+                        leave.status === "Approved" && "bg-green-500"
+                      )}
+                    >
+                      {leave.status}
+                    </Badge>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -359,3 +415,5 @@ export default function LeavePage() {
     </>
   )
 }
+
+    
