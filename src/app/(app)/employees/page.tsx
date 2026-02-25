@@ -353,7 +353,7 @@ export default function EmployeesPage() {
                 </Label>
                 <Input
                   id="name"
-                  value={editingEmployee.name}
+                  value={editingEmployee.name ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
                 />
@@ -364,7 +364,7 @@ export default function EmployeesPage() {
                 </Label>
                 <Select
                   onValueChange={handleRankChange}
-                  value={editingEmployee.rank}
+                  value={editingEmployee.rank ?? ""}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select rank" />
@@ -384,7 +384,7 @@ export default function EmployeesPage() {
                 </Label>
                 <Input
                   id="badgeNumber"
-                  value={editingEmployee.badgeNumber}
+                  value={editingEmployee.badgeNumber ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
                 />
@@ -395,7 +395,7 @@ export default function EmployeesPage() {
                 </Label>
                 <Input
                   id="pno"
-                  value={editingEmployee.pno}
+                  value={editingEmployee.pno ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
                 />
@@ -406,7 +406,7 @@ export default function EmployeesPage() {
                 </Label>
                 <Input
                   id="contact"
-                  value={editingEmployee.contact}
+                  value={editingEmployee.contact ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
                 />
@@ -418,7 +418,7 @@ export default function EmployeesPage() {
                 <Input
                   id="joiningDate"
                   type="date"
-                  value={editingEmployee.joiningDate}
+                  value={editingEmployee.joiningDate ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
                 />
@@ -429,7 +429,7 @@ export default function EmployeesPage() {
                 </Label>
                 <Input
                   id="joiningDistrict"
-                  value={editingEmployee.joiningDistrict}
+                  value={editingEmployee.joiningDistrict ?? ""}
                   onChange={handleEditInputChange}
                   className="col-span-3"
                 />
