@@ -102,8 +102,10 @@ export default function EmployeesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Employee</TableHead>
               <TableHead>Rank</TableHead>
+              <TableHead>Badge Number</TableHead>
+              <TableHead>PNO</TableHead>
+              <TableHead>Employee Name</TableHead>
               <TableHead>Joining Date</TableHead>
               <TableHead>Mobile Number</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -112,19 +114,18 @@ export default function EmployeesPage() {
           <TableBody>
             {filteredEmployees.map((employee) => (
               <TableRow key={employee.id}>
+                <TableCell><Badge variant="outline">{employee.rank}</Badge></TableCell>
+                <TableCell>{employee.pno}</TableCell>
+                <TableCell>{employee.pno}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
                       <AvatarImage src={employee.avatarUrl} alt={employee.name} data-ai-hint="person portrait" />
                       <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <div>
-                      <div className="font-medium">{employee.name}</div>
-                      <div className="text-sm text-muted-foreground">PNO: {employee.pno}</div>
-                    </div>
+                    <div className="font-medium">{employee.name}</div>
                   </div>
                 </TableCell>
-                <TableCell><Badge variant="outline">{employee.rank}</Badge></TableCell>
                 <TableCell>{employee.joiningDate}</TableCell>
                 <TableCell>{employee.contact}</TableCell>
                 <TableCell className="text-right">
