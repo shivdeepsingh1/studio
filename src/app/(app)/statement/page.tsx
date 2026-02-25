@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { useAuth } from '@/lib/auth';
 import { mockEmployees, mockDuties, mockLeaves } from '@/lib/mock-data';
 import { Employee, Duty, Leave, employeeRanks, EmployeeRank, leaveTypes } from '@/lib/types';
@@ -126,10 +126,12 @@ export default function StatementPage() {
                                     </TableRow>
                                 ))}
                             </TableBody>
-                            <TableRow className="bg-muted/50 font-bold">
-                                <TableHead>Total</TableHead>
-                                <TableHead className="text-right">{totalStrength}</TableHead>
-                            </TableRow>
+                            <TableFooter>
+                                <TableRow className="bg-muted/50 font-bold">
+                                    <TableHead>Total</TableHead>
+                                    <TableHead className="text-right">{totalStrength}</TableHead>
+                                </TableRow>
+                            </TableFooter>
                         </Table>
                     </CardContent>
                 </Card>
@@ -155,11 +157,13 @@ export default function StatementPage() {
                                         </TableRow>
                                     ))}
                                 </TableBody>
-                                <TableRow className="bg-muted/50 font-bold">
-                                    <TableHead>Total</TableHead>
-                                    {leaveTypes.map(type => <TableHead key={type} className="text-right">{totalLeaveByType[type]}</TableHead>)}
-                                    <TableHead className="text-right">{totalLeaveByType['Total']}</TableHead>
-                                </TableRow>
+                                <TableFooter>
+                                    <TableRow className="bg-muted/50 font-bold">
+                                        <TableHead>Total</TableHead>
+                                        {leaveTypes.map(type => <TableHead key={type} className="text-right">{totalLeaveByType[type]}</TableHead>)}
+                                        <TableHead className="text-right">{totalLeaveByType['Total']}</TableHead>
+                                    </TableRow>
+                                </TableFooter>
                             </Table>
                         </ScrollArea>
                     </CardContent>
@@ -184,10 +188,12 @@ export default function StatementPage() {
                                         </TableRow>
                                     ))}
                                 </TableBody>
-                                <TableRow className="bg-muted/50 font-bold">
-                                    <TableHead>Total</TableHead>
-                                    <TableHead className="text-right">{totalAbsent}</TableHead>
-                                </TableRow>
+                                <TableFooter>
+                                    <TableRow className="bg-muted/50 font-bold">
+                                        <TableHead>Total</TableHead>
+                                        <TableHead className="text-right">{totalAbsent}</TableHead>
+                                    </TableRow>
+                                </TableFooter>
                             </Table>
                         </CardContent>
                     </Card>
@@ -210,10 +216,12 @@ export default function StatementPage() {
                                         </TableRow>
                                     ))}
                                 </TableBody>
-                                <TableRow className="bg-muted/50 font-bold">
-                                    <TableHead>Total</TableHead>
-                                    <TableHead className="text-right">{totalSuspended}</TableHead>
-                                </TableRow>
+                                <TableFooter>
+                                    <TableRow className="bg-muted/50 font-bold">
+                                        <TableHead>Total</TableHead>
+                                        <TableHead className="text-right">{totalSuspended}</TableHead>
+                                    </TableRow>
+                                </TableFooter>
                             </Table>
                         </CardContent>
                     </Card>
