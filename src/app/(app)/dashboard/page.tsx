@@ -12,7 +12,7 @@ import { PageHeader } from '@/components/page-header';
 import { mockEmployees, mockDuties, mockLeaves } from '@/lib/mock-data';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis } from 'recharts';
-import { Employee, Duty, Leave } from '@/lib/types';
+import { Employee, Duty, Leave, employeeRanks, EmployeeRank } from '@/lib/types';
 
 const chartData = [
   { month: 'January', desktop: 186 },
@@ -61,6 +61,11 @@ export default function DashboardPage() {
     earnedLeave: leavesToday.filter(l => l.type === 'Earned').length,
     otherLeave: leavesToday.filter(l => l.type !== 'Casual' && l.type !== 'Earned').length,
   };
+  
+  const rankCounts = employeeRanks.reduce((acc, rank) => {
+    acc[rank] = employees.filter(e => e.rank === rank).length;
+    return acc;
+  }, {} as Record<EmployeeRank, number>);
 
   const employeeDuty = duties.find(d => d.employeeId === user?.id && d.date === todayString)
   const employeeLeaveBalance = 12; // Mock data
@@ -132,6 +137,25 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground">Sick, Maternity, etc.</p>
               </CardContent>
             </Card>
+          </div>
+          
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground mb-4">Rank-wise Strength</h2>
+            <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {employeeRanks
+                .filter((rank) => rank !== 'Administrator')
+                .map((rank) => (
+                  <Card key={rank}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">{rank}</CardTitle>
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{rankCounts[rank] || 0}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
