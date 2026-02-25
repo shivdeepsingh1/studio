@@ -134,9 +134,12 @@ export default function EmployeesPage() {
     const avatarUrl = `https://picsum.photos/seed/${newId}/100/100`
 
     let employeeToAdd = { ...newEmployee };
-    if (!employeeToAdd.password && employeeToAdd.dob) {
-      const [year, month, day] = employeeToAdd.dob.split('-');
-      employeeToAdd.password = `${day}${month}${year}`;
+    if (!employeeToAdd.password && employeeToAdd.dob && employeeToAdd.dob.includes('-')) {
+        const parts = employeeToAdd.dob.split('-');
+        if (parts.length === 3) {
+            const [year, month, day] = parts;
+            employeeToAdd.password = `${day}${month}${year}`;
+        }
     }
 
     updateEmployees([...employees, { ...employeeToAdd, id: newId, avatarUrl }])

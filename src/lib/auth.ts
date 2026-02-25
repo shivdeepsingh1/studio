@@ -38,69 +38,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback((pno: string, password: string, role: 'admin' | 'employee'): boolean => {
-    let foundUser: User | null = null;
-    
     if (role === 'admin') {
       if (pno === 'ADMIN' && password === 'admin') {
-        foundUser = {
-          id: 'admin01',
-          pno: 'ADMIN',
-          name: 'Admin User',
-          rank: 'Administrator',
-          avatarUrl: 'https://picsum.photos/seed/admin/100/100',
-          email: 'admin@police.gov'
+        const adminUser = {
+          id: 'admin01', pno: 'ADMIN', name: 'Admin User', rank: 'Administrator',
+          avatarUrl: 'https://picsum.photos/seed/admin/100/100', email: 'admin@police.gov'
         };
+        setUser(adminUser);
+        setRole('admin');
+        localStorage.setItem('line-command-user', JSON.stringify(adminUser));
+        localStorage.setItem('line-command-role', 'admin');
+        return true;
       }
-    } else {
-        let employees: Employee[] = [];
-        const storedEmployees = localStorage.getItem("line-command-employees");
-        if (storedEmployees) {
-          try {
-            employees = JSON.parse(storedEmployees);
-          } catch (e) {
-            employees = mockEmployees;
-          }
-        } else {
-          employees = mockEmployees;
-        }
-        
-        const employee = employees.find(emp => emp.pno === pno);
+      return false;
+    }
 
-        if (employee) {
-            let employeePassword = employee.password;
-            // If password is not set, create a default one from DoB
-            if (!employeePassword && employee.dob && employee.dob.includes('-')) {
-                const parts = employee.dob.split('-');
-                if (parts.length === 3) {
-                    const [year, month, day] = parts;
-                    employeePassword = `${day}${month}${year}`;
-                }
-            }
+    // Employee Login
+    let employees: Employee[] = [];
+    const storedEmployees = localStorage.getItem("line-command-employees");
+    try {
+        employees = storedEmployees ? JSON.parse(storedEmployees) : mockEmployees;
+    } catch (e) {
+        employees = mockEmployees;
+    }
 
-            if (employeePassword === password) {
-                foundUser = {
-                    id: employee.id,
-                    pno: employee.pno,
-                    name: employee.name,
-                    rank: employee.rank,
-                    avatarUrl: employee.avatarUrl,
-                    email: `${employee.pno}@police.gov`
-                };
-            }
+    const employee = employees.find(emp => emp.pno === pno);
+    if (!employee) {
+        return false;
+    }
+
+    let effectivePassword = employee.password;
+    if (!effectivePassword && employee.dob && typeof employee.dob === 'string' && employee.dob.includes('-')) {
+        const parts = employee.dob.split('-');
+        if (parts.length === 3) {
+            const [year, month, day] = parts;
+            effectivePassword = `${day}${month}${year}`;
         }
     }
     
-    if (foundUser) {
-        setUser(foundUser);
-        setRole(role);
-        localStorage.setItem('line-command-user', JSON.stringify(foundUser));
-        localStorage.setItem('line-command-role', role);
-        return true;
-    } else {
-        // Handle failed login
-        console.error("Login failed: User not found or password incorrect");
-        return false;
+    if (effectivePassword === password) {
+      const employeeUser = {
+          id: employee.id,
+          pno: employee.pno,
+          name: employee.name,
+          rank: employee.rank,
+          avatarUrl: employee.avatarUrl,
+          email: `${employee.pno}@police.gov`
+      };
+      setUser(employeeUser);
+      setRole('employee');
+      localStorage.setItem('line-command-user', JSON.stringify(employeeUser));
+      localStorage.setItem('line-command-role', 'employee');
+      return true;
     }
+
+    console.error("Login failed: User not found or password incorrect");
+    return false;
   }, []);
 
   const logout = useCallback(() => {
