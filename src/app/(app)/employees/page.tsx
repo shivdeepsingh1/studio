@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -43,6 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useAuth } from "@/lib/auth"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function EmployeesPage() {
   const { user } = useAuth();
@@ -213,156 +213,158 @@ export default function EmployeesPage() {
                 Fill in the form to add a new employee to the system.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  value={newEmployee.name}
-                  onChange={handleNewInputChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="password" className="text-right">
-                  Password
-                </Label>
-                <div className="col-span-3 relative">
+            <ScrollArea className="max-h-[70vh]">
+              <div className="grid gap-4 py-4 pr-6">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Name
+                  </Label>
                   <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={newEmployee.password}
+                    id="name"
+                    value={newEmployee.name}
                     onChange={handleNewInputChange}
-                    className="pr-10"
-                    placeholder="Leave blank for default"
+                    className="col-span-3"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute inset-y-0 right-0 h-full w-10 flex items-center justify-center text-muted-foreground"
-                    onClick={() => setShowPassword(p => !p)}
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="password" className="text-right">
+                    Password
+                  </Label>
+                  <div className="col-span-3 relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={newEmployee.password}
+                      onChange={handleNewInputChange}
+                      className="pr-10"
+                      placeholder="Leave blank for default"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute inset-y-0 right-0 h-full w-10 flex items-center justify-center text-muted-foreground"
+                      onClick={() => setShowPassword(p => !p)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                       <span className="sr-only">Toggle password visibility</span>
+                    </Button>
+                  </div>
+                </div>
+                 <div className="grid grid-cols-4 items-center gap-4">
+                  <div className="col-start-2 col-span-3">
+                    <p className="text-xs text-muted-foreground -mt-2">
+                      Default password is the date of birth in <strong>ddmmyyyy</strong> format.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="rank" className="text-right">
+                    Rank
+                  </Label>
+                  <Select
+                    onValueChange={handleNewRankChange}
+                    value={newEmployee.rank}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                     <span className="sr-only">Toggle password visibility</span>
-                  </Button>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select rank" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employeeRanks.map((rank) => (
+                        <SelectItem key={rank} value={rank} disabled={rank === 'Administrator'}>
+                          {rank}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                 <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="role" className="text-right">
+                    Role
+                  </Label>
+                  <Select
+                    onValueChange={handleNewRoleChange}
+                    value={newEmployee.role}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="employee">Employee</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="badgeNumber" className="text-right">
+                    Badge Number
+                  </Label>
+                  <Input
+                    id="badgeNumber"
+                    value={newEmployee.badgeNumber}
+                    onChange={handleNewInputChange}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="pno" className="text-right">
+                    PNO
+                  </Label>
+                  <Input
+                    id="pno"
+                    value={newEmployee.pno}
+                    onChange={handleNewInputChange}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="dob" className="text-right">
+                    Date of Birth
+                  </Label>
+                  <Input
+                    id="dob"
+                    type="date"
+                    value={newEmployee.dob}
+                    onChange={handleNewInputChange}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="contact" className="text-right">
+                    Mobile No.
+                  </Label>
+                  <Input
+                    id="contact"
+                    value={newEmployee.contact}
+                    onChange={handleNewInputChange}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="joiningDate" className="text-right">
+                    Joining Date
+                  </Label>
+                  <Input
+                    id="joiningDate"
+                    type="date"
+                    value={newEmployee.joiningDate}
+                    onChange={handleNewInputChange}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="joiningDistrict" className="text-right">
+                    Joining District
+                  </Label>
+                  <Input
+                    id="joiningDistrict"
+                    value={newEmployee.joiningDistrict}
+                    onChange={handleNewInputChange}
+                    className="col-span-3"
+                  />
                 </div>
               </div>
-               <div className="grid grid-cols-4 items-center gap-4">
-                <div className="col-start-2 col-span-3">
-                  <p className="text-xs text-muted-foreground -mt-2">
-                    Default password is the date of birth in <strong>ddmmyyyy</strong> format.
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="rank" className="text-right">
-                  Rank
-                </Label>
-                <Select
-                  onValueChange={handleNewRankChange}
-                  value={newEmployee.rank}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select rank" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employeeRanks.map((rank) => (
-                      <SelectItem key={rank} value={rank} disabled={rank === 'Administrator'}>
-                        {rank}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="role" className="text-right">
-                  Role
-                </Label>
-                <Select
-                  onValueChange={handleNewRoleChange}
-                  value={newEmployee.role}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="employee">Employee</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="badgeNumber" className="text-right">
-                  Badge Number
-                </Label>
-                <Input
-                  id="badgeNumber"
-                  value={newEmployee.badgeNumber}
-                  onChange={handleNewInputChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="pno" className="text-right">
-                  PNO
-                </Label>
-                <Input
-                  id="pno"
-                  value={newEmployee.pno}
-                  onChange={handleNewInputChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="dob" className="text-right">
-                  Date of Birth
-                </Label>
-                <Input
-                  id="dob"
-                  type="date"
-                  value={newEmployee.dob}
-                  onChange={handleNewInputChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="contact" className="text-right">
-                  Mobile No.
-                </Label>
-                <Input
-                  id="contact"
-                  value={newEmployee.contact}
-                  onChange={handleNewInputChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="joiningDate" className="text-right">
-                  Joining Date
-                </Label>
-                <Input
-                  id="joiningDate"
-                  type="date"
-                  value={newEmployee.joiningDate}
-                  onChange={handleNewInputChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="joiningDistrict" className="text-right">
-                  Joining District
-                </Label>
-                <Input
-                  id="joiningDistrict"
-                  value={newEmployee.joiningDistrict}
-                  onChange={handleNewInputChange}
-                  className="col-span-3"
-                />
-              </div>
-            </div>
+            </ScrollArea>
             <DialogFooter>
               <Button
                 type="button"
@@ -465,178 +467,180 @@ export default function EmployeesPage() {
             </DialogDescription>
           </DialogHeader>
           {editingEmployee && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  value={editingEmployee.name ?? ""}
-                  onChange={handleEditInputChange}
-                  className="col-span-3"
-                  disabled={!canEdit}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="password" className="text-right">
-                  Password
-                </Label>
-                <div className="col-span-3 relative">
+            <ScrollArea className="max-h-[70vh]">
+              <div className="grid gap-4 py-4 pr-6">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Name
+                  </Label>
                   <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={editingEmployee.password ?? ""}
+                    id="name"
+                    value={editingEmployee.name ?? ""}
                     onChange={handleEditInputChange}
-                    className="pr-10"
-                    placeholder="Leave blank for default"
+                    className="col-span-3"
+                    disabled={!canEdit}
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute inset-y-0 right-0 h-full w-10 flex items-center justify-center text-muted-foreground"
-                    onClick={() => setShowPassword(p => !p)}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                     <span className="sr-only">Toggle password visibility</span>
-                  </Button>
                 </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <div className="col-start-2 col-span-3 flex flex-col items-start gap-2">
-                  <p className="text-xs text-muted-foreground -mt-2">
-                    Default password is the date of birth in <strong>ddmmyyyy</strong> format.
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                        if (editingEmployee) {
-                            setEditingEmployee({ ...editingEmployee, password: "" });
-                        }
-                    }}
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="password" className="text-right">
+                    Password
+                  </Label>
+                  <div className="col-span-3 relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={editingEmployee.password ?? ""}
+                      onChange={handleEditInputChange}
+                      className="pr-10"
+                      placeholder="Leave blank for default"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute inset-y-0 right-0 h-full w-10 flex items-center justify-center text-muted-foreground"
+                      onClick={() => setShowPassword(p => !p)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                       <span className="sr-only">Toggle password visibility</span>
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <div className="col-start-2 col-span-3 flex flex-col items-start gap-2">
+                    <p className="text-xs text-muted-foreground -mt-2">
+                      Default password is the date of birth in <strong>ddmmyyyy</strong> format.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                          if (editingEmployee) {
+                              setEditingEmployee({ ...editingEmployee, password: "" });
+                          }
+                      }}
+                      disabled={!canEdit}
+                    >
+                      <RotateCcw className="mr-2 h-3 w-3" />
+                      Reset to Default
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="rank" className="text-right">
+                    Rank
+                  </Label>
+                  <Select
+                    onValueChange={handleRankChange}
+                    value={editingEmployee.rank ?? ""}
+                     disabled={!canEdit}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select rank" />
+                    </SelectTrigger>
+                    <SelectContent>
+                       {employeeRanks.map((rank) => (
+                        <SelectItem key={rank} value={rank} disabled={rank === 'Administrator'}>
+                          {rank}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="role" className="text-right">
+                    Role
+                  </Label>
+                  <Select
+                    onValueChange={handleRoleChange}
+                    value={editingEmployee.role ?? "employee"}
                     disabled={!canEdit}
                   >
-                    <RotateCcw className="mr-2 h-3 w-3" />
-                    Reset to Default
-                  </Button>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="employee">Employee</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="badgeNumber" className="text-right">
+                    Badge Number
+                  </Label>
+                  <Input
+                    id="badgeNumber"
+                    value={editingEmployee.badgeNumber ?? ""}
+                    onChange={handleEditInputChange}
+                    className="col-span-3"
+                    disabled={!canEdit}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="pno" className="text-right">
+                    PNO
+                  </Label>
+                  <Input
+                    id="pno"
+                    value={editingEmployee.pno ?? ""}
+                    onChange={handleEditInputChange}
+                    className="col-span-3"
+                    disabled={!canEdit}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="dob" className="text-right">
+                    Date of Birth
+                  </Label>
+                  <Input
+                    id="dob"
+                    type="date"
+                    value={editingEmployee.dob ?? ""}
+                    onChange={handleEditInputChange}
+                    className="col-span-3"
+                    disabled={!canEdit}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="contact" className="text-right">
+                    Mobile No.
+                  </Label>
+                  <Input
+                    id="contact"
+                    value={editingEmployee.contact ?? ""}
+                    onChange={handleEditInputChange}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="joiningDate" className="text-right">
+                    Joining Date
+                  </Label>
+                  <Input
+                    id="joiningDate"
+                    type="date"
+                    value={editingEmployee.joiningDate ?? ""}
+                    onChange={handleEditInputChange}
+                    className="col-span-3"
+                    disabled={!canEdit}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="joiningDistrict" className="text-right">
+                    Joining District
+                  </Label>
+                  <Input
+                    id="joiningDistrict"
+                    value={editingEmployee.joiningDistrict ?? ""}
+                    onChange={handleEditInputChange}
+                    className="col-span-3"
+                    disabled={!canEdit}
+                  />
                 </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="rank" className="text-right">
-                  Rank
-                </Label>
-                <Select
-                  onValueChange={handleRankChange}
-                  value={editingEmployee.rank ?? ""}
-                   disabled={!canEdit}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select rank" />
-                  </SelectTrigger>
-                  <SelectContent>
-                     {employeeRanks.map((rank) => (
-                      <SelectItem key={rank} value={rank} disabled={rank === 'Administrator'}>
-                        {rank}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="role" className="text-right">
-                  Role
-                </Label>
-                <Select
-                  onValueChange={handleRoleChange}
-                  value={editingEmployee.role ?? "employee"}
-                  disabled={!canEdit}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="employee">Employee</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="badgeNumber" className="text-right">
-                  Badge Number
-                </Label>
-                <Input
-                  id="badgeNumber"
-                  value={editingEmployee.badgeNumber ?? ""}
-                  onChange={handleEditInputChange}
-                  className="col-span-3"
-                  disabled={!canEdit}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="pno" className="text-right">
-                  PNO
-                </Label>
-                <Input
-                  id="pno"
-                  value={editingEmployee.pno ?? ""}
-                  onChange={handleEditInputChange}
-                  className="col-span-3"
-                  disabled={!canEdit}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="dob" className="text-right">
-                  Date of Birth
-                </Label>
-                <Input
-                  id="dob"
-                  type="date"
-                  value={editingEmployee.dob ?? ""}
-                  onChange={handleEditInputChange}
-                  className="col-span-3"
-                  disabled={!canEdit}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="contact" className="text-right">
-                  Mobile No.
-                </Label>
-                <Input
-                  id="contact"
-                  value={editingEmployee.contact ?? ""}
-                  onChange={handleEditInputChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="joiningDate" className="text-right">
-                  Joining Date
-                </Label>
-                <Input
-                  id="joiningDate"
-                  type="date"
-                  value={editingEmployee.joiningDate ?? ""}
-                  onChange={handleEditInputChange}
-                  className="col-span-3"
-                  disabled={!canEdit}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="joiningDistrict" className="text-right">
-                  Joining District
-                </Label>
-                <Input
-                  id="joiningDistrict"
-                  value={editingEmployee.joiningDistrict ?? ""}
-                  onChange={handleEditInputChange}
-                  className="col-span-3"
-                  disabled={!canEdit}
-                />
-              </div>
-            </div>
+            </ScrollArea>
           )}
           <DialogFooter>
             <Button
@@ -652,3 +656,5 @@ export default function EmployeesPage() {
     </>
   )
 }
+
+    
