@@ -17,15 +17,26 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { mockDuties } from "@/lib/mock-data"
+import { mockDuties, mockEmployees } from "@/lib/mock-data"
 import { Duty } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 
 // A mock function for PDF generation
 const generatePdf = (data: any, title: string) => {
@@ -37,12 +48,54 @@ export default function DutyPage() {
   const { role, user } = useAuth()
   const [duties, setDuties] = useState<Duty[]>(mockDuties)
   const [date, setDate] = useState<Date | undefined>(new Date())
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
+
+  const initialNewDutyState = {
+    employeeId: "",
+    date: "",
+    shift: "Morning" as "Morning" | "Afternoon" | "Night",
+    location: "",
+    details: "",
+  }
+  const [newDuty, setNewDuty] = useState(initialNewDutyState)
+
+  const handleNewDutyInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target
+    setNewDuty({ ...newDuty, [id]: value })
+  }
+
+  const handleNewDutySelectChange = (id: string, value: string) => {
+    setNewDuty({ ...newDuty, [id]: value as any })
+  }
+
+  const handleAssignDuty = () => {
+    if (!newDuty.employeeId || !newDuty.date || !newDuty.location) {
+      alert("Please fill all required fields.")
+      return
+    }
+    const employee = mockEmployees.find((e) => e.id === newDuty.employeeId)
+    if (!employee) {
+      alert("Selected employee not found.")
+      return
+    }
+
+    const dutyToAdd: Duty = {
+      id: Date.now().toString(),
+      employeeName: employee.name,
+      ...newDuty,
+    }
+    setDuties([...duties, dutyToAdd])
+    setIsAssignDialogOpen(false)
+    setNewDuty(initialNewDutyState)
+  }
 
   const handleExport = () => {
     generatePdf(duties, "Duty Roster")
   }
-  
-  const employeeDuties = duties.filter(d => d.employeeId === user?.id);
+
+  const employeeDuties = duties.filter((d) => d.employeeId === user?.id)
 
   return (
     <>
@@ -55,7 +108,10 @@ export default function DutyPage() {
         }
       >
         {role === "admin" && (
-          <Dialog>
+          <Dialog
+            open={isAssignDialogOpen}
+            onOpenChange={setIsAssignDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button>
                 <PlusCircle className="mr-2" />
@@ -66,12 +122,97 @@ export default function DutyPage() {
               <DialogHeader>
                 <DialogTitle>Assign New Duty</DialogTitle>
                 <DialogDescription>
-                  Fill in the details to assign a new duty. This is a placeholder form.
+                  Fill in the details to assign a new duty.
                 </DialogDescription>
               </DialogHeader>
-              <div className="py-4">
-                <p>Duty assignment form would be here.</p>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="employeeId" className="text-right">
+                    Employee
+                  </Label>
+                  <Select
+                    onValueChange={(value) =>
+                      handleNewDutySelectChange("employeeId", value)
+                    }
+                    value={newDuty.employeeId}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockEmployees.map((employee) => (
+                        <SelectItem key={employee.id} value={employee.id}>
+                          {employee.name} ({employee.pno})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="date" className="text-right">
+                    Date
+                  </Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={newDuty.date}
+                    onChange={handleNewDutyInputChange}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="shift" className="text-right">
+                    Shift
+                  </Label>
+                  <Select
+                    onValueChange={(value) =>
+                      handleNewDutySelectChange("shift", value)
+                    }
+                    value={newDuty.shift}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select shift" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Morning">Morning</SelectItem>
+                      <SelectItem value="Afternoon">Afternoon</SelectItem>
+                      <SelectItem value="Night">Night</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="location" className="text-right">
+                    Location
+                  </Label>
+                  <Input
+                    id="location"
+                    value={newDuty.location}
+                    onChange={handleNewDutyInputChange}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="details" className="text-right">
+                    Details
+                  </Label>
+                  <Textarea
+                    id="details"
+                    value={newDuty.details}
+                    onChange={handleNewDutyInputChange}
+                    className="col-span-3"
+                  />
+                </div>
               </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setIsAssignDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleAssignDuty}>Save</Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         )}
@@ -80,7 +221,7 @@ export default function DutyPage() {
           Export PDF
         </Button>
       </PageHeader>
-      
+
       {role === "admin" ? (
         <Tabs defaultValue="list">
           <TabsList>
@@ -92,6 +233,7 @@ export default function DutyPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Badge Number</TableHead>
                     <TableHead>PNO</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Date</TableHead>
@@ -100,22 +242,38 @@ export default function DutyPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {duties.map((duty) => (
-                    <TableRow key={duty.id}>
-                      <TableCell>{mockDuties.find(e => e.id === duty.employeeId)?.employeeId}</TableCell>
-                      <TableCell>{duty.employeeName}</TableCell>
-                      <TableCell>{duty.date}</TableCell>
-                      <TableCell><Badge variant={duty.shift === 'Night' ? 'destructive' : 'secondary'}>{duty.shift}</Badge></TableCell>
-                      <TableCell>{duty.location}</TableCell>
-                    </TableRow>
-                  ))}
+                  {duties.map((duty) => {
+                    const employee = mockEmployees.find(
+                      (e) => e.id === duty.employeeId
+                    )
+                    return (
+                      <TableRow key={duty.id}>
+                        <TableCell>{employee?.pno}</TableCell>
+                        <TableCell>{employee?.pno}</TableCell>
+                        <TableCell>{duty.employeeName}</TableCell>
+                        <TableCell>{duty.date}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              duty.shift === "Night"
+                                ? "destructive"
+                                : "secondary"
+                            }
+                          >
+                            {duty.shift}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{duty.location}</TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
             </div>
           </TabsContent>
-           <TabsContent value="calendar">
+          <TabsContent value="calendar">
             <div className="flex justify-center p-4 border rounded-lg bg-card">
-               <Calendar
+              <Calendar
                 mode="single"
                 selected={date}
                 onSelect={setDate}
@@ -139,14 +297,24 @@ export default function DutyPage() {
               {employeeDuties.map((duty) => (
                 <TableRow key={duty.id}>
                   <TableCell>{duty.date}</TableCell>
-                  <TableCell><Badge variant={duty.shift === 'Night' ? 'destructive' : 'secondary'}>{duty.shift}</Badge></TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        duty.shift === "Night" ? "destructive" : "secondary"
+                      }
+                    >
+                      {duty.shift}
+                    </Badge>
+                  </TableCell>
                   <TableCell>{duty.location}</TableCell>
                   <TableCell>{duty.details}</TableCell>
                 </TableRow>
               ))}
               {employeeDuties.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">No duties assigned.</TableCell>
+                  <TableCell colSpan={4} className="text-center">
+                    No duties assigned.
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
