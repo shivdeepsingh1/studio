@@ -67,10 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
     }
     
-    let hasExplicitPassword = employee.password && employee.password.length > 0;
     let correctPassword = employee.password;
 
-    if (!hasExplicitPassword) {
+    // If there is no stored password OR it's an empty string, generate from DOB as a fallback.
+    if (!correctPassword) { 
         if (employee.dob && typeof employee.dob === 'string' && employee.dob.includes('-')) {
             const parts = employee.dob.split('-');
             if (parts.length === 3) {
@@ -80,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
     
+    // If after all checks, there's a password to verify, compare it.
     if (correctPassword && password === correctPassword) {
       const employeeUser: User = {
           id: employee.id,
