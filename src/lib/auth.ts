@@ -66,17 +66,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!employee) {
         return false;
     }
+    
+    // Determine the correct password.
+    // The password can be explicitly set on the employee record.
+    let hasExplicitPassword = employee.password && employee.password.length > 0;
+    let correctPassword = employee.password;
 
-    let effectivePassword = employee.password;
-    if (!effectivePassword && employee.dob && typeof employee.dob === 'string' && employee.dob.includes('-')) {
-        const parts = employee.dob.split('-');
-        if (parts.length === 3) {
-            const [year, month, day] = parts;
-            effectivePassword = `${day}${month}${year}`;
+    // If there's no explicit password, fall back to the DOB-based default.
+    if (!hasExplicitPassword) {
+        if (employee.dob && typeof employee.dob === 'string' && employee.dob.includes('-')) {
+            const parts = employee.dob.split('-');
+            if (parts.length === 3) {
+                const [year, month, day] = parts;
+                correctPassword = `${day}${month}${year}`;
+            }
         }
     }
     
-    if (effectivePassword === password) {
+    // Now, compare the provided password with the determined correct password.
+    if (correctPassword && password === correctPassword) {
       const employeeUser = {
           id: employee.id,
           pno: employee.pno,
@@ -92,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     }
 
-    console.error("Login failed: User not found or password incorrect");
+    // If we've reached here, the login has failed.
     return false;
   }, []);
 

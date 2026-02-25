@@ -95,9 +95,18 @@ export default function EmployeesPage() {
 
   const handleUpdateEmployee = () => {
     if (!editingEmployee) return
+    
+    const employeeToUpdate = { ...editingEmployee };
+
+    // If password field is empty, don't save an empty string. 
+    // Let the login logic use the DOB default.
+    if (employeeToUpdate.password === "") {
+      delete (employeeToUpdate as Partial<typeof employeeToUpdate>).password;
+    }
+
     updateEmployees(
       employees.map((emp) =>
-        emp.id === editingEmployee.id ? editingEmployee : emp
+        emp.id === employeeToUpdate.id ? employeeToUpdate : emp
       )
     )
     setIsEditDialogOpen(false)
@@ -439,6 +448,7 @@ export default function EmployeesPage() {
                     value={editingEmployee.password ?? ""}
                     onChange={handleEditInputChange}
                     className="pr-10"
+                    placeholder="Default: DoB (ddmmyyyy)"
                   />
                   <Button
                     type="button"
