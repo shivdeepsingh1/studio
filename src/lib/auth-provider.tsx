@@ -7,7 +7,7 @@ export interface AuthContextType {
   user: User | null;
   logout: () => void;
   loading: boolean;
-  updateUser: (user: User) => void;
+  updateUser: (user: Partial<User>) => void;
   _setUser: (user: User | null) => void; // internal setter for login page
 }
 
@@ -32,18 +32,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const _setUser = useCallback((newUser: User | null) => {
+    setUser(newUser);
     if (newUser) {
         localStorage.setItem('line-command-user', JSON.stringify(newUser));
     } else {
         localStorage.removeItem('line-command-user');
     }
-    window.location.reload();
   }, []);
 
 
-  const updateUser = useCallback((updatedUserData: User) => {
-    localStorage.setItem('line-command-user', JSON.stringify(updatedUserData));
-    window.location.reload();
+  const updateUser = useCallback((updatedUserData: Partial<User>) => {
+    setUser(prevUser => {
+        if (!prevUser) return null;
+        const newUser = { ...prevUser, ...updatedUserData };
+        localStorage.setItem('line-command-user', JSON.stringify(newUser));
+        return newUser;
+    });
   }, []);
 
 

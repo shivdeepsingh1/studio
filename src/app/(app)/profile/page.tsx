@@ -55,7 +55,7 @@ export default function ProfilePage() {
     if (!editingProfile || !editingProfile.id) return;
 
     // Update user context
-    updateUser(editingProfile as User);
+    updateUser(editingProfile);
 
     // Update employee list
     const updatedEmployees = employees.map(emp => {
