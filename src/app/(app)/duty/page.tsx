@@ -54,6 +54,7 @@ export default function DutyPage() {
   const { duties, employees: allEmployees, updateDuties } = useData()
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
+  const [attendanceStatus, setAttendanceStatus] = useState<"Present" | "Absent">("Present");
   
   const [editingDuty, setEditingDuty] = useState<Duty | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -99,6 +100,11 @@ export default function DutyPage() {
   }
 
   const handleAssignDuty = () => {
+    if (attendanceStatus === 'Absent') {
+        alert("Cannot assign duty to an employee marked as Absent.");
+        return;
+    }
+
     if (!newDuty.employeeId || !newDuty.date || !newDuty.location) {
       alert("Please fill all required fields.")
       return
@@ -227,10 +233,12 @@ export default function DutyPage() {
                 })
                 setPnoInput("")
                 setFoundEmployee(null)
+                setAttendanceStatus("Present")
               } else {
                 setNewDuty(initialNewDutyState)
                 setPnoInput("")
                 setFoundEmployee(null)
+                setAttendanceStatus("Present")
               }
               setIsAssignDialogOpen(isOpen)
             }}
@@ -279,6 +287,23 @@ export default function DutyPage() {
                         <p>Employee not found.</p>
                     </div>
                 )}
+
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="attendance" className="text-right">Attendance</Label>
+                    <Select
+                        onValueChange={(value) => setAttendanceStatus(value as 'Present' | 'Absent')}
+                        value={attendanceStatus}
+                        disabled={!foundEmployee || foundEmployee.status === 'Suspended'}
+                    >
+                        <SelectTrigger className="col-span-3">
+                            <SelectValue placeholder="Select attendance" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Present">Present</SelectItem>
+                            <SelectItem value="Absent">Absent</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
                 
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="date" className="text-right">
@@ -290,6 +315,7 @@ export default function DutyPage() {
                     value={newDuty.date}
                     onChange={handleNewDutyInputChange}
                     className="col-span-3"
+                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -301,6 +327,7 @@ export default function DutyPage() {
                       handleNewDutySelectChange("shift", value)
                     }
                     value={newDuty.shift}
+                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select shift" />
@@ -321,6 +348,7 @@ export default function DutyPage() {
                     value={newDuty.location}
                     onChange={handleNewDutyInputChange}
                     className="col-span-3"
+                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -332,6 +360,7 @@ export default function DutyPage() {
                     value={newDuty.details}
                     onChange={handleNewDutyInputChange}
                     className="col-span-3"
+                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}
                   />
                 </div>
               </div>
@@ -343,7 +372,7 @@ export default function DutyPage() {
                 >
                   Cancel
                 </Button>
-                <Button onClick={handleAssignDuty} disabled={!foundEmployee || foundEmployee.status === 'Suspended'}>Save</Button>
+                <Button onClick={handleAssignDuty} disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}>Save</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -632,5 +661,7 @@ export default function DutyPage() {
     </>
   )
 }
+
+    
 
     
