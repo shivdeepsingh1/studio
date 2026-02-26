@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { Employee, Duty, Leave } from './types';
 import { mockEmployees, mockDuties, mockLeaves } from './mock-data';
 
@@ -79,9 +79,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setInStorage("line-command-leaves", updatedLeaves);
   }, []);
 
-  const value = { employees, duties, leaves, updateEmployees, updateDuties, updateLeaves, loading };
+  const value = useMemo(() => ({
+      employees,
+      duties,
+      leaves,
+      updateEmployees,
+      updateDuties,
+      updateLeaves,
+      loading
+  }), [employees, duties, leaves, loading, updateEmployees, updateDuties, updateLeaves]);
 
-  return React.createElement(DataContext.Provider, { value: value }, children);
+  return (
+    <DataContext.Provider value={value}>
+        {children}
+    </DataContext.Provider>
+  );
 }
 
 export function useData() {
