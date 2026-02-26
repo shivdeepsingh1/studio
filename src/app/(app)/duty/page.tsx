@@ -32,7 +32,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Duty, Employee } from "@/lib/types"
+import { Duty, Employee, Leave } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
@@ -48,10 +48,12 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useData } from "@/lib/data-provider"
+import { useToast } from "@/hooks/use-toast"
 
 export default function DutyPage() {
   const { user } = useAuth()
-  const { duties, employees: allEmployees, updateDuties } = useData()
+  const { duties, employees: allEmployees, updateDuties, leaves, updateLeaves } = useData()
+  const { toast } = useToast()
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
   const [attendanceStatus, setAttendanceStatus] = useState<"Present" | "Absent">("Present");
@@ -100,29 +102,42 @@ export default function DutyPage() {
   }
 
   const handleAssignDuty = () => {
+    if (!foundEmployee) {
+      toast({ variant: 'destructive', title: 'No Employee Selected', description: "Please search for an employee first." });
+      return;
+    }
+
+    if (foundEmployee.status === 'Suspended') {
+        toast({ variant: 'destructive', title: 'Action Prohibited', description: "Cannot assign duty or mark attendance for a suspended employee." });
+        return;
+    }
+
     if (attendanceStatus === 'Absent') {
-        alert("Cannot assign duty to an employee marked as Absent.");
-        return;
+      const absentLeave: Leave = {
+        id: Date.now().toString(),
+        employeeId: foundEmployee.id,
+        employeeName: foundEmployee.name,
+        type: 'Absent',
+        startDate: newDuty.date,
+        endDate: newDuty.date,
+        reason: 'Marked absent from duty roster.',
+        status: 'Approved'
+      };
+      updateLeaves([...leaves, absentLeave]);
+      toast({ title: "Employee Marked Absent", description: `${foundEmployee.name} has been marked as absent for ${format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')}.` });
+      setIsAssignDialogOpen(false);
+      return;
     }
-
+    
+    // This is for 'Present'
     if (!newDuty.employeeId || !newDuty.date || !newDuty.location) {
-      alert("Please fill all required fields.")
+      toast({ variant: 'destructive', title: 'Missing Information', description: "Please fill all required fields for duty assignment." });
       return
-    }
-    const employee = allEmployees.find((e) => e.id === newDuty.employeeId)
-    if (!employee) {
-      alert("Employee not found. Please verify PNO.")
-      return
-    }
-
-    if (employee.status === 'Suspended') {
-        alert("Cannot assign duty to a suspended employee.");
-        return;
     }
 
     const dutyToAdd: Duty = {
       id: Date.now().toString(),
-      employeeName: employee.name,
+      employeeName: foundEmployee.name,
       employeeId: newDuty.employeeId,
       date: newDuty.date,
       shift: newDuty.shift,
@@ -130,6 +145,7 @@ export default function DutyPage() {
       details: newDuty.details,
     }
     updateDuties([...duties, dutyToAdd])
+    toast({ title: "Duty Assigned", description: `Duty assigned to ${foundEmployee.name} for ${format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')}.` });
     setIsAssignDialogOpen(false)
   }
 
@@ -315,7 +331,7 @@ export default function DutyPage() {
                     value={newDuty.date}
                     onChange={handleNewDutyInputChange}
                     className="col-span-3"
-                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}
+                    disabled={!foundEmployee || foundEmployee.status === 'Suspended'}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -372,7 +388,7 @@ export default function DutyPage() {
                 >
                   Cancel
                 </Button>
-                <Button onClick={handleAssignDuty} disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}>Save</Button>
+                <Button onClick={handleAssignDuty} disabled={!foundEmployee || foundEmployee.status === 'Suspended'}>Save</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

@@ -69,12 +69,12 @@ export interface Leave {
   id: string;
   employeeId: string;
   employeeName: string;
-  type: 'Casual' | 'Sick' | 'Earned' | 'Maternity';
+  type: 'Casual' | 'Sick' | 'Earned' | 'Maternity' | 'Absent';
   startDate: string;
   endDate: string;
   reason: string;
   status: 'Approved' | 'Pending' | 'Rejected';
 }
 
-export const leaveTypes: Leave['type'][] = ["Casual", "Sick", "Earned", "Maternity"];
+export const leaveTypes: Leave['type'][] = ["Casual", "Sick", "Earned", "Maternity", "Absent"];
 export const leaveStatuses: Leave['status'][] = ["Pending", "Approved", "Rejected"];
