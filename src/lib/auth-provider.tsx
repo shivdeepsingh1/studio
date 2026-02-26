@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('line-command-user', JSON.stringify(newUser));
         return newUser;
     });
+    window.location.reload();
   }, []);
 
 
