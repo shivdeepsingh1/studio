@@ -10,31 +10,96 @@ import { useAuth } from '@/lib/auth';
 import { Shield, User } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { useToast } from '@/hooks/use-toast';
+import { useData } from '@/lib/data-provider';
+import { User as UserType } from '@/lib/types';
 
 export default function LoginPage() {
   const [pno, setPno] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
-  const { login } = useAuth();
+  const { _setUser } = useAuth();
+  const { employees, loading: dataLoading } = useData();
   const { toast } = useToast();
 
   const handleLogin = () => {
-    if (pno && password) {
-      const success = login(pno, password);
-      if (success) {
-        router.push('/dashboard');
-      } else {
+    if (dataLoading) {
+      toast({
+        variant: "destructive",
+        title: "System Busy",
+        description: "Data is still loading. Please try again in a moment.",
+      });
+      return;
+    }
+    
+    if (!pno || !password) {
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "PNO and password are required.",
+      });
+      return;
+    }
+
+    // 1. Admin special case login
+    if (pno === 'ADMIN' && password === 'admin') {
+      const adminUser: UserType = {
+        id: '0',
+        pno: 'ADMIN',
+        name: 'Chief Administrator',
+        rank: 'Administrator',
+        avatarUrl: 'https://picsum.photos/seed/admin/100/100',
+        email: 'admin@police.gov',
+        role: 'admin',
+        status: 'Active',
+      };
+      _setUser(adminUser);
+      router.push('/dashboard');
+      return;
+    }
+
+    // 2. Find the employee from context
+    const employee = employees.find(emp => emp.pno === pno);
+    if (!employee) {
         toast({
           variant: "destructive",
           title: "Login Failed",
           description: "Invalid PNO or password. Please try again.",
         });
-      }
+        return;
+    }
+
+    // 3. Determine the correct password
+    const hasExplicitPassword = employee.password && employee.password.length > 0;
+    
+    let correctPassword;
+    if (hasExplicitPassword) {
+        correctPassword = employee.password;
+    } else {
+        if (employee.dob && typeof employee.dob === 'string' && employee.dob.includes('-')) {
+            const [year, month, day] = employee.dob.split('-');
+            correctPassword = `${day}${month}${year}`;
+        }
+    }
+
+    // 4. Check if passwords match
+    if (correctPassword && password === correctPassword) {
+      const employeeUser: UserType = {
+          id: employee.id,
+          pno: employee.pno,
+          name: employee.name,
+          rank: employee.rank,
+          avatarUrl: employee.avatarUrl,
+          email: `${employee.pno}@police.gov`,
+          role: employee.role || 'employee',
+          status: employee.status || 'Active',
+      };
+      _setUser(employeeUser);
+      router.push('/dashboard');
     } else {
       toast({
         variant: "destructive",
-        title: "Missing Information",
-        description: "PNO and password are required.",
+        title: "Login Failed",
+        description: "Invalid PNO or password. Please try again.",
       });
     }
   };
