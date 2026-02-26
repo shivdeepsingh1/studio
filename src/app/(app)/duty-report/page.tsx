@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -20,27 +20,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Employee, Duty } from "@/lib/types";
-import { mockEmployees, mockDuties } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
+import { useData } from "@/lib/data-provider";
 
 export default function DutyReportPage() {
   const { user } = useAuth();
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [duties, setDuties] = useState<Duty[]>([]);
+  const { employees, duties } = useData();
   const [pnoInput, setPnoInput] = useState<string>("");
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [dateFrom, setDateFrom] = useState<string>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]
   );
   const [dateTo, setDateTo] = useState<string>(new Date().toISOString().split('T')[0]);
-
-  useEffect(() => {
-    const storedEmployees = localStorage.getItem("line-command-employees");
-    setEmployees(storedEmployees ? JSON.parse(storedEmployees) : mockEmployees);
-
-    const storedDuties = localStorage.getItem("line-command-duties");
-    setDuties(storedDuties ? JSON.parse(storedDuties) : mockDuties);
-  }, []);
 
   const handlePnoSearch = () => {
     const employee = employees.find(e => e.pno === pnoInput);

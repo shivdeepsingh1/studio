@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { format } from "date-fns"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
@@ -32,8 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { mockEmployees, mockLeaves } from "@/lib/mock-data"
-import { Employee, Leave, leaveTypes, leaveStatuses } from "@/lib/types"
+import { Leave, leaveTypes, leaveStatuses } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
@@ -46,11 +45,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { useData } from "@/lib/data-provider"
 
 export default function LeavePage() {
   const { user } = useAuth()
-  const [leaves, setLeaves] = useState<Leave[]>([])
-  const [allEmployees, setAllEmployees] = useState<Employee[]>([])
+  const { leaves, employees: allEmployees, updateLeaves } = useData();
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false)
 
   const initialNewLeaveState = {
@@ -63,36 +62,6 @@ export default function LeavePage() {
   }
 
   const [newLeave, setNewLeave] = useState(initialNewLeaveState)
-
-  useEffect(() => {
-    const storedLeaves = localStorage.getItem("line-command-leaves");
-    if (storedLeaves) {
-        try {
-            setLeaves(JSON.parse(storedLeaves));
-        } catch(e) {
-            setLeaves(mockLeaves);
-        }
-    } else {
-        setLeaves(mockLeaves);
-    }
-    
-
-    const storedEmployees = localStorage.getItem("line-command-employees");
-     if (storedEmployees) {
-        try {
-            setAllEmployees(JSON.parse(storedEmployees));
-        } catch(e) {
-            setAllEmployees(mockEmployees);
-        }
-    } else {
-        setAllEmployees(mockEmployees);
-    }
-  }, []);
-
-  const updateLeaves = (updatedLeaves: Leave[]) => {
-    setLeaves(updatedLeaves);
-    localStorage.setItem("line-command-leaves", JSON.stringify(updatedLeaves));
-  }
 
   const handleNewLeaveInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

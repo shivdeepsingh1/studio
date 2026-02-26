@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { format } from "date-fns"
 import * as XLSX from "xlsx"
 import jsPDF from "jspdf"
@@ -27,7 +27,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { mockEmployees } from "@/lib/mock-data"
 import { Employee, EmployeeRank, employeeRanks } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -47,10 +46,11 @@ import {
 } from "@/components/ui/select"
 import { useAuth } from "@/lib/auth"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useData } from "@/lib/data-provider"
 
 export default function EmployeesPage() {
   const { user } = useAuth();
-  const [employees, setEmployees] = useState<Employee[]>([])
+  const { employees, updateEmployees } = useData();
   const [searchQuery, setSearchQuery] = useState("")
   const [editingEmployee, setEditingEmployee] = useState<Partial<Employee> | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -74,24 +74,6 @@ export default function EmployeesPage() {
 
   const [newEmployee, setNewEmployee] = useState(initialNewEmployeeState)
 
-  useEffect(() => {
-    const storedEmployees = localStorage.getItem("line-command-employees");
-    if (storedEmployees) {
-      try {
-        setEmployees(JSON.parse(storedEmployees));
-      } catch (e) {
-        setEmployees(mockEmployees);
-      }
-    } else {
-      setEmployees(mockEmployees);
-    }
-  }, []);
-
-  const updateEmployees = (updatedEmployees: Employee[]) => {
-    setEmployees(updatedEmployees);
-    localStorage.setItem("line-command-employees", JSON.stringify(updatedEmployees));
-  };
-
   const filteredEmployees = employees.filter(
     (employee) =>
       employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -108,11 +90,11 @@ export default function EmployeesPage() {
     if (!editingEmployee || !editingEmployee.id) return;
     if (user?.role !== 'admin') return;
   
-    const updatedEmployees = employees.map((emp) =>
+    const updatedEmployeesList = employees.map((emp) =>
       emp.id === editingEmployee.id ? { ...emp, ...editingEmployee } as Employee : emp
     )
     
-    updateEmployees(updatedEmployees);
+    updateEmployees(updatedEmployeesList);
   
     setIsEditDialogOpen(false);
     setEditingEmployee(null);

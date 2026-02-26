@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
 import { Users, CalendarOff, Send, Plus, Anchor, Globe, Calendar, CalendarPlus, CalendarHeart } from 'lucide-react';
 import Link from 'next/link';
 
@@ -9,10 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth';
 import { PageHeader } from '@/components/page-header';
-import { mockEmployees, mockDuties, mockLeaves } from '@/lib/mock-data';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis } from 'recharts';
-import { Employee, Duty, Leave, employeeRanks, EmployeeRank } from '@/lib/types';
+import { employeeRanks, EmployeeRank } from '@/lib/types';
+import { useData } from '@/lib/data-provider';
 
 const chartData = [
   { month: 'January', desktop: 186 },
@@ -32,20 +31,7 @@ const chartConfig = {
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [duties, setDuties] = useState<Duty[]>([]);
-  const [leaves, setLeaves] = useState<Leave[]>([]);
-
-  useEffect(() => {
-    const storedEmployees = localStorage.getItem("line-command-employees");
-    setEmployees(storedEmployees ? JSON.parse(storedEmployees) : mockEmployees);
-
-    const storedDuties = localStorage.getItem("line-command-duties");
-    setDuties(storedDuties ? JSON.parse(storedDuties) : mockDuties);
-
-    const storedLeaves = localStorage.getItem("line-command-leaves");
-    setLeaves(storedLeaves ? JSON.parse(storedLeaves) : mockLeaves);
-  }, []);
+  const { employees, duties, leaves } = useData();
   
   const today = new Date();
   const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;

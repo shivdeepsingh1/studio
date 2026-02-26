@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -9,16 +10,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { LogOut, Pencil, Eye, EyeOff } from "lucide-react"
-import { mockEmployees } from "@/lib/mock-data"
 import { Employee, User } from "@/lib/types"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useData } from "@/lib/data-provider"
 
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth()
   const router = useRouter()
+  const { employees, updateEmployees } = useData();
   const [employeeDetails, setEmployeeDetails] = useState<Employee | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<Partial<User & Employee> | null>(null);
@@ -27,8 +29,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
-      const storedEmployees = localStorage.getItem("line-command-employees");
-      const employees: Employee[] = storedEmployees ? JSON.parse(storedEmployees) : mockEmployees;
       const details = employees.find((e: Employee) => e.id === user.id);
       setEmployeeDetails(details || null);
       setEditingProfile({ ...user, ...details });
@@ -38,7 +38,7 @@ export default function ProfilePage() {
         setAdminList(otherAdmins);
       }
     }
-  }, [user]);
+  }, [user, employees]);
 
   const handleLogout = () => {
     logout()
@@ -57,10 +57,7 @@ export default function ProfilePage() {
     // Update user context
     updateUser(editingProfile as User);
 
-    // Update employee list in local storage
-    const storedEmployees = localStorage.getItem("line-command-employees");
-    let employees: Employee[] = storedEmployees ? JSON.parse(storedEmployees) : mockEmployees;
-    
+    // Update employee list
     const updatedEmployees = employees.map(emp => {
       if (emp.id === editingProfile.id) {
         return { ...emp, ...editingProfile } as Employee;
@@ -68,8 +65,7 @@ export default function ProfilePage() {
       return emp;
     });
 
-    localStorage.setItem("line-command-employees", JSON.stringify(updatedEmployees));
-    setEmployeeDetails(updatedEmployees.find(e => e.id === editingProfile.id) || null);
+    updateEmployees(updatedEmployees);
     
     setIsEditDialogOpen(false);
   };

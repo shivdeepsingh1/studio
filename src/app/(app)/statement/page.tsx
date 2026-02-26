@@ -1,32 +1,18 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { useAuth } from '@/lib/auth';
-import { mockEmployees, mockDuties, mockLeaves } from '@/lib/mock-data';
-import { Employee, Duty, Leave, employeeRanks, EmployeeRank, leaveTypes } from '@/lib/types';
+import { EmployeeRank, employeeRanks, leaveTypes } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useData } from '@/lib/data-provider';
 
 export default function StatementPage() {
     const { user } = useAuth();
-    const [employees, setEmployees] = useState<Employee[]>([]);
-    const [duties, setDuties] = useState<Duty[]>([]);
-    const [leaves, setLeaves] = useState<Leave[]>([]);
-
-    useEffect(() => {
-        const storedEmployees = localStorage.getItem("line-command-employees");
-        setEmployees(storedEmployees ? JSON.parse(storedEmployees) : mockEmployees);
-
-        const storedDuties = localStorage.getItem("line-command-duties");
-        setDuties(storedDuties ? JSON.parse(storedDuties) : mockDuties);
-
-        const storedLeaves = localStorage.getItem("line-command-leaves");
-        setLeaves(storedLeaves ? JSON.parse(storedLeaves) : mockLeaves);
-    }, []);
+    const { employees, duties, leaves } = useData();
 
     if (user?.role !== 'admin') {
         return (
@@ -127,7 +113,7 @@ export default function StatementPage() {
                                 ))}
                             </TableBody>
                             <TableFooter>
-                                <TableRow className="bg-muted/50 font-bold">
+                                <TableRow>
                                     <TableHead>Total</TableHead>
                                     <TableHead className="text-right">{totalStrength}</TableHead>
                                 </TableRow>
@@ -158,7 +144,7 @@ export default function StatementPage() {
                                     ))}
                                 </TableBody>
                                 <TableFooter>
-                                    <TableRow className="bg-muted/50 font-bold">
+                                    <TableRow>
                                         <TableHead>Total</TableHead>
                                         {leaveTypes.map(type => <TableHead key={type} className="text-right">{totalLeaveByType[type]}</TableHead>)}
                                         <TableHead className="text-right">{totalLeaveByType['Total']}</TableHead>
@@ -189,7 +175,7 @@ export default function StatementPage() {
                                     ))}
                                 </TableBody>
                                 <TableFooter>
-                                    <TableRow className="bg-muted/50 font-bold">
+                                    <TableRow>
                                         <TableHead>Total</TableHead>
                                         <TableHead className="text-right">{totalAbsent}</TableHead>
                                     </TableRow>
@@ -217,7 +203,7 @@ export default function StatementPage() {
                                     ))}
                                 </TableBody>
                                 <TableFooter>
-                                    <TableRow className="bg-muted/50 font-bold">
+                                    <TableRow>
                                         <TableHead>Total</TableHead>
                                         <TableHead className="text-right">{totalSuspended}</TableHead>
                                     </TableRow>
