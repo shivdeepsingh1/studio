@@ -32,18 +32,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const _setUser = useCallback((newUser: User | null) => {
-    setUser(newUser);
     if (newUser) {
         localStorage.setItem('line-command-user', JSON.stringify(newUser));
     } else {
         localStorage.removeItem('line-command-user');
     }
+    window.location.reload();
   }, []);
 
 
   const updateUser = useCallback((updatedUserData: User) => {
-    setUser(updatedUserData);
     localStorage.setItem('line-command-user', JSON.stringify(updatedUserData));
+    window.location.reload();
   }, []);
 
 

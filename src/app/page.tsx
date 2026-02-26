@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,9 +17,15 @@ export default function LoginPage() {
   const [pno, setPno] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
-  const { _setUser } = useAuth();
+  const { user, _setUser, loading: authLoading } = useAuth();
   const { employees, loading: dataLoading } = useData();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
 
   const handleLogin = () => {
     if (dataLoading) {
@@ -53,7 +59,6 @@ export default function LoginPage() {
         status: 'Active',
       };
       _setUser(adminUser);
-      router.push('/dashboard');
       return;
     }
 
@@ -94,7 +99,6 @@ export default function LoginPage() {
           status: employee.status || 'Active',
       };
       _setUser(employeeUser);
-      router.push('/dashboard');
     } else {
       toast({
         variant: "destructive",
@@ -103,6 +107,15 @@ export default function LoginPage() {
       });
     }
   };
+  
+  if (authLoading || dataLoading || (!authLoading && user)) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-lg font-semibold">Loading...</div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
