@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User, Employee } from './types';
-import { mockEmployees } from './mock-data';
+import { useData } from './data-provider';
 
 interface AuthContextType {
   user: User | null;
@@ -17,6 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const data = useData();
 
   useEffect(() => {
     try {
@@ -32,12 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const updateUser = (updatedUserData: User) => {
+  const updateUser = useCallback((updatedUserData: User) => {
     setUser(updatedUserData);
     localStorage.setItem('line-command-user', JSON.stringify(updatedUserData));
-  };
+  }, []);
 
-  const login = (pno: string, password: string): boolean => {
+  const login = useCallback((pno: string, password: string): boolean => {
+    if (data.loading) return false;
+
     // 1. Admin special case login
     if (pno === 'ADMIN' && password === 'admin') {
       const adminUser: User = {
@@ -55,38 +58,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     }
 
-    // 2. Load employees from storage
-    let employees: Employee[] = [];
-    const storedEmployees = localStorage.getItem("line-command-employees");
-    try {
-        employees = storedEmployees ? JSON.parse(storedEmployees) : mockEmployees;
-    } catch (e) {
-        console.error("Failed to parse employees from localStorage", e);
-        employees = mockEmployees;
-    }
-    
-    // 3. Find the employee
-    const employee = employees.find(emp => emp.pno === pno);
+    // 2. Find the employee from context
+    const employee = data.employees.find(emp => emp.pno === pno);
     if (!employee) {
         return false;
     }
 
-    // 4. Determine the correct password
-    // The employee record has an explicit password set (and it's not an empty string).
+    // 3. Determine the correct password
     const hasExplicitPassword = employee.password && employee.password.length > 0;
     
     let correctPassword;
     if (hasExplicitPassword) {
         correctPassword = employee.password;
     } else {
-        // No explicit password, so use DOB as default.
         if (employee.dob && typeof employee.dob === 'string' && employee.dob.includes('-')) {
             const [year, month, day] = employee.dob.split('-');
             correctPassword = `${day}${month}${year}`;
         }
     }
 
-    // 5. Check if passwords match
+    // 4. Check if passwords match
     if (correctPassword && password === correctPassword) {
       const employeeUser: User = {
           id: employee.id,
@@ -104,12 +95,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return false;
-  };
+  }, [data.employees, data.loading]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('line-command-user');
-  };
+  }, []);
 
   const value = { user, login, logout, loading, updateUser };
 

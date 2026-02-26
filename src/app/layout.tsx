@@ -25,12 +25,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className={`font-body antialiased ${inter.variable}`}>
-        <AuthProvider>
-          <DataProvider>
+        <DataProvider>
+          <AuthProvider>
             {children}
-          </DataProvider>
-          <Toaster />
-        </AuthProvider>
+          </AuthProvider>
+        </DataProvider>
+        <Toaster />
       </body>
     </html>
   );

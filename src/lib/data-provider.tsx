@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Employee, Duty, Leave } from './types';
 import { mockEmployees, mockDuties, mockLeaves } from './mock-data';
 
@@ -16,31 +16,25 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-// Helper function to get data from localStorage
 const getFromStorage = <T,>(key: string, fallback: T): T => {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined') return fallback;
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : fallback;
+    } catch (e) {
+        console.error(`Failed to parse ${key} from localStorage`, e);
         return fallback;
     }
-    const item = localStorage.getItem(key);
-    if (item) {
-        try {
-            return JSON.parse(item);
-        } catch (e) {
-            console.error(`Failed to parse ${key} from localStorage`, e);
-            return fallback;
-        }
-    }
-    return fallback;
 };
 
-// Helper function to set data to localStorage
 const setInStorage = <T,>(key: string, value: T) => {
-    if (typeof window === 'undefined') {
-        return;
+    if (typeof window === 'undefined') return;
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+        console.error(`Failed to set ${key} in localStorage`, e);
     }
-    localStorage.setItem(key, JSON.stringify(value));
 };
-
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -50,46 +44,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initialEmployees = getFromStorage("line-command-employees", mockEmployees);
-    if (initialEmployees.length === 0) {
+    setEmployees(initialEmployees);
+    if (localStorage.getItem("line-command-employees") === null) {
       setInStorage("line-command-employees", mockEmployees);
-      setEmployees(mockEmployees);
-    } else {
-      setEmployees(initialEmployees);
     }
 
     const initialDuties = getFromStorage("line-command-duties", mockDuties);
-     if (initialDuties.length === 0) {
+    setDuties(initialDuties);
+    if (localStorage.getItem("line-command-duties") === null) {
       setInStorage("line-command-duties", mockDuties);
-      setDuties(mockDuties);
-    } else {
-      setDuties(initialDuties);
     }
     
     const initialLeaves = getFromStorage("line-command-leaves", mockLeaves);
-    if (initialLeaves.length === 0) {
+    setLeaves(initialLeaves);
+    if (localStorage.getItem("line-command-leaves") === null) {
       setInStorage("line-command-leaves", mockLeaves);
-      setLeaves(mockLeaves);
-    } else {
-      setLeaves(initialLeaves);
     }
 
     setLoading(false);
   }, []);
 
-  const updateEmployees = (updatedEmployees: Employee[]) => {
+  const updateEmployees = useCallback((updatedEmployees: Employee[]) => {
     setEmployees(updatedEmployees);
     setInStorage("line-command-employees", updatedEmployees);
-  };
+  }, []);
 
-  const updateDuties = (updatedDuties: Duty[]) => {
+  const updateDuties = useCallback((updatedDuties: Duty[]) => {
     setDuties(updatedDuties);
     setInStorage("line-command-duties", updatedDuties);
-  };
+  }, []);
 
-  const updateLeaves = (updatedLeaves: Leave[]) => {
+  const updateLeaves = useCallback((updatedLeaves: Leave[]) => {
     setLeaves(updatedLeaves);
     setInStorage("line-command-leaves", updatedLeaves);
-  };
+  }, []);
 
   const value = { employees, duties, leaves, updateEmployees, updateDuties, updateLeaves, loading };
 
