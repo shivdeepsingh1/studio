@@ -254,3 +254,8 @@ export default function StatementPage() {
                             </TableFooter>
                         </Table>
                     </ScrollArea>
+                </CardContent>
+            </Card>
+        </>
+    );
+}
