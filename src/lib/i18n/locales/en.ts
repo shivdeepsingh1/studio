@@ -45,7 +45,7 @@ export const en = {
     duty: 'Duty',
     leave: 'Leave',
     employees: 'Employees',
-    absentEmployees: 'Daily Attendance',
+    absentEmployees: 'Absent Employees',
     dutyReport: 'Duty Report',
     statement: 'Statement',
     profile: 'Profile',
@@ -97,6 +97,10 @@ export const en = {
       title: 'Daily Statement',
       description: (date: string) => `Status overview for ${date}`,
     },
+    absentEmployees: {
+      title: 'Absent Employees',
+      description: 'Manage daily absences and view the list of absentees.',
+    },
     permissionDenied: 'You do not have permission to view this page.',
   },
   
@@ -104,6 +108,8 @@ export const en = {
   dashboard: {
     totalEmployees: 'Total Employees',
     totalStrength: 'Total Strength',
+    suspended: 'Suspended',
+    absent: 'Absent',
     reserve: 'Reserve',
     onReserveDuty: 'On reserve duty today',
     outOfDistrict: 'Out of District Duty',
@@ -291,18 +297,15 @@ export const en = {
 
   // Absent Employees Page
   absentEmployeesPage: {
-    title: 'Daily Attendance',
-    description: 'Manage daily attendance and view the status of all employees.',
-    updateAttendance: 'Update Attendance',
+    title: "Today's Absentee List",
+    description: (date: string) => `Showing employees marked absent for ${date}.`,
+    updateAttendance: 'Update Absence',
     updateAttendanceDescription: 'Search for an employee by PNO to mark them as present or absent for today.',
     markAsPresentButton: 'Mark as Present',
     markAsAbsentButton: 'Mark as Absent',
     employeePno: 'Employee PNO',
     enterEmployeePno: 'Enter employee PNO',
-    todaysAttendanceList: "Today's Attendance List",
-    attendanceListDescription: (date: string) => `Showing attendance status for ${date}.`,
     noAbsentees: 'No employees are marked as absent today.',
-    noEmployeesFound: 'No employees found for the current filter.',
     alreadyAbsentTitle: 'Already Absent',
     alreadyAbsentDescription: (name: string) => `${name} is already marked as absent for today.`,
     actionProhibitedDescription: (name: string, status: string) => `${name} cannot be marked absent as they are currently: ${status}.`,
@@ -310,7 +313,6 @@ export const en = {
     markedPresentDescription: (name: string) => `${name} has been marked as present.`,
     alreadyPresentTitle: 'Already Present',
     alreadyPresentDescription: (name: string) => `${name} is not marked as absent.`,
-    employeeStatus: 'Status',
     contactNumber: 'Contact No.',
   },
   

@@ -26,7 +26,6 @@ import { useLanguage } from "@/lib/i18n/language-provider";
 import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 type EmployeeWithStatus = {
   employee: Employee;
@@ -123,7 +122,7 @@ export default function AbsentEmployeesPage() {
       type: 'Absent',
       startDate: todayString,
       endDate: todayString,
-      reason: 'Marked absent from Daily Attendance page.',
+      reason: 'Marked absent from Absent Employees page.',
       status: 'Approved'
     };
     updateLeaves([...leaves, absentLeave]);
@@ -156,6 +155,22 @@ export default function AbsentEmployeesPage() {
     setPnoInput("");
   }
 
+  const absentEmployees = useMemo(() => {
+    return employeesWithStatus.filter(e => e.status === 'Absent' && e.employee.rank !== 'Administrator');
+  }, [employeesWithStatus]);
+
+  const filteredAbsentEmployees = useMemo(() => {
+    if (!mainSearchQuery) {
+        return absentEmployees;
+    }
+    return absentEmployees.filter(
+      (e) =>
+        e.employee.name.toLowerCase().includes(mainSearchQuery.toLowerCase()) ||
+        e.employee.pno.includes(mainSearchQuery) ||
+        e.employee.badgeNumber.toLowerCase().includes(mainSearchQuery.toLowerCase())
+    );
+  }, [absentEmployees, mainSearchQuery]);
+
   const handleExportPdf = () => {
     const doc = new jsPDF();
     doc.addFileToVFS('Hind-Regular.ttf', font);
@@ -166,42 +181,20 @@ export default function AbsentEmployeesPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.name, t.pno, t.rank, t.absentEmployeesPage.contactNumber, t.absentEmployeesPage.employeeStatus]],
-      body: filteredEmployees.map((e, index) => [
+      head: [[t.serialNumber, t.name, t.pno, t.rank, t.absentEmployeesPage.contactNumber]],
+      body: filteredAbsentEmployees.map((e, index) => [
         index + 1,
         e.employee.name,
         e.employee.pno,
         t.ranks[e.employee.rank],
         e.employee.contact,
-        e.details,
       ]),
       styles: { font: 'Hind' },
       headStyles: { font: 'Hind' },
     });
-    doc.save(`daily_attendance_${todayString}.pdf`);
+    doc.save(`absent_employees_${todayString}.pdf`);
   };
   
-  const getStatusBadgeVariant = (status: EmployeeWithStatus['status']) => {
-    switch (status) {
-      case "On Duty": return "default";
-      case "Available": return "secondary";
-      case "On Leave": return "outline";
-      case "Absent": return "destructive";
-      case "Suspended": return "destructive";
-      default: return "secondary";
-    }
-  }
-
-  const filteredEmployees = useMemo(() => {
-    return employeesWithStatus.filter(
-      (e) =>
-        e.employee.name.toLowerCase().includes(mainSearchQuery.toLowerCase()) ||
-        e.employee.pno.includes(mainSearchQuery) ||
-        e.employee.badgeNumber.toLowerCase().includes(mainSearchQuery.toLowerCase())
-    ).filter(emp => emp.employee.rank !== 'Administrator');
-  }, [employeesWithStatus, mainSearchQuery]);
-
-
   if (user?.role !== 'admin') {
       return (
           <div className="flex items-center justify-center h-full">
@@ -213,8 +206,8 @@ export default function AbsentEmployeesPage() {
   return (
     <>
       <PageHeader
-        title={t.absentEmployeesPage.title}
-        description={t.absentEmployeesPage.description}
+        title={t.pageHeaders.absentEmployees.title}
+        description={t.pageHeaders.absentEmployees.description}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -273,9 +266,9 @@ export default function AbsentEmployeesPage() {
         <Card className="lg:col-span-2">
             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <CardTitle>{t.absentEmployeesPage.todaysAttendanceList}</CardTitle>
+                  <CardTitle>{t.absentEmployeesPage.title}</CardTitle>
                   <CardContent className="text-sm text-muted-foreground p-0 pt-1">
-                    {t.absentEmployeesPage.attendanceListDescription(format(new Date(), 'dd-MM-yyyy'))}
+                    {t.absentEmployeesPage.description(format(new Date(), 'dd-MM-yyyy'))}
                   </CardContent>
                 </div>
                 <div className="flex items-center gap-2 w-full md:w-auto">
@@ -285,7 +278,7 @@ export default function AbsentEmployeesPage() {
                       onChange={(e) => setMainSearchQuery(e.target.value)}
                       className="w-full md:w-64"
                     />
-                    <Button variant="outline" onClick={handleExportPdf} disabled={filteredEmployees.length === 0}>
+                    <Button variant="outline" onClick={handleExportPdf} disabled={filteredAbsentEmployees.length === 0}>
                         <FileDown className="mr-2" /> {t.exportPdf}
                     </Button>
                 </div>
@@ -300,12 +293,11 @@ export default function AbsentEmployeesPage() {
                             <TableHead>{t.pno}</TableHead>
                             <TableHead>{t.rank}</TableHead>
                             <TableHead>{t.absentEmployeesPage.contactNumber}</TableHead>
-                            <TableHead>{t.absentEmployeesPage.employeeStatus}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredEmployees.length > 0 ? (
-                        filteredEmployees.map(({ employee, status, details }, index) => (
+                        {filteredAbsentEmployees.length > 0 ? (
+                        filteredAbsentEmployees.map(({ employee }, index) => (
                             <TableRow key={employee.id}>
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell>
@@ -324,17 +316,12 @@ export default function AbsentEmployeesPage() {
                                 <TableCell>{employee.pno}</TableCell>
                                 <TableCell>{t.ranks[employee.rank]}</TableCell>
                                 <TableCell>{employee.contact}</TableCell>
-                                <TableCell>
-                                  <Badge variant={getStatusBadgeVariant(status)}>
-                                    {t.statusTypes[status.replace(/\s/g, '') as keyof typeof t.statusTypes] || status}: {details}
-                                  </Badge>
-                                </TableCell>
                             </TableRow>
                         ))
                         ) : (
                         <TableRow>
-                            <TableCell colSpan={6} className="text-center h-24">
-                                {t.absentEmployeesPage.noEmployeesFound}
+                            <TableCell colSpan={5} className="text-center h-24">
+                                {t.absentEmployeesPage.noAbsentees}
                             </TableCell>
                         </TableRow>
                         )}
@@ -347,5 +334,3 @@ export default function AbsentEmployeesPage() {
     </>
   );
 }
-
-    
