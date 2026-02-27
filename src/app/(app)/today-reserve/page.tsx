@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, PlusCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -16,17 +16,36 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Employee } from "@/lib/types";
+import { Employee, Duty } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
 import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TodayReservePage() {
   const { user } = useAuth();
-  const { employees, duties, leaves } = useData();
+  const { employees, duties, leaves, updateDuties } = useData();
   const { t } = useLanguage();
+  const { toast } = useToast();
+
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [newDuty, setNewDuty] = useState<{
+    shift: 'Morning' | 'Afternoon' | 'Night';
+    location: string;
+    details: string;
+  }>({
+    shift: 'Morning',
+    location: '',
+    details: '',
+  });
 
   const today = useMemo(() => new Date(), []);
   const todayString = useMemo(() => format(today, "yyyy-MM-dd"), [today]);
@@ -46,7 +65,7 @@ export default function TodayReservePage() {
 
     const suspendedIds = new Set(employees.filter(e => e.status === 'Suspended').map(e => e.id));
 
-    const onActiveDutyIds = new Set(duties.filter(d => d.date === todayString && d.location.toLowerCase() !== 'reserve').map(d => d.employeeId));
+    const onActiveDutyIds = new Set(duties.filter(d => d.date === todayString).map(d => d.employeeId));
 
     const reserve = employees.filter(employee =>
         employee.rank !== 'Administrator' &&
@@ -82,6 +101,34 @@ export default function TodayReservePage() {
       headStyles: { font: 'Hind' },
     });
     doc.save(`reserve_employees_${todayString}.pdf`);
+  };
+
+  const handleOpenAssignDialog = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setNewDuty({ shift: 'Morning', location: '', details: '' });
+    setIsAssignDialogOpen(true);
+  };
+  
+  const handleAssignDuty = () => {
+    if (!selectedEmployee || !newDuty.location) {
+        toast({ variant: 'destructive', title: t.duty.incompleteInformation, description: t.duty.incompleteInformationDescription });
+        return;
+    }
+
+    const dutyToAdd: Duty = {
+        id: Date.now().toString(),
+        employeeId: selectedEmployee.id,
+        employeeName: selectedEmployee.name,
+        date: todayString,
+        shift: newDuty.shift,
+        location: newDuty.location,
+        details: newDuty.details,
+    };
+
+    updateDuties(prevDuties => [...prevDuties, dutyToAdd]);
+    toast({ title: t.duty.dutyAssigned, description: t.duty.dutyAssignedDescription(selectedEmployee.name, format(new Date(), 'dd-MM-yyyy')) });
+    setIsAssignDialogOpen(false);
+    setSelectedEmployee(null);
   };
   
   if (user?.role !== 'admin') {
@@ -143,7 +190,11 @@ export default function TodayReservePage() {
                               </TableCell>
                               <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.contact}</TableCell>
-                              <TableCell>{t.statement.reserve}</TableCell>
+                              <TableCell>
+                                <Button variant="link" onClick={() => handleOpenAssignDialog(employee)}>
+                                  {t.statement.reserve}
+                                </Button>
+                              </TableCell>
                           </TableRow>
                       ))
                       ) : (
@@ -158,6 +209,67 @@ export default function TodayReservePage() {
               </div>
           </CardContent>
       </Card>
+
+      <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.duty.assignDutyTo(selectedEmployee?.name || '')}</DialogTitle>
+            <DialogDescription>{t.duty.assignDutyDescriptionReserve}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="shift" className="text-right">
+                {t.duty.shift}
+              </Label>
+              <Select
+                onValueChange={(value) => setNewDuty(prev => ({ ...prev, shift: value as any }))}
+                value={newDuty.shift}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder={t.duty.selectShift} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Morning">{t.duty.morning}</SelectItem>
+                  <SelectItem value="Afternoon">{t.duty.afternoon}</SelectItem>
+                  <SelectItem value="Night">{t.duty.night}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="location" className="text-right">
+                {t.duty.location}
+              </Label>
+              <Input
+                id="location"
+                value={newDuty.location}
+                onChange={(e) => setNewDuty(prev => ({ ...prev, location: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="details" className="text-right">
+                {t.duty.details}
+              </Label>
+              <Textarea
+                id="details"
+                value={newDuty.details}
+                onChange={(e) => setNewDuty(prev => ({ ...prev, details: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsAssignDialogOpen(false)}
+            >
+              {t.cancel}
+            </Button>
+            <Button onClick={handleAssignDuty}>{t.duty.assignDuty}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

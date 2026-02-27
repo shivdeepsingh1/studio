@@ -42,10 +42,12 @@ export default function DashboardPage() {
      return today >= startDate && today <= endDate;
   });
 
-  const totalEmployees = employees.length;
-  const suspendedEmployeesCount = employees.filter(e => e.status === 'Suspended').length;
-
+  const totalEmployees = employees.filter(e => e.rank !== 'Administrator').length;
+  const suspendedEmployeesCount = employees.filter(e => e.status === 'Suspended' && e.rank !== 'Administrator').length;
+  
+  const onLeaveForStatement = onLeaveToday.filter(l => l.type !== 'Absent');
   const onAbsentLeave = onLeaveToday.filter(l => l.type === 'Absent');
+
   const onLeaveTodayIds = new Set(onLeaveToday.map(l => l.employeeId));
   const onDutyTodayIds = new Set(dutiesToday.map(d => d.employeeId));
   
@@ -57,12 +59,10 @@ export default function DashboardPage() {
   );
   
   const totalAbsent = unaccountedAbsentEmployees.length + onAbsentLeave.length;
-
-  const onLeaveForStatement = onLeaveToday.filter(l => l.type !== 'Absent');
   const totalOnLeaveForStatement = onLeaveForStatement.length;
-
+  
   const totalPresentForDuty = totalEmployees - suspendedEmployeesCount - totalOnLeaveForStatement - totalAbsent;
-
+  
   const outOfDistrict = dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length;
   const reserve = totalPresentForDuty - outOfDistrict;
 

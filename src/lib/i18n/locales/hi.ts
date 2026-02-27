@@ -162,6 +162,8 @@ export const hi = {
     // Assign Duty Dialog
     assignNewDuty: 'नई ड्यूटी सौंपें',
     assignNewDutyDescription: 'कर्मचारी को खोजने और ड्यूटी सौंपने के लिए उसका PNO दर्ज करें।',
+    assignDutyTo: (name: string) => `${name} को ड्यूटी सौंपें`,
+    assignDutyDescriptionReserve: "आज की ड्यूटी के लिए शिफ्ट, स्थान और विवरण सौंपें।",
     pno: 'PNO',
     pnoPlaceholder: 'कर्मचारी PNO दर्ज करें',
     employeeNotFound: 'कर्मचारी नहीं मिला।',

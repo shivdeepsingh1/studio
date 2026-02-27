@@ -162,6 +162,8 @@ export const en = {
     // Assign Duty Dialog
     assignNewDuty: 'Assign New Duty',
     assignNewDutyDescription: 'Enter the PNO to find an employee and assign duty.',
+    assignDutyTo: (name: string) => `Assign Duty to ${name}`,
+    assignDutyDescriptionReserve: "Assign a shift, location, and details for today's duty.",
     pno: 'PNO',
     pnoPlaceholder: 'Enter employee PNO',
     employeeNotFound: 'Employee not found.',
