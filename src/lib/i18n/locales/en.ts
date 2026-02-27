@@ -45,6 +45,7 @@ export const en = {
     duty: 'Duty',
     leave: 'Leave',
     employees: 'Employees',
+    absentEmployees: 'Absent Employees',
     dutyReport: 'Duty Report',
     statement: 'Statement',
     profile: 'Profile',
@@ -97,6 +98,10 @@ export const en = {
       description: (date: string) => `Status overview for ${date}`,
     },
     permissionDenied: 'You do not have permission to view this page.',
+    absentEmployees: {
+        title: 'Absent Employees',
+        description: 'Mark employees as absent and view today\'s absentee list.',
+    },
   },
   
   // Dashboard
@@ -169,6 +174,8 @@ export const en = {
     incompleteInformationDescription: 'Please fill all required fields for duty assignment.',
     dutyAssigned: 'Duty Assigned',
     dutyAssignedDescription: (name: string, date: string) => `Duty has been assigned to ${name} for ${date}.`,
+    employeeOnLeaveTitle: 'Employee on Leave',
+    employeeOnLeaveDescription: (name: string, type: string) => `${name} is on ${type} leave and cannot be assigned duty.`,
     // Edit Dialog
     editDuty: 'Edit Duty',
     editDutyDescription: 'Update the details for this duty assignment.',
@@ -284,6 +291,21 @@ export const en = {
     noDataToExport: 'No data to export.',
     searchForReport: 'Please search for an employee by PNO to see their duty report.',
     noDutiesFound: 'No duties found for the selected employee and date range.',
+  },
+
+  // Absent Employees Page
+  absentEmployeesPage: {
+    title: 'Absent Employees',
+    description: 'Mark employees as absent and view the list of absentees for today.',
+    markAbsent: 'Mark Employee Absent',
+    markAbsentDescription: 'Search for an employee by their PNO to mark them as absent for today. This will prevent them from being assigned any duties.',
+    markAsAbsentButton: 'Mark as Absent',
+    employeePno: 'Employee PNO',
+    enterEmployeePno: 'Enter employee PNO',
+    absentList: 'Today\'s Absentee List',
+    noAbsentees: 'No employees are marked as absent today.',
+    alreadyAbsentTitle: 'Already Absent',
+    alreadyAbsentDescription: (name: string) => `${name} is already marked as absent for today.`,
   },
 
   // Translations for types

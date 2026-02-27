@@ -45,6 +45,7 @@ export const hi = {
     duty: 'ड्यूटी',
     leave: 'अवकाश',
     employees: 'कर्मचारी',
+    absentEmployees: 'अनुपस्थित कर्मचारी',
     dutyReport: 'ड्यूटी रिपोर्ट',
     statement: 'विवरण',
     profile: 'प्रोफ़ाइल',
@@ -97,6 +98,10 @@ export const hi = {
       description: (date: string) => `${date} के लिए स्थिति अवलोकन`,
     },
     permissionDenied: 'आपको यह पृष्ठ देखने की अनुमति नहीं है।',
+    absentEmployees: {
+        title: 'अनुपस्थित कर्मचारी',
+        description: 'कर्मचारियों को अनुपस्थित के रूप में चिह्नित करें और आज की अनुपस्थित सूची देखें।',
+    },
   },
 
   // Dashboard
@@ -169,6 +174,8 @@ export const hi = {
     incompleteInformationDescription: 'कृपया ड्यूटी असाइनमेंट के लिए सभी आवश्यक फ़ील्ड भरें।',
     dutyAssigned: 'ड्यूटी सौंपी गई',
     dutyAssignedDescription: (name: string, date: string) => `ड्यूटी ${name} को ${date} के लिए सौंपी गई है।`,
+    employeeOnLeaveTitle: 'कर्मचारी अवकाश पर है',
+    employeeOnLeaveDescription: (name: string, type: string) => `${name} ${type} अवकाश पर है और उसे ड्यूटी नहीं सौंपी जा सकती।`,
     // Edit Dialog
     editDuty: 'ड्यूटी संपादित करें',
     editDutyDescription: 'इस ड्यूटी असाइनमेंट के लिए विवरण अपडेट करें।',
@@ -286,6 +293,21 @@ export const hi = {
     noDutiesFound: 'चयनित कर्मचारी और दिनांक सीमा के लिए कोई ड्यूटी नहीं मिली।',
   },
   
+  // Absent Employees Page
+  absentEmployeesPage: {
+    title: 'अनुपस्थित कर्मचारी',
+    description: 'कर्मचारियों को अनुपस्थित के रूप में चिह्नित करें और आज के लिए अनुपस्थितों की सूची देखें।',
+    markAbsent: 'कर्मचारी को अनुपस्थित चिह्नित करें',
+    markAbsentDescription: 'किसी कर्मचारी को आज के लिए अनुपस्थित चिह्नित करने के लिए उसके PNO से खोजें। यह उन्हें किसी भी ड्यूटी पर असाइन किए जाने से रोकेगा।',
+    markAsAbsentButton: 'अनुपस्थित चिह्नित करें',
+    employeePno: 'कर्मचारी PNO',
+    enterEmployeePno: 'कर्मचारी PNO दर्ज करें',
+    absentList: 'आज की अनुपस्थित सूची',
+    noAbsentees: 'आज कोई भी कर्मचारी अनुपस्थित नहीं है।',
+    alreadyAbsentTitle: 'पहले से ही अनुपस्थित',
+    alreadyAbsentDescription: (name: string) => `${name} आज के लिए पहले से ही अनुपस्थित के रूप में चिह्नित है।`,
+  },
+
   // Translations for types
   ranks: {
     Administrator: 'प्रशासक',

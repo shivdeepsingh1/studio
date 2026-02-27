@@ -102,7 +102,7 @@ export default function AbsentEmployeesPage() {
   
   const handleExportPdf = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
+    doc.addFileToVFS('Hind-Regular.ttf', font.replace(/\s/g, ''));
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
     doc.setFont('Hind');
     
@@ -149,11 +149,11 @@ export default function AbsentEmployeesPage() {
                 <CardContent>
                     <div className="space-y-4">
                          <div className="space-y-2">
-                            <Label htmlFor="pno-search">{t.dutyReport.employeePno}</Label>
+                            <Label htmlFor="pno-search">{t.absentEmployeesPage.employeePno}</Label>
                             <div className="flex items-center gap-2">
                                 <Input
                                     id="pno-search"
-                                    placeholder={t.dutyReport.enterEmployeePno}
+                                    placeholder={t.absentEmployeesPage.enterEmployeePno}
                                     value={pnoInput}
                                     onChange={(e) => setPnoInput(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handlePnoSearch()}
