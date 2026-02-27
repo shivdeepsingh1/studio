@@ -47,11 +47,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { useData } from "@/lib/data-provider"
 import { useLanguage } from "@/lib/i18n/language-provider"
 import { font } from "@/lib/fonts/Hind-Regular"
+import { useToast } from "@/hooks/use-toast"
 
 export default function LeavePage() {
   const { user } = useAuth()
   const { leaves, employees: allEmployees, updateLeaves } = useData()
   const { t } = useLanguage()
+  const { toast } = useToast()
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false)
   const [editingLeave, setEditingLeave] = useState<Leave | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -88,17 +90,17 @@ export default function LeavePage() {
       !newLeave.endDate ||
       !newLeave.reason
     ) {
-      alert(t.leave.fillAllFields)
+      toast({ variant: 'destructive', title: t.leave.fillAllFields });
       return
     }
     const employee = allEmployees.find((e) => e.id === employeeId)
     if (!employee) {
-      alert(t.leave.employeeNotFound)
+      toast({ variant: 'destructive', title: t.leave.employeeNotFound });
       return
     }
 
     if (employee.status === 'Suspended') {
-        alert(t.leave.suspendedLeaveError);
+        toast({ variant: 'destructive', title: t.leave.suspendedLeaveError });
         setIsLeaveDialogOpen(false);
         return;
     }

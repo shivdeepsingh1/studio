@@ -43,49 +43,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initialEmployees = getFromStorage("line-command-employees", mockEmployees);
-    setEmployees(initialEmployees);
-    if (localStorage.getItem("line-command-employees") === null) {
-      setInStorage("line-command-employees", mockEmployees);
-    }
-
-    const initialDuties = getFromStorage("line-command-duties", mockDuties);
-    setDuties(initialDuties);
-    if (localStorage.getItem("line-command-duties") === null) {
-      setInStorage("line-command-duties", mockDuties);
-    }
-    
-    const initialLeaves = getFromStorage("line-command-leaves", mockLeaves);
-    setLeaves(initialLeaves);
-    if (localStorage.getItem("line-command-leaves") === null) {
-      setInStorage("line-command-leaves", mockLeaves);
-    }
-
+    setEmployees(getFromStorage("line-command-employees", mockEmployees));
+    setDuties(getFromStorage("line-command-duties", mockDuties));
+    setLeaves(getFromStorage("line-command-leaves", mockLeaves));
     setLoading(false);
   }, []);
 
   const updateEmployees = useCallback((updater: Employee[] | ((prev: Employee[]) => Employee[])) => {
-    setEmployees(prev => {
-        const newState = typeof updater === 'function' ? (updater as (prev: Employee[]) => Employee[])(prev) : updater;
-        setInStorage("line-command-employees", newState);
-        return newState;
-    });
+    const currentData = getFromStorage("line-command-employees", mockEmployees);
+    const newData = typeof updater === 'function' ? (updater as (prev: Employee[]) => Employee[])(currentData) : updater;
+    setInStorage("line-command-employees", newData);
+    setEmployees(newData);
   }, []);
 
   const updateDuties = useCallback((updater: Duty[] | ((prev: Duty[]) => Duty[])) => {
-    setDuties(prev => {
-        const newState = typeof updater === 'function' ? (updater as (prev: Duty[]) => Duty[])(prev) : updater;
-        setInStorage("line-command-duties", newState);
-        return newState;
-    });
+    const currentData = getFromStorage("line-command-duties", mockDuties);
+    const newData = typeof updater === 'function' ? (updater as (prev: Duty[]) => Duty[])(currentData) : updater;
+    setInStorage("line-command-duties", newData);
+    setDuties(newData);
   }, []);
 
   const updateLeaves = useCallback((updater: Leave[] | ((prev: Leave[]) => Leave[])) => {
-    setLeaves(prev => {
-        const newState = typeof updater === 'function' ? (updater as (prev: Leave[]) => Leave[])(prev) : updater;
-        setInStorage("line-command-leaves", newState);
-        return newState;
-    });
+    const currentData = getFromStorage("line-command-leaves", mockLeaves);
+    const newData = typeof updater === 'function' ? (updater as (prev: Leave[]) => Leave[])(currentData) : updater;
+    setInStorage("line-command-leaves", newData);
+    setLeaves(newData);
   }, []);
 
 
