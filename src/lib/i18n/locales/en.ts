@@ -42,7 +42,7 @@ export const en = {
   // Sidebar & Layout
   sidebar: {
     dashboard: 'Dashboard',
-    duty: 'Duty',
+    duty: 'Duty Management Roster',
     leave: 'Leave',
     employees: 'Employees',
     absentEmployees: 'Absent Employees',
@@ -68,11 +68,11 @@ export const en = {
       description: 'This is your daily summary.',
     },
     dutyAdmin: {
-      title: 'Duty Roster',
+      title: 'Duty Management Roster',
       description: 'Assign and manage daily duties for all employees.',
     },
     dutyEmployee: {
-      title: 'Duty Roster',
+      title: 'Duty Management Roster',
       description: 'View your upcoming and past duty assignments.',
     },
     dutyReport: {

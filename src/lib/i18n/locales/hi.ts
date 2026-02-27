@@ -42,7 +42,7 @@ export const hi = {
   // Sidebar & Layout
   sidebar: {
     dashboard: 'डैशबोर्ड',
-    duty: 'ड्यूटी',
+    duty: 'ड्यूटी प्रबंधन रोस्टर',
     leave: 'अवकाश',
     employees: 'कर्मचारी',
     absentEmployees: 'अनुपस्थित कर्मचारी',
@@ -68,11 +68,11 @@ export const hi = {
       description: 'यह आपका दैनिक सारांश है।',
     },
     dutyAdmin: {
-      title: 'ड्यूटी रोस्टर',
+      title: 'ड्यूटी प्रबंधन रोस्टर',
       description: 'सभी कर्मचारियों के लिए दैनिक ड्यूटी सौंपें और प्रबंधित करें।',
     },
     dutyEmployee: {
-      title: 'ड्यूटी रोस्टर',
+      title: 'ड्यूटी प्रबंधन रोस्टर',
       description: 'अपने आगामी और पिछले ड्यूटी असाइनमेंट देखें।',
     },
     dutyReport: {
