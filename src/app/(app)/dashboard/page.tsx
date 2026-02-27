@@ -32,8 +32,7 @@ export default function DashboardPage() {
   const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
   const dutiesToday = duties.filter(d => d.date === todayString);
-  const leavesToday = leaves.filter(l => l.status === 'Approved' && l.startDate <= todayString && l.endDate >= todayString);
-
+  
   const onLeaveToday = leaves.filter(l => {
      if (l.status !== 'Approved' || !l.startDate || !l.endDate) return false;
      const startDate = new Date(l.startDate.replace(/-/g, '/'));
@@ -42,26 +41,40 @@ export default function DashboardPage() {
      endDate.setHours(23,59,59,999);
      return today >= startDate && today <= endDate;
   });
+
+  const totalEmployees = employees.length;
+  const suspendedEmployeesCount = employees.filter(e => e.status === 'Suspended').length;
+
   const onAbsentLeave = onLeaveToday.filter(l => l.type === 'Absent');
   const onLeaveTodayIds = new Set(onLeaveToday.map(l => l.employeeId));
   const onDutyTodayIds = new Set(dutiesToday.map(d => d.employeeId));
+  
   const unaccountedAbsentEmployees = employees.filter(e => 
       e.rank !== 'Administrator' &&
       (e.status === 'Active' || !e.status) &&
       !onLeaveTodayIds.has(e.id) &&
       !onDutyTodayIds.has(e.id)
   );
+  
   const totalAbsent = unaccountedAbsentEmployees.length + onAbsentLeave.length;
 
+  const onLeaveForStatement = onLeaveToday.filter(l => l.type !== 'Absent');
+  const totalOnLeaveForStatement = onLeaveForStatement.length;
+
+  const totalPresentForDuty = totalEmployees - suspendedEmployeesCount - totalOnLeaveForStatement - totalAbsent;
+
+  const outOfDistrict = dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length;
+  const reserve = totalPresentForDuty - outOfDistrict;
+
   const stats = {
-    totalEmployees: employees.length,
-    suspended: employees.filter(e => e.status === 'Suspended').length,
+    totalEmployees: totalEmployees,
+    suspended: suspendedEmployeesCount,
     absent: totalAbsent,
-    reserve: dutiesToday.filter(d => d.location.toLowerCase() === 'reserve').length,
-    outOfDistrict: dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length,
-    casualLeave: leavesToday.filter(l => l.type === 'Casual').length,
-    earnedLeave: leavesToday.filter(l => l.type === 'Earned').length,
-    otherLeave: leavesToday.filter(l => l.type !== 'Casual' && l.type !== 'Earned' && l.type !== 'Absent').length,
+    reserve: reserve,
+    outOfDistrict: outOfDistrict,
+    casualLeave: onLeaveToday.filter(l => l.type === 'Casual').length,
+    earnedLeave: onLeaveToday.filter(l => l.type === 'Earned').length,
+    otherLeave: onLeaveToday.filter(l => l.type !== 'Casual' && l.type !== 'Earned' && l.type !== 'Absent').length,
   };
   
   const rankCounts = employeeRanks.reduce((acc, rank) => {
