@@ -301,11 +301,9 @@ export const hi = {
     Casual: 'आकस्मिक',
     Sick: 'बीमारी',
     Earned: 'अर्जित',
-    Maternity: 'मातृत्व',
     Absent: 'अनुपस्थित',
     Medical: 'चिकित्सा',
     CCL: 'सीसीएल',
-    'Bhe Jodo': 'भे जोड़ो',
   },
   leaveStatuses: {
     Pending: 'लंबित',

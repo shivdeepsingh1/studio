@@ -301,11 +301,9 @@ export const en = {
     Casual: 'Casual',
     Sick: 'Sick',
     Earned: 'Earned',
-    Maternity: 'Maternity',
     Absent: 'Absent',
     Medical: 'Medical',
     CCL: 'CCL',
-    'Bhe Jodo': 'Bhe Jodo',
   },
   leaveStatuses: {
     Pending: 'Pending',

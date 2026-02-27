@@ -55,7 +55,7 @@ export interface Employee {
   status?: 'Active' | 'Suspended';
 }
 
-export type LeaveType = 'Casual' | 'Sick' | 'Earned' | 'Maternity' | 'Absent' | 'Medical' | 'CCL' | 'Bhe Jodo';
+export type LeaveType = 'Casual' | 'Sick' | 'Earned' | 'Absent' | 'Medical' | 'CCL';
 export type LeaveStatus = 'Approved' | 'Pending' | 'Rejected';
 
 export interface Leave {
@@ -69,7 +69,7 @@ export interface Leave {
   status: LeaveStatus;
 }
 
-export const leaveTypes: LeaveType[] = ["Casual", "Sick", "Earned", "Maternity", "Absent", "Medical", "CCL", "Bhe Jodo"];
+export const leaveTypes: LeaveType[] = ["Casual", "Sick", "Earned", "Absent", "Medical", "CCL"];
 
 export const leaveStatuses: LeaveStatus[] = ["Pending", "Approved", "Rejected"];
 
