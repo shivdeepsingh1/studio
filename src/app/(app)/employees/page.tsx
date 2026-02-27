@@ -48,6 +48,7 @@ import { useAuth } from "@/lib/auth"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useData } from "@/lib/data-provider"
 import { useLanguage } from "@/lib/i18n/language-provider"
+import { font } from "@/lib/fonts/Hind-Regular";
 
 export default function EmployeesPage() {
   const { user } = useAuth();
@@ -240,6 +241,10 @@ export default function EmployeesPage() {
   
   const handleExportPdf = () => {
     const doc = new jsPDF()
+    doc.addFileToVFS('Hind-Regular.ttf', font);
+    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
+    doc.setFont('Hind');
+
     doc.text(t.pageHeaders.employees.title, 14, 16)
     autoTable(doc, {
       startY: 20,
@@ -260,6 +265,8 @@ export default function EmployeesPage() {
             employee.status === 'Suspended' ? t.employees.suspended : t.employees.active
         ]
       }),
+      styles: { font: 'Hind' },
+      headStyles: { font: 'Hind' },
     })
     doc.save("employees.pdf")
   }
@@ -810,10 +817,4 @@ export default function EmployeesPage() {
             </Button>
             <Button onClick={handleUpdateEmployee}>{t.save}</Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
-  )
-}
-
-    
+        </Dialog

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -23,6 +22,7 @@ import { Employee, Duty } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
+import { font } from "@/lib/fonts/Hind-Regular";
 
 export default function DutyReportPage() {
   const { user } = useAuth();
@@ -66,6 +66,10 @@ export default function DutyReportPage() {
       return;
     }
     const doc = new jsPDF();
+    doc.addFileToVFS('Hind-Regular.ttf', font);
+    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
+    doc.setFont('Hind');
+    
     doc.text(`${t.pageHeaders.dutyReport.title} for ${selectedEmployee.name}`, 14, 16);
     doc.text(`${t.dutyReport.dateFrom}: ${format(new Date(dateFrom.replace(/-/g, '/')), "dd-MM-yyyy")} ${t.dutyReport.dateTo}: ${format(new Date(dateTo.replace(/-/g, '/')), "dd-MM-yyyy")}`, 14, 22);
 
@@ -81,6 +85,8 @@ export default function DutyReportPage() {
         duty.location,
         duty.details,
       ]),
+      styles: { font: 'Hind' },
+      headStyles: { font: 'Hind' },
     });
     doc.save(`duty_report_${selectedEmployee.pno}.pdf`);
   };
@@ -237,5 +243,3 @@ export default function DutyReportPage() {
     </>
   );
 }
-
-    

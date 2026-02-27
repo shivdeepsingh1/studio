@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -47,6 +46,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { useData } from "@/lib/data-provider"
 import { useLanguage } from "@/lib/i18n/language-provider"
+import { font } from "@/lib/fonts/Hind-Regular";
 
 export default function LeavePage() {
   const { user } = useAuth()
@@ -124,6 +124,10 @@ export default function LeavePage() {
 
   const handleExport = () => {
     const doc = new jsPDF()
+    doc.addFileToVFS('Hind-Regular.ttf', font);
+    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
+    doc.setFont('Hind');
+
     doc.text(t.pageHeaders.leaveAdmin.title, 14, 16)
     
     const isEmployeeView = user?.role !== "admin"
@@ -157,6 +161,8 @@ export default function LeavePage() {
       startY: 20,
       head: head,
       body: body as any,
+      styles: { font: 'Hind' },
+      headStyles: { font: 'Hind' },
     })
 
     doc.save("leave_records.pdf")
@@ -430,5 +436,3 @@ export default function LeavePage() {
     </>
   )
 }
-
-    
