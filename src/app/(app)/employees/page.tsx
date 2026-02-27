@@ -27,7 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Employee, EmployeeRank, employeeRanks } from "@/lib/types"
+import { Employee, EmployeeRank, employeeRanks, employeeRankTranslations } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -240,16 +240,16 @@ export default function EmployeesPage() {
   
   const handleExportPdf = () => {
     const doc = new jsPDF()
-    doc.text("Employee List", 14, 16)
+    doc.text("कर्मचारी सूची", 14, 16)
     autoTable(doc, {
       startY: 20,
-      head: [['Sr. No.', 'Rank', 'Badge No.', 'PNO', 'Name', 'DOB', 'Joining Date', 'Joining District', 'Mobile No.', 'Status']],
+      head: [['क्र.सं.', 'पद', 'बैज नं.', 'PNO', 'नाम', 'जन्म तिथि', 'ज्वाइनिंग तिथि', 'ज्वाइनिंग जिला', 'मोबाइल नं.', 'स्थिति']],
       body: filteredEmployees.map((employee, index) => {
         const dobValid = employee.dob && !isNaN(new Date(employee.dob.replace(/-/g, '/')).getTime());
         const joiningDateValid = employee.joiningDate && !isNaN(new Date(employee.joiningDate.replace(/-/g, '/')).getTime());
         return [
             index + 1,
-            employee.rank,
+            employeeRankTranslations[employee.rank],
             employee.badgeNumber,
             employee.pno,
             employee.name,
@@ -257,7 +257,7 @@ export default function EmployeesPage() {
             joiningDateValid ? format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
             employee.joiningDistrict,
             employee.contact,
-            employee.status || 'Active'
+            employee.status === 'Suspended' ? 'निलंबित' : 'सक्रिय'
         ]
       }),
     })
@@ -268,14 +268,14 @@ export default function EmployeesPage() {
   return (
     <>
       <PageHeader
-        title="Employee Management"
-        description="Add, edit, or delete employee records."
+        title="कर्मचारी प्रबंधन"
+        description="कर्मचारी रिकॉर्ड जोड़ें, संपादित करें या हटाएं।"
       >
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search by PNO, Badge No. or name..."
+            placeholder="PNO, बैज नंबर या नाम से खोजें..."
             className="pl-8 sm:w-[300px]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -285,14 +285,14 @@ export default function EmployeesPage() {
           <DialogTrigger asChild>
             <Button variant="outline" disabled={!canEdit}>
               <FileUp className="mr-2 h-4 w-4" />
-              Import Excel
+              एक्सेल आयात करें
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Import Employees from Excel</DialogTitle>
+              <DialogTitle>एक्सेल से कर्मचारी आयात करें</DialogTitle>
               <DialogDescription>
-                Upload an .xlsx or .csv file. The file must contain columns with headers: `badgeNumber`, `pno`, `name`, `rank`, `dob`, `contact`, `joiningDate`, `joiningDistrict`, `password`, `role`, `status`.
+                एक .xlsx या .csv फ़ाइल अपलोड करें। फ़ाइल में हेडर के साथ कॉलम होने चाहिए: `badgeNumber`, `pno`, `name`, `rank`, `dob`, `contact`, `joiningDate`, `joiningDistrict`, `password`, `role`, `status`.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -304,33 +304,33 @@ export default function EmployeesPage() {
               />
             </div>
             <DialogFooter>
-               <Button variant="secondary" onClick={() => setIsImportDialogOpen(false)}>Cancel</Button>
+               <Button variant="secondary" onClick={() => setIsImportDialogOpen(false)}>रद्द करें</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
         <Button variant="outline" onClick={handleExportPdf}>
           <FileDown className="mr-2 h-4 w-4" />
-          Export PDF
+          PDF निर्यात करें
         </Button>
         <Dialog open={isAddDialogOpen} onOpenChange={handleAddDialogChange}>
           <DialogTrigger asChild>
             <Button disabled={!canEdit}>
               <PlusCircle className="mr-2" />
-              Add Employee
+              कर्मचारी जोड़ें
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Employee</DialogTitle>
+              <DialogTitle>नया कर्मचारी जोड़ें</DialogTitle>
               <DialogDescription>
-                Fill in the form to add a new employee to the system.
+                सिस्टम में एक नया कर्मचारी जोड़ने के लिए फॉर्म भरें।
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[70vh] pr-6">
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">
-                    Name
+                    नाम
                   </Label>
                   <Input
                     id="name"
@@ -341,7 +341,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="password" className="text-right">
-                    Password
+                    पासवर्ड
                   </Label>
                   <div className="col-span-3 relative">
                     <Input
@@ -350,7 +350,7 @@ export default function EmployeesPage() {
                       value={newEmployee.password}
                       onChange={handleNewInputChange}
                       className="pr-10"
-                      placeholder="Leave blank for default"
+                      placeholder="डिफ़ॉल्ट के लिए खाली छोड़ दें"
                     />
                     <Button
                       type="button"
@@ -360,32 +360,32 @@ export default function EmployeesPage() {
                       onClick={() => setShowPassword(p => !p)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                       <span className="sr-only">Toggle password visibility</span>
+                       <span className="sr-only">पासवर्ड दृश्यता टॉगल करें</span>
                     </Button>
                   </div>
                 </div>
                  <div className="grid grid-cols-4 items-center gap-4">
                   <div className="col-start-2 col-span-3">
                     <p className="text-xs text-muted-foreground -mt-2">
-                      Default password is the date of birth in <strong>ddmmyyyy</strong> format.
+                      डिफ़ॉल्ट पासवर्ड <strong>ddmmyyyy</strong> प्रारूप में जन्म तिथि है।
                     </p>
                   </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="rank" className="text-right">
-                    Rank
+                    पद
                   </Label>
                   <Select
                     onValueChange={(value) => handleNewSelectChange('rank', value)}
                     value={newEmployee.rank}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select rank" />
+                      <SelectValue placeholder="पद चुनें" />
                     </SelectTrigger>
                     <SelectContent>
                       {employeeRanks.map((rank) => (
                         <SelectItem key={rank} value={rank} disabled={rank === 'Administrator'}>
-                          {rank}
+                          {employeeRankTranslations[rank]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -393,41 +393,41 @@ export default function EmployeesPage() {
                 </div>
                  <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="role" className="text-right">
-                    Role
+                    भूमिका
                   </Label>
                   <Select
                     onValueChange={(value) => handleNewSelectChange('role', value)}
                     value={newEmployee.role}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select role" />
+                      <SelectValue placeholder="भूमिका चुनें" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="employee">Employee</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="employee">कर्मचारी</SelectItem>
+                      <SelectItem value="admin">एडमिन</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="status" className="text-right">
-                    Status
+                    स्थिति
                   </Label>
                   <Select
                     onValueChange={(value) => handleNewSelectChange('status', value)}
                     value={newEmployee.status}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="स्थिति चुनें" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="Suspended">Suspended</SelectItem>
+                      <SelectItem value="Active">सक्रिय</SelectItem>
+                      <SelectItem value="Suspended">निलंबित</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="badgeNumber" className="text-right">
-                    Badge Number
+                    बैज नंबर
                   </Label>
                   <Input
                     id="badgeNumber"
@@ -449,7 +449,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="dob" className="text-right">
-                    Date of Birth
+                    जन्म तिथि
                   </Label>
                   <Input
                     id="dob"
@@ -461,7 +461,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="contact" className="text-right">
-                    Mobile No.
+                    मोबाइल नंबर
                   </Label>
                   <Input
                     id="contact"
@@ -472,7 +472,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="joiningDate" className="text-right">
-                    Joining Date
+                    ज्वाइनिंग तिथि
                   </Label>
                   <Input
                     id="joiningDate"
@@ -484,7 +484,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="joiningDistrict" className="text-right">
-                    Joining District
+                    ज्वाइनिंग जिला
                   </Label>
                   <Input
                     id="joiningDistrict"
@@ -501,9 +501,9 @@ export default function EmployeesPage() {
                 variant="secondary"
                 onClick={() => setIsAddDialogOpen(false)}
               >
-                Cancel
+                रद्द करें
               </Button>
-              <Button onClick={handleAddEmployee}>Save</Button>
+              <Button onClick={handleAddEmployee}>सहेजें</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -513,18 +513,18 @@ export default function EmployeesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sr. No.</TableHead>
-              <TableHead>Rank</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Badge Number</TableHead>
+              <TableHead>क्र.सं.</TableHead>
+              <TableHead>पद</TableHead>
+              <TableHead>भूमिका</TableHead>
+              <TableHead>स्थिति</TableHead>
+              <TableHead>बैज नंबर</TableHead>
               <TableHead>PNO</TableHead>
-              <TableHead>Employee Name</TableHead>
-              <TableHead>Date of Birth</TableHead>
-              <TableHead>Joining Date</TableHead>
-              <TableHead>Joining Branch/District</TableHead>
-              <TableHead>Mobile Number</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>कर्मचारी का नाम</TableHead>
+              <TableHead>जन्म तिथि</TableHead>
+              <TableHead>ज्वाइनिंग तिथि</TableHead>
+              <TableHead>ज्वाइनिंग शाखा/जिला</TableHead>
+              <TableHead>मोबाइल नंबर</TableHead>
+              <TableHead className="text-right">कार्रवाई</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -538,13 +538,13 @@ export default function EmployeesPage() {
                 <TableRow key={employee.id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{employee.rank}</Badge>
+                    <Badge variant="outline">{employeeRankTranslations[employee.rank]}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>{employee.role}</Badge>
+                    <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>{employee.role === 'admin' ? 'एडमिन' : 'कर्मचारी'}</Badge>
                   </TableCell>
                    <TableCell>
-                    <Badge variant={employee.status === 'Suspended' ? 'destructive' : 'default'}>{employee.status || 'Active'}</Badge>
+                    <Badge variant={employee.status === 'Suspended' ? 'destructive' : 'default'}>{employee.status === 'Suspended' ? 'निलंबित' : 'सक्रिय'}</Badge>
                   </TableCell>
                   <TableCell>{employee.badgeNumber}</TableCell>
                   <TableCell>{employee.pno}</TableCell>
@@ -569,20 +569,20 @@ export default function EmployeesPage() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0" disabled={!canEditThisRow}>
-                          <span className="sr-only">Open menu</span>
+                          <span className="sr-only">मेनू खोलें</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => openEditDialog(employee)} disabled={!canEditThisRow}>
-                          Edit
+                          संपादित करें
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-red-500"
                           onClick={() => deleteEmployee(employee.id)}
                           disabled={!isCurrentUserAdministrator || employee.rank === 'Administrator'}
                         >
-                          Delete
+                          हटाएं
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -595,16 +595,16 @@ export default function EmployeesPage() {
       </div>
       {filteredEmployees.length === 0 && (
         <div className="text-center p-8 text-muted-foreground">
-          No employees found.
+          कोई कर्मचारी नहीं मिला।
         </div>
       )}
 
       <Dialog open={isEditDialogOpen} onOpenChange={handleEditDialogChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit Employee Details</DialogTitle>
+            <DialogTitle>कर्मचारी विवरण संपादित करें</DialogTitle>
             <DialogDescription>
-              Update the employee's information and click save.
+              कर्मचारी की जानकारी अपडेट करें और सहेजें पर क्लिक करें।
             </DialogDescription>
           </DialogHeader>
           {editingEmployee && (
@@ -612,7 +612,7 @@ export default function EmployeesPage() {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">
-                    Name
+                    नाम
                   </Label>
                   <Input
                     id="name"
@@ -624,7 +624,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="password" className="text-right">
-                    Password
+                    पासवर्ड
                   </Label>
                   <div className="col-span-3 relative">
                     <Input
@@ -633,7 +633,7 @@ export default function EmployeesPage() {
                       value={editingEmployee.password ?? ""}
                       onChange={handleEditInputChange}
                       className="pr-10"
-                      placeholder="Leave blank for default"
+                      placeholder="डिफ़ॉल्ट के लिए खाली छोड़ दें"
                     />
                     <Button
                       type="button"
@@ -643,14 +643,14 @@ export default function EmployeesPage() {
                       onClick={() => setShowPassword(p => !p)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                       <span className="sr-only">Toggle password visibility</span>
+                       <span className="sr-only">पासवर्ड दृश्यता टॉगल करें</span>
                     </Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <div className="col-start-2 col-span-3 flex flex-col items-start gap-2">
                     <p className="text-xs text-muted-foreground -mt-2">
-                      Default password is the date of birth in <strong>ddmmyyyy</strong> format.
+                      डिफ़ॉल्ट पासवर्ड <strong>ddmmyyyy</strong> प्रारूप में जन्म तिथि है।
                     </p>
                     <Button
                       type="button"
@@ -664,13 +664,13 @@ export default function EmployeesPage() {
                       disabled={!canEdit}
                     >
                       <RotateCcw className="mr-2 h-3 w-3" />
-                      Reset to Default
+                      डिफ़ॉल्ट पर रीसेट करें
                     </Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="rank" className="text-right">
-                    Rank
+                    पद
                   </Label>
                   <Select
                     onValueChange={(value) => handleEditSelectChange('rank', value)}
@@ -678,12 +678,12 @@ export default function EmployeesPage() {
                      disabled={!canEdit || (!isCurrentUserAdministrator && editingEmployee.rank === 'Administrator')}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select rank" />
+                      <SelectValue placeholder="पद चुनें" />
                     </SelectTrigger>
                     <SelectContent>
                        {employeeRanks.map((rank) => (
                         <SelectItem key={rank} value={rank} disabled={!isCurrentUserAdministrator && rank === 'Administrator'}>
-                          {rank}
+                          {employeeRankTranslations[rank]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -691,7 +691,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="role" className="text-right">
-                    Role
+                    भूमिका
                   </Label>
                   <Select
                     onValueChange={(value) => handleEditSelectChange('role', value)}
@@ -699,17 +699,17 @@ export default function EmployeesPage() {
                     disabled={!canEdit || (!isCurrentUserAdministrator && editingEmployee.rank === 'Administrator')}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select role" />
+                      <SelectValue placeholder="भूमिका चुनें" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="employee">Employee</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="employee">कर्मचारी</SelectItem>
+                      <SelectItem value="admin">एडमिन</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="status" className="text-right">
-                    Status
+                    स्थिति
                   </Label>
                   <Select
                     onValueChange={(value) => handleEditSelectChange('status', value)}
@@ -717,17 +717,17 @@ export default function EmployeesPage() {
                     disabled={!canEdit || (!isCurrentUserAdministrator && editingEmployee.rank === 'Administrator')}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="स्थिति चुनें" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="Suspended">Suspended</SelectItem>
+                      <SelectItem value="Active">सक्रिय</SelectItem>
+                      <SelectItem value="Suspended">निलंबित</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="badgeNumber" className="text-right">
-                    Badge Number
+                    बैज नंबर
                   </Label>
                   <Input
                     id="badgeNumber"
@@ -751,7 +751,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="dob" className="text-right">
-                    Date of Birth
+                    जन्म तिथि
                   </Label>
                   <Input
                     id="dob"
@@ -764,7 +764,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="contact" className="text-right">
-                    Mobile No.
+                    मोबाइल नंबर
                   </Label>
                   <Input
                     id="contact"
@@ -775,7 +775,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="joiningDate" className="text-right">
-                    Joining Date
+                    ज्वाइनिंग तिथि
                   </Label>
                   <Input
                     id="joiningDate"
@@ -788,7 +788,7 @@ export default function EmployeesPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="joiningDistrict" className="text-right">
-                    Joining District
+                    ज्वाइनिंग जिला
                   </Label>
                   <Input
                     id="joiningDistrict"
@@ -806,9 +806,9 @@ export default function EmployeesPage() {
               variant="secondary"
               onClick={() => setIsEditDialogOpen(false)}
             >
-              Cancel
+              रद्द करें
             </Button>
-            <Button onClick={handleUpdateEmployee}>Save Changes</Button>
+            <Button onClick={handleUpdateEmployee}>बदलाव सहेजें</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -32,7 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Leave, leaveTypes, leaveStatuses } from "@/lib/types"
+import { Leave, leaveTypes, leaveStatuses, LeaveType, LeaveStatus, leaveTypeTranslations, leaveStatusTranslations, employeeRankTranslations } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
@@ -54,11 +54,11 @@ export default function LeavePage() {
 
   const initialNewLeaveState = {
     employeeId: "",
-    type: "Casual" as Leave["type"],
+    type: "Casual" as LeaveType,
     startDate: "",
     endDate: "",
     reason: "",
-    status: "Pending" as Leave["status"],
+    status: "Pending" as LeaveStatus,
   }
 
   const [newLeave, setNewLeave] = useState(initialNewLeaveState)
@@ -84,17 +84,17 @@ export default function LeavePage() {
       !newLeave.endDate ||
       !newLeave.reason
     ) {
-      alert("Please fill all required fields.")
+      alert("कृपया सभी आवश्यक फ़ील्ड भरें।")
       return
     }
     const employee = allEmployees.find((e) => e.id === employeeId)
     if (!employee) {
-      alert("Employee not found.")
+      alert("कर्मचारी नहीं मिला।")
       return
     }
 
     if (employee.status === 'Suspended') {
-        alert("Cannot process leave for a suspended employee.");
+        alert("निलंबित कर्मचारी के लिए अवकाश संसाधित नहीं किया जा सकता है।");
         setIsLeaveDialogOpen(false);
         return;
     }
@@ -113,7 +113,7 @@ export default function LeavePage() {
     setIsLeaveDialogOpen(false)
   }
 
-  const handleStatusUpdate = (leaveId: string, status: Leave["status"]) => {
+  const handleStatusUpdate = (leaveId: string, status: LeaveStatus) => {
     if (user?.rank !== 'Administrator') return;
     updateLeaves(
       leaves.map((l) => (l.id === leaveId ? { ...l, status } : l))
@@ -122,14 +122,14 @@ export default function LeavePage() {
 
   const handleExport = () => {
     const doc = new jsPDF()
-    doc.text("Leave Records", 14, 16)
+    doc.text("अवकाश रिकॉर्ड", 14, 16)
     
     const isEmployeeView = user?.role !== "admin"
     const data = isEmployeeView ? employeeLeaves : leaves
     
     const head = isEmployeeView 
-      ? [['Sr. No.', 'Type', 'Start Date', 'End Date', 'Reason', 'Status']]
-      : [['Sr. No.', 'Employee Name', 'Type', 'Start Date', 'End Date', 'Reason', 'Status']]
+      ? [['क्र.सं.', 'प्रकार', 'प्रारंभ तिथि', 'अंतिम तिथि', 'कारण', 'स्थिति']]
+      : [['क्र.सं.', 'कर्मचारी का नाम', 'प्रकार', 'प्रारंभ तिथि', 'अंतिम तिथि', 'कारण', 'स्थिति']]
 
     const body = data.map((leave, index) => {
         const startDateValid = leave.startDate && !isNaN(new Date(leave.startDate.replace(/-/g, '/')).getTime());
@@ -137,11 +137,11 @@ export default function LeavePage() {
         
         const row: (string | number)[] = [
             index + 1,
-            leave.type,
+            leaveTypeTranslations[leave.type],
             startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
             endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
             leave.reason,
-            leave.status
+            leaveStatusTranslations[leave.status]
         ];
 
         if (!isEmployeeView) {
@@ -162,7 +162,7 @@ export default function LeavePage() {
 
   const employeeLeaves = leaves.filter((l) => l.employeeId === user?.id)
 
-  const getStatusBadgeVariant = (status: Leave["status"]) => {
+  const getStatusBadgeVariant = (status: LeaveStatus) => {
     switch (status) {
       case "Approved":
         return "default"
@@ -176,11 +176,11 @@ export default function LeavePage() {
   return (
     <>
       <PageHeader
-        title="Leave Management"
+        title="अवकाश प्रबंधन"
         description={
           user?.role === "admin"
-            ? "Update and manage employee leave details."
-            : "View your leave status and history."
+            ? "कर्मचारी अवकाश विवरण अपडेट और प्रबंधित करें।"
+            : "अपनी अवकाश स्थिति और इतिहास देखें।"
         }
       >
         <Dialog
@@ -202,23 +202,23 @@ export default function LeavePage() {
           <DialogTrigger asChild>
             <Button disabled={user?.status === 'Suspended'}>
               <PlusCircle className="mr-2" />
-              {user?.role === "admin" ? "Add Leave" : "Request Leave"}
+              {user?.role === "admin" ? "अवकाश जोड़ें" : "अवकाश का अनुरोध करें"}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {user?.role === "admin" ? "Add Leave Record" : "Request New Leave"}
+                {user?.role === "admin" ? "अवकाश रिकॉर्ड जोड़ें" : "नए अवकाश का अनुरोध करें"}
               </DialogTitle>
               <DialogDescription>
-                Fill in the details to submit a leave request.
+                अवकाश अनुरोध जमा करने के लिए विवरण भरें।
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {user?.role === "admin" && (
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="employeeId" className="text-right">
-                    Employee
+                    कर्मचारी
                   </Label>
                   <Select
                     onValueChange={(value) =>
@@ -227,7 +227,7 @@ export default function LeavePage() {
                     value={newLeave.employeeId}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select employee" />
+                      <SelectValue placeholder="कर्मचारी चुनें" />
                     </SelectTrigger>
                     <SelectContent>
                       {allEmployees.filter(emp => emp.status !== 'Suspended').map((employee) => (
@@ -241,19 +241,19 @@ export default function LeavePage() {
               )}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="type" className="text-right">
-                  Leave Type
+                  अवकाश का प्रकार
                 </Label>
                 <Select
                   onValueChange={(value) => handleNewLeaveSelectChange("type", value)}
                   value={newLeave.type}
                 >
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder="प्रकार चुनें" />
                   </SelectTrigger>
                   <SelectContent>
                     {leaveTypes.map((type) => (
                       <SelectItem key={type} value={type}>
-                        {type}
+                        {leaveTypeTranslations[type]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -261,7 +261,7 @@ export default function LeavePage() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="startDate" className="text-right">
-                  Start Date
+                  प्रारंभ तिथि
                 </Label>
                 <Input
                   id="startDate"
@@ -273,7 +273,7 @@ export default function LeavePage() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="endDate" className="text-right">
-                  End Date
+                  अंतिम तिथि
                 </Label>
                 <Input
                   id="endDate"
@@ -285,7 +285,7 @@ export default function LeavePage() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="reason" className="text-right">
-                  Reason
+                  कारण
                 </Label>
                 <Textarea
                   id="reason"
@@ -297,7 +297,7 @@ export default function LeavePage() {
               {user?.role === "admin" && (
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="status" className="text-right">
-                    Status
+                    स्थिति
                   </Label>
                   <Select
                     onValueChange={(value) => handleNewLeaveSelectChange("status", value)}
@@ -305,12 +305,12 @@ export default function LeavePage() {
                     disabled={user.rank !== 'Administrator'}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="स्थिति चुनें" />
                     </SelectTrigger>
                     <SelectContent>
                       {leaveStatuses.map((status) => (
                         <SelectItem key={status} value={status}>
-                          {status}
+                          {leaveStatusTranslations[status]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -324,21 +324,21 @@ export default function LeavePage() {
                 variant="secondary"
                 onClick={() => setIsLeaveDialogOpen(false)}
               >
-                Cancel
+                रद्द करें
               </Button>
-              <Button onClick={handleSaveLeave}>Save</Button>
+              <Button onClick={handleSaveLeave}>सहेजें</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
         <Button variant="outline" onClick={handleExport}>
           <FileDown className="mr-2" />
-          Export PDF
+          PDF निर्यात करें
         </Button>
       </PageHeader>
 
       {user?.status === 'Suspended' && (
         <div className="mb-4 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-center text-destructive">
-            Your account is currently suspended. You cannot apply for new leave. Please contact an administrator.
+            आपका खाता वर्तमान में निलंबित है। आप नए अवकाश के लिए आवेदन नहीं कर सकते। कृपया एक प्रशासक से संपर्क करें।
         </div>
       )}
 
@@ -346,13 +346,13 @@ export default function LeavePage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sr. No.</TableHead>
-              {user?.role === "admin" && <TableHead>Employee Name</TableHead>}
-              <TableHead>Type</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Reason</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>क्र.सं.</TableHead>
+              {user?.role === "admin" && <TableHead>कर्मचारी का नाम</TableHead>}
+              <TableHead>प्रकार</TableHead>
+              <TableHead>प्रारंभ तिथि</TableHead>
+              <TableHead>अंतिम तिथि</TableHead>
+              <TableHead>कारण</TableHead>
+              <TableHead>स्थिति</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -365,7 +365,7 @@ export default function LeavePage() {
                   {user?.role === "admin" && (
                     <TableCell>{leave.employeeName}</TableCell>
                   )}
-                  <TableCell>{leave.type}</TableCell>
+                  <TableCell>{leaveTypeTranslations[leave.type]}</TableCell>
                   <TableCell>{startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                   <TableCell>{endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                   <TableCell className="max-w-xs truncate">
@@ -382,19 +382,19 @@ export default function LeavePage() {
                                 leave.status === "Approved" && "bg-green-500 hover:bg-green-600"
                               )}
                             >
-                              {leave.status}
+                              {leaveStatusTranslations[leave.status]}
                             </Badge>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Approved')}>
-                            Approve
+                            स्वीकृत करें
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Rejected')}>
-                            Reject
+                            अस्वीकार करें
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Pending')}>
-                            Set as Pending
+                            लंबित के रूप में सेट करें
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -405,7 +405,7 @@ export default function LeavePage() {
                           leave.status === "Approved" && "bg-green-500"
                         )}
                       >
-                        {leave.status}
+                        {leaveStatusTranslations[leave.status]}
                       </Badge>
                     )}
                   </TableCell>
@@ -415,14 +415,14 @@ export default function LeavePage() {
             {user?.role === "employee" && employeeLeaves.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center">
-                  No leave records found.
+                  कोई अवकाश रिकॉर्ड नहीं मिला।
                 </TableCell>
               </TableRow>
             )}
              {user?.role === "admin" && leaves.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center">
-                  No leave records found.
+                  कोई अवकाश रिकॉर्ड नहीं मिला।
                 </TableCell>
               </TableRow>
             )}

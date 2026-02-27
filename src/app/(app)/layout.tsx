@@ -44,13 +44,13 @@ function MainSidebar() {
   };
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
-    { href: '/duty', label: 'Duty', icon: ClipboardList },
-    { href: '/leave', label: 'Leave', icon: CalendarOff },
-    { href: '/employees', label: 'Employees', icon: Users, adminOnly: true },
-    { href: '/duty-report', label: 'Duty Report', icon: BookCheck, adminOnly: true },
-    { href: '/statement', label: 'Statement', icon: FileText, adminOnly: true },
-    { href: '/profile', label: 'Profile', icon: User },
+    { href: '/dashboard', label: 'डैशबोर्ड', icon: LayoutGrid },
+    { href: '/duty', label: 'ड्यूटी', icon: ClipboardList },
+    { href: '/leave', label: 'अवकाश', icon: CalendarOff },
+    { href: '/employees', label: 'कर्मचारी', icon: Users, adminOnly: true },
+    { href: '/duty-report', label: 'ड्यूटी रिपोर्ट', icon: BookCheck, adminOnly: true },
+    { href: '/statement', label: 'विवरण', icon: FileText, adminOnly: true },
+    { href: '/profile', label: 'प्रोफ़ाइल', icon: User },
   ];
 
   return (
@@ -116,7 +116,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (loading || !user) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-lg font-semibold">Loading...</div>
+        <div className="text-lg font-semibold">लोड हो रहा है...</div>
       </div>
     );
   }

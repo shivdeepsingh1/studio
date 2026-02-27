@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -31,8 +32,8 @@ export default function LoginPage() {
     if (dataLoading) {
       toast({
         variant: "destructive",
-        title: "System Busy",
-        description: "Data is still loading. Please try again in a moment.",
+        title: "सिस्टम व्यस्त है",
+        description: "डेटा अभी भी लोड हो रहा है। कृपया कुछ क्षण बाद पुनः प्रयास करें।",
       });
       return;
     }
@@ -40,8 +41,8 @@ export default function LoginPage() {
     if (!pno || !password) {
       toast({
         variant: "destructive",
-        title: "Missing Information",
-        description: "PNO and password are required.",
+        title: "जानकारी अधूरी है",
+        description: "PNO और पासवर्ड आवश्यक हैं।",
       });
       return;
     }
@@ -51,8 +52,8 @@ export default function LoginPage() {
     if (!employee) {
         toast({
           variant: "destructive",
-          title: "Login Failed",
-          description: "Invalid PNO or password. Please try again.",
+          title: "लॉगिन विफल",
+          description: "अमान्य PNO या पासवर्ड। कृपया पुनः प्रयास करें।",
         });
         return;
     }
@@ -86,8 +87,8 @@ export default function LoginPage() {
     } else {
       toast({
         variant: "destructive",
-        title: "Login Failed",
-        description: "Invalid PNO or password. Please try again.",
+        title: "लॉगिन विफल",
+        description: "अमान्य PNO या पासवर्ड। कृपया पुनः प्रयास करें।",
       });
     }
   };
@@ -95,7 +96,7 @@ export default function LoginPage() {
   if (authLoading || dataLoading || (!authLoading && user)) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-lg font-semibold">Loading...</div>
+        <div className="text-lg font-semibold">लोड हो रहा है...</div>
       </div>
     );
   }
@@ -108,22 +109,22 @@ export default function LoginPage() {
           <div className="mx-auto mb-4">
             <Logo />
           </div>
-          <CardTitle className="text-3xl font-bold tracking-tight">Welcome to LineCommand</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+          <CardTitle className="text-3xl font-bold tracking-tight">लाइनकमांड में आपका स्वागत है</CardTitle>
+          <CardDescription>अपने खाते तक पहुंचने के लिए अपनी क्रेडेंशियल दर्ज करें</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="pno">PNO (Police Number)</Label>
-            <Input id="pno" type="text" placeholder="Enter your PNO" value={pno} onChange={(e) => setPno(e.target.value)} required />
+            <Label htmlFor="pno">PNO (पुलिस नंबर)</Label>
+            <Input id="pno" type="text" placeholder="अपना PNO दर्ज करें" value={pno} onChange={(e) => setPno(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Label htmlFor="password">पासवर्ड</Label>
+            <Input id="password" type="password" placeholder="अपना पासवर्ड दर्ज करें" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button className="w-full" onClick={handleLogin}>
-            <User className="mr-2 h-4 w-4" /> Login
+            <User className="mr-2 h-4 w-4" /> लॉग इन करें
           </Button>
         </CardFooter>
       </Card>

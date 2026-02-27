@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/auth';
 import { PageHeader } from '@/components/page-header';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis } from 'recharts';
-import { employeeRanks, EmployeeRank } from '@/lib/types';
+import { employeeRanks, EmployeeRank, employeeRankTranslations } from '@/lib/types';
 import { useData } from '@/lib/data-provider';
 
 const chartData = [
@@ -24,7 +24,7 @@ const chartData = [
 
 const chartConfig = {
   desktop: {
-    label: 'Duties',
+    label: 'ड्यूटियां',
     color: 'hsl(var(--primary))',
   },
 };
@@ -58,82 +58,82 @@ export default function DashboardPage() {
 
   return (
     <>
-      <PageHeader title={`Welcome, ${user?.name?.split(' ')[0]}!`} description={user?.role === 'admin' ? "Here's your command center overview." : "Here's your daily summary."} />
+      <PageHeader title={`नमस्ते, ${user?.name?.split(' ')[0]}!`} description={user?.role === 'admin' ? "यह आपका कमांड सेंटर ओवरव्यू है।" : "यह आपका दैनिक सारांश है।"} />
 
       {user?.role === 'admin' ? (
         <div className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+                <CardTitle className="text-sm font-medium">कुल कर्मचारी</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalEmployees}</div>
-                <p className="text-xs text-muted-foreground">Total strength</p>
+                <p className="text-xs text-muted-foreground">कुल संख्या</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Reserve</CardTitle>
+                <CardTitle className="text-sm font-medium">रिज़र्व</CardTitle>
                 <Anchor className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.reserve}</div>
-                <p className="text-xs text-muted-foreground">On reserve duty today</p>
+                <p className="text-xs text-muted-foreground">आज रिज़र्व ड्यूटी पर</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Out of District Duty</CardTitle>
+                <CardTitle className="text-sm font-medium">जिले से बाहर ड्यूटी</CardTitle>
                 <Globe className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.outOfDistrict}</div>
-                <p className="text-xs text-muted-foreground">Deployed outside district</p>
+                <p className="text-xs text-muted-foreground">जिले से बाहर तैनात</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Casual Leave</CardTitle>
+                <CardTitle className="text-sm font-medium">आकस्मिक अवकाश</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.casualLeave}</div>
-                <p className="text-xs text-muted-foreground">On casual leave today</p>
+                <p className="text-xs text-muted-foreground">आज आकस्मिक अवकाश पर</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Earned Leave</CardTitle>
+                <CardTitle className="text-sm font-medium">अर्जित अवकाश</CardTitle>
                 <CalendarPlus className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.earnedLeave}</div>
-                <p className="text-xs text-muted-foreground">On earned leave today</p>
+                <p className="text-xs text-muted-foreground">आज अर्जित अवकाश पर</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Other Leave</CardTitle>
+                <CardTitle className="text-sm font-medium">अन्य अवकाश</CardTitle>
                 <CalendarHeart className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.otherLeave}</div>
-                <p className="text-xs text-muted-foreground">Sick, Maternity, etc.</p>
+                <p className="text-xs text-muted-foreground">बीमारी, मातृत्व, आदि।</p>
               </CardContent>
             </Card>
           </div>
           
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground mb-4">Rank-wise Strength</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground mb-4">पद-अनुसार संख्या</h2>
             <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {employeeRanks
                 .filter((rank) => rank !== 'Administrator')
                 .map((rank) => (
                   <Card key={rank}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">{rank}</CardTitle>
+                      <CardTitle className="text-sm font-medium">{employeeRankTranslations[rank]}</CardTitle>
                       <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <Card className="lg:col-span-3">
               <CardHeader>
-                <CardTitle>Duty Assignments Overview</CardTitle>
+                <CardTitle>ड्यूटी असाइनमेंट का अवलोकन</CardTitle>
               </CardHeader>
               <CardContent>
                 <ChartContainer config={chartConfig} className="h-64 w-full">
@@ -162,12 +162,12 @@ export default function DashboardPage() {
             </Card>
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>त्वरित कार्रवाई</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
-                <Link href="/duty"><Button><Send className="mr-2"/>Assign Duty</Button></Link>
-                <Link href="/employees"><Button variant="secondary"><Plus className="mr-2"/>Add New Employee</Button></Link>
-                <Link href="/leave"><Button variant="secondary"><CalendarOff className="mr-2"/>Update Leave Details</Button></Link>
+                <Link href="/duty"><Button><Send className="mr-2"/>ड्यूटी सौंपें</Button></Link>
+                <Link href="/employees"><Button variant="secondary"><Plus className="mr-2"/>नया कर्मचारी जोड़ें</Button></Link>
+                <Link href="/leave"><Button variant="secondary"><CalendarOff className="mr-2"/>अवकाश विवरण अपडेट करें</Button></Link>
               </CardContent>
             </Card>
           </div>
@@ -176,27 +176,27 @@ export default function DashboardPage() {
         <div className="grid gap-6 md:grid-cols-2">
            <Card className="bg-primary text-primary-foreground">
               <CardHeader>
-                <CardTitle>Today's Duty</CardTitle>
+                <CardTitle>आज की ड्यूटी</CardTitle>
               </CardHeader>
               <CardContent>
                 {employeeDuty ? (
                     <div>
                         <p className="text-lg font-semibold">{employeeDuty.location}</p>
-                        <p>Shift: {employeeDuty.shift}</p>
-                        <p>Details: {employeeDuty.details}</p>
+                        <p>शिफ्ट: {employeeDuty.shift}</p>
+                        <p>विवरण: {employeeDuty.details}</p>
                     </div>
                 ) : (
-                    <p>No duty assigned for today.</p>
+                    <p>आज के लिए कोई ड्यूटी नहीं सौंपी गई।</p>
                 )}
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Leave Balance</CardTitle>
+                <CardTitle>अवकाश शेष</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{employeeLeaveBalance} Days</div>
-                <p className="text-sm text-muted-foreground">Casual Leave available</p>
+                <div className="text-3xl font-bold">{employeeLeaveBalance} दिन</div>
+                <p className="text-sm text-muted-foreground">आकस्मिक अवकाश उपलब्ध</p>
               </CardContent>
             </Card>
         </div>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -9,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { LogOut, Pencil, Eye, EyeOff } from "lucide-react"
-import { Employee, User } from "@/lib/types"
+import { Employee, User, employeeRankTranslations } from "@/lib/types"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -76,7 +77,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <PageHeader title="My Profile" description="View and manage your personal information." />
+      <PageHeader title="मेरी प्रोफ़ाइल" description="अपनी व्यक्तिगत जानकारी देखें और प्रबंधित करें।" />
 
       <div className="max-w-4xl mx-auto">
         <Card>
@@ -88,7 +89,7 @@ export default function ProfilePage() {
                 </Avatar>
                 <div>
                     <CardTitle className="text-2xl">{user.name}</CardTitle>
-                    <p className="text-muted-foreground">{user.rank}</p>
+                    <p className="text-muted-foreground">{user.rank in employeeRankTranslations ? employeeRankTranslations[user.rank as keyof typeof employeeRankTranslations] : user.rank}</p>
                 </div>
                 <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                   <DialogTrigger asChild>
@@ -98,16 +99,16 @@ export default function ProfilePage() {
                   </DialogTrigger>
                    <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Edit Profile</DialogTitle>
+                      <DialogTitle>प्रोफ़ाइल संपादित करें</DialogTitle>
                       <DialogDescription>
-                        Update your personal information.
+                        अपनी व्यक्तिगत जानकारी अपडेट करें।
                       </DialogDescription>
                     </DialogHeader>
                     {editingProfile && (
                        <div className="grid gap-4 py-4">
                           <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">
-                              Name
+                              नाम
                             </Label>
                             <Input
                               id="name"
@@ -118,7 +119,7 @@ export default function ProfilePage() {
                           </div>
                           <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="pno" className="text-right">
-                              PNO / Username
+                              PNO / उपयोगकर्ता नाम
                             </Label>
                             <Input
                               id="pno"
@@ -129,7 +130,7 @@ export default function ProfilePage() {
                           </div>
                            <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="email" className="text-right">
-                              Email
+                              ईमेल
                             </Label>
                             <Input
                               id="email"
@@ -140,7 +141,7 @@ export default function ProfilePage() {
                           </div>
                           <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="contact" className="text-right">
-                              Mobile No.
+                              मोबाइल नंबर
                             </Label>
                             <Input
                               id="contact"
@@ -151,7 +152,7 @@ export default function ProfilePage() {
                           </div>
                            <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="password" className="text-right">
-                              Password
+                              पासवर्ड
                             </Label>
                             <div className="col-span-3 relative">
                               <Input
@@ -160,7 +161,7 @@ export default function ProfilePage() {
                                 value={editingProfile.password ?? ""}
                                 onChange={handleEditInputChange}
                                 className="pr-10"
-                                placeholder="Leave blank for default"
+                                placeholder="डिफ़ॉल्ट के लिए खाली छोड़ दें"
                               />
                               <Button
                                 type="button"
@@ -170,7 +171,7 @@ export default function ProfilePage() {
                                 onClick={() => setShowPassword(p => !p)}
                               >
                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                 <span className="sr-only">Toggle password visibility</span>
+                                 <span className="sr-only">पासवर्ड दृश्यता टॉगल करें</span>
                               </Button>
                             </div>
                           </div>
@@ -182,9 +183,9 @@ export default function ProfilePage() {
                           variant="secondary"
                           onClick={() => setIsEditDialogOpen(false)}
                         >
-                          Cancel
+                          रद्द करें
                         </Button>
-                        <Button onClick={handleUpdateProfile}>Save Changes</Button>
+                        <Button onClick={handleUpdateProfile}>बदलाव सहेजें</Button>
                       </DialogFooter>
                    </DialogContent>
                 </Dialog>
@@ -197,25 +198,25 @@ export default function ProfilePage() {
                     <p className="font-medium">{user.pno}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-muted-foreground">Email Address</p>
+                    <p className="text-muted-foreground">ईमेल पता</p>
                     <p className="font-medium">{user.email}</p>
                 </div>
                 {employeeDetails && (
                   <>
                     <div className="space-y-1">
-                        <p className="text-muted-foreground">Date of Birth</p>
+                        <p className="text-muted-foreground">जन्म तिथि</p>
                         <p className="font-medium">{employeeDetails?.dob && !isNaN(new Date(employeeDetails.dob.replace(/-/g, '/')).getTime()) ? format(new Date(employeeDetails.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</p>
                     </div>
                      <div className="space-y-1">
-                        <p className="text-muted-foreground">Joining Date</p>
+                        <p className="text-muted-foreground">ज्वाइनिंग तिथि</p>
                         <p className="font-medium">{employeeDetails?.joiningDate && !isNaN(new Date(employeeDetails.joiningDate.replace(/-/g, '/')).getTime()) ? format(new Date(employeeDetails.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</p>
                     </div>
                     <div className="space-y-1">
-                        <p className="text-muted-foreground">Joining Branch/District</p>
+                        <p className="text-muted-foreground">ज्वाइनिंग शाखा/जिला</p>
                         <p className="font-medium">{employeeDetails?.joiningDistrict || 'N/A'}</p>
                     </div>
                     <div className="space-y-1">
-                        <p className="text-muted-foreground">Mobile Number</p>
+                        <p className="text-muted-foreground">मोबाइल नंबर</p>
                         <p className="font-medium">{employeeDetails?.contact || 'N/A'}</p>
                     </div>
                   </>
@@ -224,7 +225,7 @@ export default function ProfilePage() {
              <div className="mt-8 flex justify-end">
                 <Button variant="destructive" onClick={handleLogout}>
                     <LogOut className="mr-2"/>
-                    Logout
+                    लॉग आउट
                 </Button>
             </div>
           </CardContent>
@@ -233,15 +234,15 @@ export default function ProfilePage() {
         {user.rank === 'Administrator' && adminList.length > 0 && (
           <Card className="mt-8">
               <CardHeader>
-                  <CardTitle>Other Administrators</CardTitle>
+                  <CardTitle>अन्य प्रशासक</CardTitle>
               </CardHeader>
               <CardContent>
                   <Table>
                       <TableHeader>
                           <TableRow>
-                              <TableHead>Name</TableHead>
+                              <TableHead>नाम</TableHead>
                               <TableHead>PNO</TableHead>
-                              <TableHead>Rank</TableHead>
+                              <TableHead>पद</TableHead>
                           </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -257,7 +258,7 @@ export default function ProfilePage() {
                                       </div>
                                   </TableCell>
                                   <TableCell>{admin.pno}</TableCell>
-                                  <TableCell>{admin.rank}</TableCell>
+                                  <TableCell>{employeeRankTranslations[admin.rank]}</TableCell>
                               </TableRow>
                           ))}
                       </TableBody>

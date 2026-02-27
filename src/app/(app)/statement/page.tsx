@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { useAuth } from '@/lib/auth';
-import { EmployeeRank, employeeRanks, leaveTypes } from '@/lib/types';
+import { EmployeeRank, employeeRanks, leaveTypes, employeeRankTranslations, leaveTypeTranslations } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useData } from '@/lib/data-provider';
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export default function StatementPage() {
     if (user?.role !== 'admin') {
         return (
              <div className="flex items-center justify-center h-full">
-              <p>You do not have permission to view this page.</p>
+              <p>आपको यह पृष्ठ देखने की अनुमति नहीं है।</p>
           </div>
         );
     }
@@ -115,21 +115,21 @@ export default function StatementPage() {
 
         const head = [
             [
-                { content: 'Rank', rowSpan: 2 },
-                { content: 'Posted Strength', rowSpan: 2, styles: { halign: 'center' } },
-                { content: 'On Leave', colSpan: leaveTypes.length + 1, styles: { halign: 'center' } },
-                { content: 'Suspended', rowSpan: 2, styles: { halign: 'center' } },
-                { content: 'Absent', rowSpan: 2, styles: { halign: 'center' } },
-                { content: 'Present for Duty', rowSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: 'पद', rowSpan: 2 },
+                { content: 'तैनात संख्या', rowSpan: 2, styles: { halign: 'center' } },
+                { content: 'अवकाश पर', colSpan: leaveTypes.length + 1, styles: { halign: 'center' } },
+                { content: 'निलंबित', rowSpan: 2, styles: { halign: 'center' } },
+                { content: 'अनुपस्थित', rowSpan: 2, styles: { halign: 'center' } },
+                { content: 'ड्यूटी पर उपस्थित', rowSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
             ],
             [
-                ...leaveTypes.map(type => ({ content: type, styles: { halign: 'center' } })),
-                { content: 'Total', styles: { halign: 'center', fontStyle: 'bold' } },
+                ...leaveTypes.map(type => ({ content: leaveTypeTranslations[type], styles: { halign: 'center' } })),
+                { content: 'कुल', styles: { halign: 'center', fontStyle: 'bold' } },
             ]
         ];
 
         const body = statementData.map(data => [
-            data.rank,
+            employeeRankTranslations[data.rank],
             { content: data.strength, styles: { halign: 'center' } },
             ...leaveTypes.map(type => ({ content: data.leaveCounts[type] || 0, styles: { halign: 'center' } })),
             { content: data.totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
@@ -140,7 +140,7 @@ export default function StatementPage() {
         
         const foot = [
             [
-                { content: 'Total', styles: { fontStyle: 'bold' } },
+                { content: 'कुल', styles: { fontStyle: 'bold' } },
                 { content: totalStrength, styles: { halign: 'center', fontStyle: 'bold' } },
                 ...leaveTypes.map(type => ({ content: totalLeaveByType[type] || 0, styles: { halign: 'center', fontStyle: 'bold' } })),
                 { content: totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
@@ -166,35 +166,35 @@ export default function StatementPage() {
 
     return (
         <>
-            <PageHeader title="Daily Statement" description={`Status overview for ${format(today, 'MMMM dd, yyyy')}`} >
+            <PageHeader title="दैनिक विवरण" description={`${format(today, 'MMMM dd, yyyy')} के लिए स्थिति अवलोकन`} >
                 <Button onClick={handleExportPdf}>
                     <FileDown className="mr-2" />
-                    Export PDF
+                    PDF निर्यात करें
                 </Button>
             </PageHeader>
             <Card>
-                <CardHeader><CardTitle>Daily Force Statement</CardTitle></CardHeader>
+                <CardHeader><CardTitle>दैनिक बल विवरण</CardTitle></CardHeader>
                 <CardContent>
                     <ScrollArea className="w-full whitespace-nowrap rounded-md border">
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead rowSpan={2} className="sticky left-0 bg-background z-10 min-w-[150px]">Rank</TableHead>
-                                    <TableHead rowSpan={2} className="text-center">Posted Strength</TableHead>
-                                    <TableHead colSpan={leaveTypes.length + 1} className="text-center border-x">On Leave</TableHead>
-                                    <TableHead rowSpan={2} className="text-center">Suspended</TableHead>
-                                    <TableHead rowSpan={2} className="text-center">Absent</TableHead>
-                                    <TableHead rowSpan={2} className="text-center">Present for Duty</TableHead>
+                                    <TableHead rowSpan={2} className="sticky left-0 bg-background z-10 min-w-[150px]">पद</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">तैनात संख्या</TableHead>
+                                    <TableHead colSpan={leaveTypes.length + 1} className="text-center border-x">अवकाश पर</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">निलंबित</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">अनुपस्थित</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">ड्यूटी पर उपस्थित</TableHead>
                                 </TableRow>
                                 <TableRow>
-                                    {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{type}</TableHead>)}
-                                    <TableHead className="text-center font-bold border-x">Total</TableHead>
+                                    {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{leaveTypeTranslations[type]}</TableHead>)}
+                                    <TableHead className="text-center font-bold border-x">कुल</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {statementData.map(data => (
                                     <TableRow key={data.rank}>
-                                        <TableCell className="font-medium sticky left-0 bg-background z-10">{data.rank}</TableCell>
+                                        <TableCell className="font-medium sticky left-0 bg-background z-10">{employeeRankTranslations[data.rank]}</TableCell>
                                         <TableCell className="text-center">{data.strength}</TableCell>
                                         {leaveTypes.map(type => <TableCell key={type} className="text-center border-x">{data.leaveCounts[type]}</TableCell>)}
                                         <TableCell className="text-center font-bold border-x">{data.totalOnLeave}</TableCell>
@@ -206,7 +206,7 @@ export default function StatementPage() {
                             </TableBody>
                             <TableFooter>
                                 <TableRow>
-                                    <TableHead className="sticky left-0 bg-muted/50 z-10">Total</TableHead>
+                                    <TableHead className="sticky left-0 bg-muted/50 z-10">कुल</TableHead>
                                     <TableHead className="text-center">{totalStrength}</TableHead>
                                     {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{totalLeaveByType[type]}</TableHead>)}
                                     <TableHead className="text-center font-bold border-x">{totalOnLeave}</TableHead>

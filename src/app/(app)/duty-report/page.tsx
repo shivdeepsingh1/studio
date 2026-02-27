@@ -19,7 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Employee, Duty } from "@/lib/types";
+import { Employee, Duty, employeeRankTranslations } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 
@@ -69,7 +69,7 @@ export default function DutyReportPage() {
 
     autoTable(doc, {
       startY: 28,
-      head: [['Sr. No.', 'Badge No.', 'Name', 'Date', 'Shift', 'Location', 'Details']],
+      head: [['क्र.सं.', 'बैज नं.', 'नाम', 'दिनांक', 'शिफ्ट', 'स्थान', 'विवरण']],
       body: filteredDuties.map((duty, index) => [
         index + 1,
         selectedEmployee.badgeNumber,
@@ -86,7 +86,7 @@ export default function DutyReportPage() {
   if (user?.role !== 'admin') {
       return (
           <div className="flex items-center justify-center h-full">
-              <p>You do not have permission to view this page.</p>
+              <p>आपको यह पृष्ठ देखने की अनुमति नहीं है।</p>
           </div>
       )
   }
@@ -94,8 +94,8 @@ export default function DutyReportPage() {
   return (
     <>
       <PageHeader
-        title="Duty Report"
-        description="Generate duty reports for a specific employee within a date range."
+        title="ड्यूटी रिपोर्ट"
+        description="एक विशिष्ट तिथि सीमा के भीतर एक विशिष्ट कर्मचारी के लिए ड्यूटी रिपोर्ट तैयार करें।"
       >
         <Button
           variant="outline"
@@ -103,34 +103,34 @@ export default function DutyReportPage() {
           disabled={!selectedEmployee || filteredDuties.length === 0 || !dateFrom || !dateTo}
         >
           <FileDown className="mr-2" />
-          Export PDF
+          PDF निर्यात करें
         </Button>
       </PageHeader>
 
       <div className="space-y-6">
         <Card>
             <CardHeader>
-                <CardTitle>Filters</CardTitle>
+                <CardTitle>फ़िल्टर</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                     <div className="space-y-2">
-                        <Label htmlFor="pno-search">Employee PNO</Label>
+                        <Label htmlFor="pno-search">कर्मचारी PNO</Label>
                         <div className="flex items-center gap-2">
                             <Input
                                 id="pno-search"
-                                placeholder="Enter employee PNO"
+                                placeholder="कर्मचारी PNO दर्ज करें"
                                 value={pnoInput}
                                 onChange={(e) => setPnoInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handlePnoSearch()}
                             />
                             <Button onClick={handlePnoSearch}>
-                                <Search className="mr-2 h-4 w-4" /> Search
+                                <Search className="mr-2 h-4 w-4" /> खोजें
                             </Button>
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="date-from">Date From</Label>
+                        <Label htmlFor="date-from">दिनांक से</Label>
                         <Input
                           id="date-from"
                           type="date"
@@ -140,7 +140,7 @@ export default function DutyReportPage() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="date-to">Date To</Label>
+                        <Label htmlFor="date-to">दिनांक तक</Label>
                         <Input
                           id="date-to"
                           type="date"
@@ -158,11 +158,11 @@ export default function DutyReportPage() {
                 <>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Employee Details</CardTitle>
+                        <CardTitle>कर्मचारी विवरण</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-6">
                         <div>
-                            <p className="text-sm font-medium">Name</p>
+                            <p className="text-sm font-medium">नाम</p>
                             <p className="text-muted-foreground">{selectedEmployee.name}</p>
                         </div>
                         <div>
@@ -170,31 +170,31 @@ export default function DutyReportPage() {
                             <p className="text-muted-foreground">{selectedEmployee.pno}</p>
                         </div>
                         <div>
-                            <p className="text-sm font-medium">Rank</p>
-                            <p className="text-muted-foreground">{selectedEmployee.rank}</p>
+                            <p className="text-sm font-medium">पद</p>
+                            <p className="text-muted-foreground">{employeeRankTranslations[selectedEmployee.rank]}</p>
                         </div>
                          <div>
-                            <p className="text-sm font-medium">Badge Number</p>
+                            <p className="text-sm font-medium">बैज नंबर</p>
                             <p className="text-muted-foreground">{selectedEmployee.badgeNumber}</p>
                         </div>
                     </CardContent>
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Report Results</CardTitle>
+                    <CardTitle>रिपोर्ट परिणाम</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="border rounded-lg">
                       <Table>
                         <TableHeader>
                             <TableRow>
-                            <TableHead>Sr. No.</TableHead>
-                            <TableHead>Badge No.</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Shift</TableHead>
-                            <TableHead>Location</TableHead>
-                            <TableHead>Details</TableHead>
+                            <TableHead>क्र.सं.</TableHead>
+                            <TableHead>बैज नं.</TableHead>
+                            <TableHead>नाम</TableHead>
+                            <TableHead>दिनांक</TableHead>
+                            <TableHead>शिफ्ट</TableHead>
+                            <TableHead>स्थान</TableHead>
+                            <TableHead>विवरण</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -213,7 +213,7 @@ export default function DutyReportPage() {
                             ) : (
                             <TableRow>
                                 <TableCell colSpan={7} className="text-center">
-                                No duties found for the selected employee and date range.
+                                चयनित कर्मचारी और दिनांक सीमा के लिए कोई ड्यूटी नहीं मिली।
                                 </TableCell>
                             </TableRow>
                             )}
@@ -226,7 +226,7 @@ export default function DutyReportPage() {
             ) : (
                 <Card className="flex items-center justify-center min-h-48">
                   <CardContent className="text-center p-8 text-muted-foreground">
-                      <p>Please search for an employee by PNO to view their duty report.</p>
+                      <p>कृपया उनकी ड्यूटी रिपोर्ट देखने के लिए PNO द्वारा कर्मचारी खोजें।</p>
                   </CardContent>
                 </Card>
             )}
