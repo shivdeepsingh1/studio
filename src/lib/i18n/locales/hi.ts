@@ -192,6 +192,8 @@ export const hi = {
     dutyAssignedDescription: (name: string, date: string) => `ड्यूटी ${name} को ${date} के लिए सौंपी गई है।`,
     employeeOnLeaveTitle: 'कर्मचारी अवकाश पर है',
     employeeOnLeaveDescription: (name: string, type: string) => `${name} ${type} अवकाश पर है और उसे ड्यूटी नहीं सौंपी जा सकती।`,
+    employeeAlreadyOnDutyTitle: 'पहले से ही ड्यूटी पर',
+    employeeAlreadyOnDutyDescription: (name: string, date: string) => `${name} को ${date} को पहले से ही एक ड्यूटी सौंपी गई है। नई ड्यूटी जोड़ने के लिए कृपया मौजूदा असाइनमेंट को हटा दें।`,
     // Edit Dialog
     editDuty: 'ड्यूटी संपादित करें',
     editDutyDescription: 'इस ड्यूटी असाइनमेंट के लिए विवरण अपडेट करें।',

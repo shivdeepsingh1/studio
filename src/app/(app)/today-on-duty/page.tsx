@@ -55,7 +55,7 @@ export default function TodayOnDutyPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.absentEmployeesPage.contactNumber, t.location]],
+      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.absentEmployeesPage.contactNumber, t.location, t.date]],
       body: onDutyEmployees.map(({ employee, duty }, index) => [
         index + 1,
         employee.badgeNumber,
@@ -64,6 +64,7 @@ export default function TodayOnDutyPage() {
         t.ranks[employee.rank],
         employee.contact,
         duty.location,
+        format(new Date(duty.date.replace(/-/g, '/')), 'dd-MM-yyyy'),
       ]),
       styles: { font: 'Hind' },
       headStyles: { font: 'Hind' },
@@ -106,6 +107,7 @@ export default function TodayOnDutyPage() {
                           <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.absentEmployeesPage.contactNumber}</TableHead>
                           <TableHead>{t.location}</TableHead>
+                          <TableHead>{t.date}</TableHead>
                       </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -131,11 +133,12 @@ export default function TodayOnDutyPage() {
                               <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.contact}</TableCell>
                               <TableCell>{duty.location}</TableCell>
+                              <TableCell>{format(new Date(duty.date.replace(/-/g, '/')), 'dd-MM-yyyy')}</TableCell>
                           </TableRow>
                       ))
                       ) : (
                       <TableRow>
-                          <TableCell colSpan={7} className="text-center h-24">
+                          <TableCell colSpan={8} className="text-center h-24">
                               {t.duty.noOnDutyEmployees}
                           </TableCell>
                       </TableRow>

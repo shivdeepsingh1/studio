@@ -114,6 +114,22 @@ export default function TodayReservePage() {
         toast({ variant: 'destructive', title: t.duty.incompleteInformation, description: t.duty.incompleteInformationDescription });
         return;
     }
+    
+    const alreadyOnDuty = duties.find(d => 
+        d.employeeId === selectedEmployee.id &&
+        d.date === todayString
+    );
+
+    if (alreadyOnDuty) {
+        toast({
+            variant: 'destructive',
+            title: t.duty.employeeAlreadyOnDutyTitle,
+            description: t.duty.employeeAlreadyOnDutyDescription(selectedEmployee.name, format(new Date(todayString.replace(/-/g, '\/')), 'dd-MM-yyyy')),
+        });
+        setIsAssignDialogOpen(false);
+        return;
+    }
+
 
     const dutyToAdd: Duty = {
         id: Date.now().toString(),

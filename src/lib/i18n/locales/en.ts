@@ -192,6 +192,8 @@ export const en = {
     dutyAssignedDescription: (name: string, date: string) => `Duty has been assigned to ${name} for ${date}.`,
     employeeOnLeaveTitle: 'Employee on Leave',
     employeeOnLeaveDescription: (name: string, type: string) => `${name} is on ${type} leave and cannot be assigned duty.`,
+    employeeAlreadyOnDutyTitle: 'Already On Duty',
+    employeeAlreadyOnDutyDescription: (name: string, date: string) => `${name} is already assigned a duty on ${date}. Please remove the existing assignment to add a new one.`,
     // Edit Dialog
     editDuty: 'Edit Duty',
     editDutyDescription: 'Update the details for this duty assignment.',

@@ -131,6 +131,21 @@ export default function DutyPage() {
         });
         return;
     }
+    
+    const alreadyOnDuty = duties.find(d => 
+        d.employeeId === foundEmployee.id &&
+        d.date === newDuty.date
+    );
+
+    if (alreadyOnDuty) {
+        toast({
+            variant: 'destructive',
+            title: t.duty.employeeAlreadyOnDutyTitle,
+            description: t.duty.employeeAlreadyOnDutyDescription(foundEmployee.name, format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')),
+        });
+        return;
+    }
+
 
     if (attendanceStatus === 'Absent') {
       const absentLeave: Leave = {
