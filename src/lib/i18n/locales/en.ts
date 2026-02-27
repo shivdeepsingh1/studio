@@ -242,6 +242,8 @@ export const en = {
     reason: 'Reason',
     status: 'Status',
     selectStatus: 'Select Status',
+    editLeave: 'Edit Leave Record',
+    editLeaveDescription: 'Update the leave details and click save.',
     // Process
     fillAllFields: 'Please fill all required fields.',
     employeeNotFound: 'Employee not found.',

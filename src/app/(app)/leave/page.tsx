@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -7,7 +6,7 @@ import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { FileDown, PlusCircle } from "lucide-react"
+import { FileDown, PlusCircle, MoreHorizontal } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import {
   Table,
@@ -47,13 +46,15 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { useData } from "@/lib/data-provider"
 import { useLanguage } from "@/lib/i18n/language-provider"
-import { font } from "@/lib/fonts/Hind-Regular";
+import { font } from "@/lib/fonts/Hind-Regular"
 
 export default function LeavePage() {
   const { user } = useAuth()
-  const { leaves, employees: allEmployees, updateLeaves } = useData();
-  const { t } = useLanguage();
+  const { leaves, employees: allEmployees, updateLeaves } = useData()
+  const { t } = useLanguage()
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false)
+  const [editingLeave, setEditingLeave] = useState<Leave | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const initialNewLeaveState = {
     employeeId: "",
@@ -116,18 +117,42 @@ export default function LeavePage() {
     setIsLeaveDialogOpen(false)
   }
 
-  const handleStatusUpdate = (leaveId: string, status: LeaveStatus) => {
+  const openEditDialog = (leave: Leave) => {
     if (user?.rank !== 'Administrator') return;
-    updateLeaves(
-      leaves.map((l) => (l.id === leaveId ? { ...l, status } : l))
-    );
+    setEditingLeave({ ...leave });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDeleteLeave = (id: string) => {
+    if (user?.rank !== 'Administrator') return;
+    if(window.confirm(t.confirmDelete)){
+      updateLeaves(leaves.filter(l => l.id !== id));
+    }
+  };
+
+  const handleUpdateLeave = () => {
+    if (!editingLeave || user?.rank !== 'Administrator') return;
+    updateLeaves(leaves.map(l => (l.id === editingLeave.id ? editingLeave : l)));
+    setIsEditDialogOpen(false);
+    setEditingLeave(null);
+  };
+
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!editingLeave) return;
+    const { id, value } = e.target;
+    setEditingLeave({ ...editingLeave, [id]: value });
+  };
+
+  const handleEditSelectChange = (field: keyof Leave, value: string) => {
+    if (!editingLeave) return;
+    setEditingLeave({ ...editingLeave, [field]: value as any });
   };
 
   const handleExport = () => {
     const doc = new jsPDF()
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
-    doc.setFont('Hind');
+    doc.addFileToVFS('Hind-Regular.ttf', font)
+    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal')
+    doc.setFont('Hind')
 
     doc.text(t.pageHeaders.leaveAdmin.title, 14, 16)
     
@@ -358,6 +383,7 @@ export default function LeavePage() {
               <TableHead>{t.leave.endDate}</TableHead>
               <TableHead>{t.leave.reason}</TableHead>
               <TableHead>{t.status}</TableHead>
+              {user?.rank === 'Administrator' && <TableHead className="text-right">{t.actions}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -377,43 +403,36 @@ export default function LeavePage() {
                     {leave.reason}
                   </TableCell>
                   <TableCell>
-                    {user?.rank === 'Administrator' ? (
+                    <Badge
+                      variant={getStatusBadgeVariant(leave.status)}
+                      className={cn(leave.status === "Approved" && "bg-green-500")}
+                    >
+                      {t.leaveStatuses[leave.status]}
+                    </Badge>
+                  </TableCell>
+                  {user?.rank === 'Administrator' && (
+                    <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="p-0 h-auto" disabled={user?.rank !== 'Administrator'}>
-                            <Badge
-                              variant={getStatusBadgeVariant(leave.status)}
-                              className={cn("cursor-pointer",
-                                leave.status === "Approved" && "bg-green-500 hover:bg-green-600"
-                              )}
-                            >
-                              {t.leaveStatuses[leave.status]}
-                            </Badge>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">{t.employees.openMenu}</span>
+                            <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Approved')}>
-                            {t.leaveStatuses['Approved']}
+                          <DropdownMenuItem onClick={() => openEditDialog(leave)}>
+                            {t.edit}
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Rejected')}>
-                            {t.leaveStatuses['Rejected']}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusUpdate(leave.id, 'Pending')}>
-                            {t.leaveStatuses['Pending']}
+                          <DropdownMenuItem
+                            className="text-red-500"
+                            onClick={() => handleDeleteLeave(leave.id)}
+                          >
+                            {t.delete}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    ) : (
-                      <Badge
-                        variant={getStatusBadgeVariant(leave.status)}
-                        className={cn(
-                          leave.status === "Approved" && "bg-green-500"
-                        )}
-                      >
-                        {t.leaveStatuses[leave.status]}
-                      </Badge>
-                    )}
-                  </TableCell>
+                    </TableCell>
+                  )}
                 </TableRow>
               )
             })}
@@ -426,7 +445,7 @@ export default function LeavePage() {
             )}
              {user?.role === "admin" && leaves.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={8} className="text-center">
                   {t.leave.noLeaveRecords}
                 </TableCell>
               </TableRow>
@@ -434,6 +453,101 @@ export default function LeavePage() {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t.leave.editLeave}</DialogTitle>
+              <DialogDescription>{t.leave.editLeaveDescription}</DialogDescription>
+            </DialogHeader>
+            {editingLeave && (
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">{t.leave.employee}</Label>
+                        <Input
+                            value={editingLeave.employeeName}
+                            disabled
+                            className="col-span-3"
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="type-edit" className="text-right">{t.leave.leaveType}</Label>
+                        <Select
+                            onValueChange={(value) => handleEditSelectChange("type", value)}
+                            value={editingLeave.type}
+                        >
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder={t.leave.selectType} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {leaveTypes.map((type) => (
+                                    <SelectItem key={type} value={type}>{t.leaveTypes[type]}</SelectItem>
+                                ))}
+                                <SelectItem value="Absent">{t.leaveTypes.Absent}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="startDate-edit" className="text-right">{t.leave.startDate}</Label>
+                        <Input
+                            id="startDate"
+                            type="date"
+                            value={editingLeave.startDate}
+                            onChange={handleEditInputChange}
+                            className="col-span-3"
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="endDate-edit" className="text-right">{t.leave.endDate}</Label>
+                        <Input
+                            id="endDate"
+                            type="date"
+                            value={editingLeave.endDate}
+                            onChange={handleEditInputChange}
+                            className="col-span-3"
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="reason-edit" className="text-right">{t.leave.reason}</Label>
+                        <Textarea
+                            id="reason"
+                            value={editingLeave.reason}
+                            onChange={handleEditInputChange}
+                            className="col-span-3"
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="status-edit" className="text-right">{t.status}</Label>
+                      <Select
+                        onValueChange={(value) => handleEditSelectChange("status", value)}
+                        value={editingLeave.status}
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder={t.leave.selectStatus} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {leaveStatuses.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {t.leaveStatuses[status]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                </div>
+            )}
+            <DialogFooter>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setIsEditDialogOpen(false)}
+                >
+                    {t.cancel}
+                </Button>
+                <Button onClick={handleUpdateLeave}>{t.save}</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

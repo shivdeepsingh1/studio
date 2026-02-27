@@ -242,6 +242,8 @@ export const hi = {
     reason: 'कारण',
     status: 'स्थिति',
     selectStatus: 'स्थिति चुनें',
+    editLeave: 'अवकाश रिकॉर्ड संपादित करें',
+    editLeaveDescription: 'अवकाश विवरण अपडेट करें और सहेजें पर क्लिक करें।',
     // Process
     fillAllFields: 'कृपया सभी आवश्यक फ़ील्ड भरें।',
     employeeNotFound: 'कर्मचारी नहीं मिला।',
