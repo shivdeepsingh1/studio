@@ -9,6 +9,10 @@ import { useAuth } from '@/lib/auth';
 import { EmployeeRank, employeeRanks, leaveTypes } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useData } from '@/lib/data-provider';
+import { Button } from "@/components/ui/button";
+import { FileDown } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function StatementPage() {
     const { user } = useAuth();
@@ -105,10 +109,69 @@ export default function StatementPage() {
     const totalAbsent = absentEmployees.length;
     const totalPresent = totalStrength - totalOnLeave - totalSuspended - totalAbsent;
 
+    const handleExportPdf = () => {
+        const doc = new jsPDF({ orientation: 'landscape' });
+        doc.text(`Daily Force Statement for ${format(today, 'MMMM dd, yyyy')}`, 14, 16);
+
+        const head = [
+            [
+                { content: 'Rank', rowSpan: 2 },
+                { content: 'Posted Strength', rowSpan: 2, styles: { halign: 'center' } },
+                { content: 'On Leave', colSpan: leaveTypes.length + 1, styles: { halign: 'center' } },
+                { content: 'Suspended', rowSpan: 2, styles: { halign: 'center' } },
+                { content: 'Absent', rowSpan: 2, styles: { halign: 'center' } },
+                { content: 'Present for Duty', rowSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
+            ],
+            [
+                ...leaveTypes.map(type => ({ content: type, styles: { halign: 'center' } })),
+                { content: 'Total', styles: { halign: 'center', fontStyle: 'bold' } },
+            ]
+        ];
+
+        const body = statementData.map(data => [
+            data.rank,
+            { content: data.strength, styles: { halign: 'center' } },
+            ...leaveTypes.map(type => ({ content: data.leaveCounts[type] || 0, styles: { halign: 'center' } })),
+            { content: data.totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
+            { content: data.suspended, styles: { halign: 'center' } },
+            { content: data.absent, styles: { halign: 'center' } },
+            { content: data.present, styles: { halign: 'center', fontStyle: 'bold' } },
+        ]);
+        
+        const foot = [
+            [
+                { content: 'Total', styles: { fontStyle: 'bold' } },
+                { content: totalStrength, styles: { halign: 'center', fontStyle: 'bold' } },
+                ...leaveTypes.map(type => ({ content: totalLeaveByType[type] || 0, styles: { halign: 'center', fontStyle: 'bold' } })),
+                { content: totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: totalSuspended, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: totalAbsent, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: totalPresent, styles: { halign: 'center', fontStyle: 'bold' } },
+            ]
+        ];
+
+        autoTable(doc, {
+            startY: 22,
+            head: head,
+            body: body as any,
+            foot: foot as any,
+            theme: 'grid',
+            headStyles: { fontStyle: 'bold', halign: 'center' },
+            footStyles: { fontStyle: 'bold' },
+        });
+
+        doc.save(`daily_force_statement_${todayString}.pdf`);
+    };
+
 
     return (
         <>
-            <PageHeader title="Daily Statement" description={`Status overview for ${format(today, 'MMMM dd, yyyy')}`} />
+            <PageHeader title="Daily Statement" description={`Status overview for ${format(today, 'MMMM dd, yyyy')}`} >
+                <Button onClick={handleExportPdf}>
+                    <FileDown className="mr-2" />
+                    Export PDF
+                </Button>
+            </PageHeader>
             <Card>
                 <CardHeader><CardTitle>Daily Force Statement</CardTitle></CardHeader>
                 <CardContent>
@@ -159,3 +222,5 @@ export default function StatementPage() {
         </>
     );
 }
+
+    
