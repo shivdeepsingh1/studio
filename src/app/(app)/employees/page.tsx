@@ -86,18 +86,20 @@ export default function EmployeesPage() {
 
   const deleteEmployee = (id: string) => {
     if (user?.rank !== 'Administrator') return;
-    updateEmployees(employees.filter((e) => e.id !== id))
+    if(window.confirm(t.confirmDelete)){
+      updateEmployees(prevEmployees => prevEmployees.filter((e) => e.id !== id));
+    }
   }
 
   const handleUpdateEmployee = () => {
     if (!editingEmployee || !editingEmployee.id) return;
     if (user?.role !== 'admin') return;
   
-    const updatedEmployeesList = employees.map((emp) =>
-      emp.id === editingEmployee.id ? { ...emp, ...editingEmployee } as Employee : emp
-    )
-    
-    updateEmployees(updatedEmployeesList);
+    updateEmployees(prevEmployees => 
+      prevEmployees.map((emp) =>
+        emp.id === editingEmployee.id ? { ...emp, ...editingEmployee } as Employee : emp
+      )
+    );
   
     setIsEditDialogOpen(false);
     setEditingEmployee(null);
@@ -143,7 +145,7 @@ export default function EmployeesPage() {
         }
     }
 
-    updateEmployees([...employees, { ...employeeToAdd, id: newId, avatarUrl } as Employee])
+    updateEmployees(prevEmployees => [...prevEmployees, { ...employeeToAdd, id: newId, avatarUrl } as Employee]);
     setIsAddDialogOpen(false)
     setNewEmployee(initialNewEmployeeState)
   }
@@ -213,22 +215,26 @@ export default function EmployeesPage() {
           };
         });
 
-        const existingPnos = new Set(employees.map(e => e.pno));
-        const newUniqueEmployees = importedEmployees.filter(e => !existingPnos.has(e.pno));
-        
-        const importedPnos = new Set();
-        const trulyUniqueNewEmployees = newUniqueEmployees.filter(e => {
-            if (importedPnos.has(e.pno)) return false;
-            importedPnos.add(e.pno);
-            return true;
+        updateEmployees(prevEmployees => {
+          const existingPnos = new Set(prevEmployees.map(e => e.pno));
+          const newUniqueEmployees = importedEmployees.filter(e => !existingPnos.has(e.pno));
+          
+          const importedPnos = new Set();
+          const trulyUniqueNewEmployees = newUniqueEmployees.filter(e => {
+              if (importedPnos.has(e.pno)) return false;
+              importedPnos.add(e.pno);
+              return true;
+          });
+
+          if (trulyUniqueNewEmployees.length > 0) {
+              alert(t.employees.importSuccess(trulyUniqueNewEmployees.length));
+              return [...prevEmployees, ...trulyUniqueNewEmployees];
+          } else {
+              alert(t.employees.noNewEmployees);
+              return prevEmployees;
+          }
         });
 
-        if (trulyUniqueNewEmployees.length > 0) {
-            updateEmployees([...employees, ...trulyUniqueNewEmployees]);
-            alert(t.employees.importSuccess(trulyUniqueNewEmployees.length));
-        } else {
-            alert(t.employees.noNewEmployees);
-        }
         setIsImportDialogOpen(false);
         e.target.value = '';
 
@@ -241,7 +247,8 @@ export default function EmployeesPage() {
   
   const handleExportPdf = () => {
     const doc = new jsPDF()
-    doc.addFileToVFS('Hind-Regular.ttf', font);
+    const cleanFont = font.replace(/\s/g, '');
+    doc.addFileToVFS('Hind-Regular.ttf', cleanFont);
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
     doc.setFont('Hind');
 

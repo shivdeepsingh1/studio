@@ -143,7 +143,7 @@ export default function DutyPage() {
         reason: 'Marked absent from duty roster.',
         status: 'Approved'
       };
-      updateLeaves([...leaves, absentLeave]);
+      updateLeaves(prevLeaves => [...prevLeaves, absentLeave]);
       toast({ title: t.duty.employeeMarkedAbsent, description: t.duty.employeeMarkedAbsentDescription(foundEmployee.name, format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')) });
       setIsAssignDialogOpen(false);
       return;
@@ -164,7 +164,7 @@ export default function DutyPage() {
       location: newDuty.location,
       details: newDuty.details,
     }
-    updateDuties([...duties, dutyToAdd])
+    updateDuties(prevDuties => [...prevDuties, dutyToAdd]);
     toast({ title: t.duty.dutyAssigned, description: t.duty.dutyAssignedDescription(foundEmployee.name, format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')) });
     setIsAssignDialogOpen(false)
   }
@@ -177,7 +177,7 @@ export default function DutyPage() {
 
   const handleUpdateDuty = () => {
     if (!editingDuty || user?.rank !== 'Administrator') return;
-    updateDuties(duties.map(d => d.id === editingDuty.id ? editingDuty : d));
+    updateDuties(prevDuties => prevDuties.map(d => d.id === editingDuty!.id ? editingDuty! : d));
     setIsEditDialogOpen(false);
     setEditingDuty(null);
   };
@@ -185,14 +185,15 @@ export default function DutyPage() {
   const handleDeleteDuty = (id: string) => {
     if (user?.rank !== 'Administrator') return;
     if(window.confirm(t.confirmDelete)){
-      updateDuties(duties.filter(d => d.id !== id));
+      updateDuties(prevDuties => prevDuties.filter(d => d.id !== id));
     }
   };
 
 
   const handleExport = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
+    const cleanFont = font.replace(/\s/g, '');
+    doc.addFileToVFS('Hind-Regular.ttf', cleanFont);
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
     doc.setFont('Hind');
     

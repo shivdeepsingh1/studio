@@ -113,7 +113,7 @@ export default function LeavePage() {
       reason: newLeave.reason,
       status: isEmployeeRequest ? "Pending" : newLeave.status,
     }
-    updateLeaves([...leaves, leaveToAdd])
+    updateLeaves(prevLeaves => [...prevLeaves, leaveToAdd]);
     setIsLeaveDialogOpen(false)
   }
 
@@ -126,13 +126,13 @@ export default function LeavePage() {
   const handleDeleteLeave = (id: string) => {
     if (user?.rank !== 'Administrator') return;
     if(window.confirm(t.confirmDelete)){
-      updateLeaves(leaves.filter(l => l.id !== id));
+      updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== id));
     }
   };
 
   const handleUpdateLeave = () => {
     if (!editingLeave || user?.rank !== 'Administrator') return;
-    updateLeaves(leaves.map(l => (l.id === editingLeave.id ? editingLeave : l)));
+    updateLeaves(prevLeaves => prevLeaves.map(l => (l.id === editingLeave!.id ? editingLeave! : l)));
     setIsEditDialogOpen(false);
     setEditingLeave(null);
   };
@@ -150,7 +150,8 @@ export default function LeavePage() {
 
   const handleExport = () => {
     const doc = new jsPDF()
-    doc.addFileToVFS('Hind-Regular.ttf', font)
+    const cleanFont = font.replace(/\s/g, '');
+    doc.addFileToVFS('Hind-Regular.ttf', cleanFont);
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal')
     doc.setFont('Hind')
 

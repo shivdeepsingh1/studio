@@ -8,9 +8,9 @@ interface DataContextType {
   employees: Employee[];
   duties: Duty[];
   leaves: Leave[];
-  updateEmployees: (employees: Employee[]) => void;
-  updateDuties: (duties: Duty[]) => void;
-  updateLeaves: (leaves: Leave[]) => void;
+  updateEmployees: (updater: (prev: Employee[]) => Employee[]) => void;
+  updateDuties: (updater: (prev: Duty[]) => Duty[]) => void;
+  updateLeaves: (updater: (prev: Leave[]) => Leave[]) => void;
   loading: boolean;
 }
 
@@ -64,20 +64,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  const updateEmployees = useCallback((updatedEmployees: Employee[]) => {
-    setEmployees(updatedEmployees);
-    setInStorage("line-command-employees", updatedEmployees);
+  const updateEmployees = useCallback((updater: (prev: Employee[]) => Employee[]) => {
+    setEmployees(prev => {
+        const newState = updater(prev);
+        setInStorage("line-command-employees", newState);
+        return newState;
+    });
   }, []);
 
-  const updateDuties = useCallback((updatedDuties: Duty[]) => {
-    setDuties(updatedDuties);
-    setInStorage("line-command-duties", updatedDuties);
+  const updateDuties = useCallback((updater: (prev: Duty[]) => Duty[]) => {
+    setDuties(prev => {
+        const newState = updater(prev);
+        setInStorage("line-command-duties", newState);
+        return newState;
+    });
   }, []);
 
-  const updateLeaves = useCallback((updatedLeaves: Leave[]) => {
-    setLeaves(updatedLeaves);
-    setInStorage("line-command-leaves", updatedLeaves);
+  const updateLeaves = useCallback((updater: (prev: Leave[]) => Leave[]) => {
+    setLeaves(prev => {
+        const newState = updater(prev);
+        setInStorage("line-command-leaves", newState);
+        return newState;
+    });
   }, []);
+
 
   const value = useMemo(() => ({
       employees,

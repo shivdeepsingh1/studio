@@ -111,7 +111,7 @@ export default function AbsentEmployeesPage() {
       return;
     }
     if (existingStatus === 'On Leave' || existingStatus === 'On Duty' || existingStatus === 'Suspended') {
-      toast({ variant: 'destructive', title: t.duty.actionProhibited, description: t.absentEmployeesPage.actionProhibitedDescription(searchedEmployee.name, existingStatus) });
+      toast({ variant: 'destructive', title: t.duty.actionProhibited, description: t.absentEmployeesPage.actionProhibitedDescription(searchedEmployee.name, existingStatus || 'N/A') });
       return;
     }
 
@@ -125,7 +125,7 @@ export default function AbsentEmployeesPage() {
       reason: 'Marked absent from Absent Employees page.',
       status: 'Approved'
     };
-    updateLeaves([...leaves, absentLeave]);
+    updateLeaves(prevLeaves => [...prevLeaves, absentLeave]);
     toast({ title: t.duty.employeeMarkedAbsent, description: t.duty.employeeMarkedAbsentDescription(searchedEmployee.name, format(new Date(), 'dd-MM-yyyy')) });
     setSearchedEmployee(null);
     setPnoInput("");
@@ -148,8 +148,7 @@ export default function AbsentEmployeesPage() {
         return;
     }
 
-    const updatedLeaves = leaves.filter(l => l.id !== absentLeaveRecord.id);
-    updateLeaves(updatedLeaves);
+    updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== absentLeaveRecord.id));
     toast({ title: t.absentEmployeesPage.markedPresentTitle, description: t.absentEmployeesPage.markedPresentDescription(searchedEmployee.name) });
     setSearchedEmployee(null);
     setPnoInput("");
@@ -173,7 +172,8 @@ export default function AbsentEmployeesPage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
+    const cleanFont = font.replace(/\s/g, '');
+    doc.addFileToVFS('Hind-Regular.ttf', cleanFont);
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
     doc.setFont('Hind');
     
@@ -206,8 +206,8 @@ export default function AbsentEmployeesPage() {
   return (
     <>
       <PageHeader
-        title={t.pageHeaders.absentEmployees.title}
-        description={t.pageHeaders.absentEmployees.description}
+        title={t.absentEmployeesPage.title}
+        description={t.absentEmployeesPage.description(format(new Date(), 'dd-MM-yyyy'))}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
