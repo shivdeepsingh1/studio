@@ -32,187 +32,130 @@ export default function StatementPage() {
         acc[rank] = employees.filter(e => e.rank === rank).length;
         return acc;
     }, {} as Record<EmployeeRank, number>);
-    const totalStrength = displayRanks.reduce((sum, rank) => sum + (rankStrength[rank] || 0), 0);
 
     // Leave Calculation
     const onLeaveToday = leaves.filter(l => {
          if (l.status !== 'Approved' || !l.startDate || !l.endDate) return false;
-         const startDate = new Date(l.startDate);
-         const endDate = new Date(l.endDate);
+         const startDate = new Date(l.startDate.replace(/-/g, '/'));
+         const endDate = new Date(l.endDate.replace(/-/g, '/'));
          startDate.setHours(0,0,0,0);
          endDate.setHours(23,59,59,999);
          return today >= startDate && today <= endDate;
     });
-    
     const onLeaveTodayIds = new Set(onLeaveToday.map(l => l.employeeId));
-
-    const leaveByRank = displayRanks.map(rank => {
-        const rankData: Record<string, number | string> = { rank };
-        let total = 0;
-        leaveTypes.forEach(leaveType => {
-            const count = onLeaveToday.filter(l => {
-                const emp = employees.find(e => e.id === l.employeeId);
-                return emp?.rank === rank && l.type === leaveType;
-            }).length;
-            rankData[leaveType] = count;
-            total += count;
-        });
-        rankData['Total'] = total;
-        return rankData;
-    });
     
-    const totalLeaveByType = leaveTypes.reduce((acc, type) => {
-        acc[type] = onLeaveToday.filter(l => l.type === type).length;
-        return acc;
-    }, {} as Record<string, number>);
-    totalLeaveByType['Total'] = onLeaveToday.length;
-
     // Suspended Calculation
     const suspendedByRank = displayRanks.reduce((acc, rank) => {
         acc[rank] = employees.filter(e => e.rank === rank && e.status === 'Suspended').length;
         return acc;
     }, {} as Record<EmployeeRank, number>);
-    const totalSuspended = Object.values(suspendedByRank).reduce((a, b) => a + b, 0);
 
-    // Absent Calculation
+    // Absent Calculation (Unaccounted for)
     const onDutyTodayIds = new Set(duties.filter(d => d.date === todayString).map(d => d.employeeId));
-    
     const absentEmployees = employees.filter(e => 
         e.rank !== 'Administrator' &&
         (e.status === 'Active' || !e.status) &&
         !onLeaveTodayIds.has(e.id) &&
         !onDutyTodayIds.has(e.id)
     );
-    
     const absentByRank = displayRanks.reduce((acc, rank) => {
         acc[rank] = absentEmployees.filter(e => e.rank === rank).length;
         return acc;
     }, {} as Record<EmployeeRank, number>);
+
+
+    // Combine data for the table
+    const statementData = displayRanks.map(rank => {
+        const strength = rankStrength[rank] || 0;
+
+        const onLeaveRank = onLeaveToday.filter(l => {
+            const emp = employees.find(e => e.id === l.employeeId);
+            return emp?.rank === rank;
+        });
+        
+        const leaveCounts: Record<string, number> = {};
+        leaveTypes.forEach(type => {
+            leaveCounts[type] = onLeaveRank.filter(l => l.type === type).length;
+        });
+        const totalOnLeave = onLeaveRank.length;
+
+        const suspended = suspendedByRank[rank] || 0;
+        const absent = absentByRank[rank] || 0;
+        const present = strength - totalOnLeave - suspended - absent;
+
+        return {
+            rank,
+            strength,
+            leaveCounts,
+            totalOnLeave,
+            suspended,
+            absent,
+            present,
+        };
+    });
+
+    // Calculate totals for the footer
+    const totalStrength = displayRanks.reduce((sum, rank) => sum + (rankStrength[rank] || 0), 0);
+    const totalLeaveByType = leaveTypes.reduce((acc, type) => {
+        acc[type] = onLeaveToday.filter(l => l.type === type).length;
+        return acc;
+    }, {} as Record<string, number>);
+    const totalOnLeave = onLeaveToday.length;
+    const totalSuspended = Object.values(suspendedByRank).reduce((a, b) => a + b, 0);
     const totalAbsent = absentEmployees.length;
+    const totalPresent = totalStrength - totalOnLeave - totalSuspended - totalAbsent;
+
 
     return (
         <>
             <PageHeader title="Daily Statement" description={`Status overview for ${format(today, 'MMMM dd, yyyy')}`} />
-            <div className="space-y-8">
-                <Card>
-                    <CardHeader><CardTitle>Full Strength</CardTitle></CardHeader>
-                    <CardContent>
+            <Card>
+                <CardHeader><CardTitle>Daily Force Statement</CardTitle></CardHeader>
+                <CardContent>
+                    <ScrollArea className="w-full whitespace-nowrap rounded-md border">
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Rank</TableHead>
-                                    <TableHead className="text-right">Strength</TableHead>
+                                    <TableHead rowSpan={2} className="sticky left-0 bg-background z-10 min-w-[150px]">Rank</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">Posted Strength</TableHead>
+                                    <TableHead colSpan={leaveTypes.length + 1} className="text-center border-x">On Leave</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">Suspended</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">Absent</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">Present for Duty</TableHead>
+                                </TableRow>
+                                <TableRow>
+                                    {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{type}</TableHead>)}
+                                    <TableHead className="text-center font-bold border-x">Total</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {displayRanks.map(rank => (
-                                    <TableRow key={rank}>
-                                        <TableCell className="font-medium">{rank}</TableCell>
-                                        <TableCell className="text-right">{rankStrength[rank] || 0}</TableCell>
+                                {statementData.map(data => (
+                                    <TableRow key={data.rank}>
+                                        <TableCell className="font-medium sticky left-0 bg-background z-10">{data.rank}</TableCell>
+                                        <TableCell className="text-center">{data.strength}</TableCell>
+                                        {leaveTypes.map(type => <TableCell key={type} className="text-center border-x">{data.leaveCounts[type]}</TableCell>)}
+                                        <TableCell className="text-center font-bold border-x">{data.totalOnLeave}</TableCell>
+                                        <TableCell className="text-center">{data.suspended}</TableCell>
+                                        <TableCell className="text-center">{data.absent}</TableCell>
+                                        <TableCell className="text-center font-bold">{data.present}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
                             <TableFooter>
                                 <TableRow>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead className="text-right">{totalStrength}</TableHead>
+                                    <TableHead className="sticky left-0 bg-muted/50 z-10">Total</TableHead>
+                                    <TableHead className="text-center">{totalStrength}</TableHead>
+                                    {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{totalLeaveByType[type]}</TableHead>)}
+                                    <TableHead className="text-center font-bold border-x">{totalOnLeave}</TableHead>
+                                    <TableHead className="text-center">{totalSuspended}</TableHead>
+                                    <TableHead className="text-center">{totalAbsent}</TableHead>
+                                    <TableHead className="text-center font-bold">{totalPresent}</TableHead>
                                 </TableRow>
                             </TableFooter>
                         </Table>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader><CardTitle>Leave Details</CardTitle></CardHeader>
-                    <CardContent>
-                        <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Rank</TableHead>
-                                        {leaveTypes.map(type => <TableHead key={type} className="text-right">{type}</TableHead>)}
-                                        <TableHead className="text-right font-bold">Total</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {leaveByRank.map(row => (
-                                        <TableRow key={row.rank as string}>
-                                            <TableCell className="font-medium">{row.rank}</TableCell>
-                                            {leaveTypes.map(type => <TableCell key={type} className="text-right">{row[type]}</TableCell>)}
-                                            <TableCell className="text-right font-bold">{row['Total']}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                                <TableFooter>
-                                    <TableRow>
-                                        <TableHead>Total</TableHead>
-                                        {leaveTypes.map(type => <TableHead key={type} className="text-right">{totalLeaveByType[type]}</TableHead>)}
-                                        <TableHead className="text-right">{totalLeaveByType['Total']}</TableHead>
-                                    </TableRow>
-                                </TableFooter>
-                            </Table>
-                        </ScrollArea>
-                    </CardContent>
-                </Card>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                     <Card>
-                        <CardHeader><CardTitle>Absent Personnel</CardTitle></CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Rank</TableHead>
-                                        <TableHead className="text-right">Count</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {displayRanks.map(rank => (
-                                        <TableRow key={rank}>
-                                            <TableCell className="font-medium">{rank}</TableCell>
-                                            <TableCell className="text-right">{absentByRank[rank] || 0}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                                <TableFooter>
-                                    <TableRow>
-                                        <TableHead>Total</TableHead>
-                                        <TableHead className="text-right">{totalAbsent}</TableHead>
-                                    </TableRow>
-                                </TableFooter>
-                            </Table>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader><CardTitle>Suspended Personnel</CardTitle></CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Rank</TableHead>
-                                        <TableHead className="text-right">Count</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {displayRanks.map(rank => (
-                                        <TableRow key={rank}>
-                                            <TableCell className="font-medium">{rank}</TableCell>
-                                            <TableCell className="text-right">{suspendedByRank[rank] || 0}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                                <TableFooter>
-                                    <TableRow>
-                                        <TableHead>Total</TableHead>
-                                        <TableHead className="text-right">{totalSuspended}</TableHead>
-                                    </TableRow>
-                                </TableFooter>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                    </ScrollArea>
+                </CardContent>
+            </Card>
         </>
     );
 }
