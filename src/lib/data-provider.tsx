@@ -67,19 +67,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateEmployees = useCallback((updatedEmployees: Employee[]) => {
     setEmployees(updatedEmployees);
     setInStorage("line-command-employees", updatedEmployees);
-    window.location.reload();
   }, []);
 
   const updateDuties = useCallback((updatedDuties: Duty[]) => {
     setDuties(updatedDuties);
     setInStorage("line-command-duties", updatedDuties);
-    window.location.reload();
   }, []);
 
   const updateLeaves = useCallback((updatedLeaves: Leave[]) => {
     setLeaves(updatedLeaves);
     setInStorage("line-command-leaves", updatedLeaves);
-    window.location.reload();
   }, []);
 
   const value = useMemo(() => ({
