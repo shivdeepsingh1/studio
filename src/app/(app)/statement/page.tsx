@@ -131,7 +131,7 @@ export default function StatementPage() {
 
     const handleExportPdf = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
-        doc.addFileToVFS('Hind-Regular.ttf', font);
+        doc.addFileToVFS('Hind-Regular.ttf', font.replace(/\s/g, ''));
         doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
         doc.setFont('Hind');
 
@@ -142,8 +142,8 @@ export default function StatementPage() {
                 { content: t.rank, rowSpan: 2 },
                 { content: t.statement.postedStrength, rowSpan: 2, styles: { halign: 'center' } },
                 { content: t.statement.onLeave, colSpan: statementLeaveTypes.length + 1, styles: { halign: 'center' } },
-                { content: t.statement.suspended, rowSpan: 2, styles: { halign: 'center' } },
                 { content: t.statement.absent, rowSpan: 2, styles: { halign: 'center' } },
+                { content: t.statement.suspended, rowSpan: 2, styles: { halign: 'center' } },
                 { content: t.statement.presentForDuty, rowSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
                 { content: t.statement.onDuty, rowSpan: 2, styles: { halign: 'center' } },
                 { content: t.statement.reserve, rowSpan: 2, styles: { halign: 'center' } },
@@ -159,8 +159,8 @@ export default function StatementPage() {
             { content: data.strength, styles: { halign: 'center' } },
             ...statementLeaveTypes.map(type => ({ content: data.leaveCounts[type] || 0, styles: { halign: 'center' } })),
             { content: data.totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
-            { content: data.suspended, styles: { halign: 'center' } },
             { content: data.absent, styles: { halign: 'center' } },
+            { content: data.suspended, styles: { halign: 'center' } },
             { content: data.present, styles: { halign: 'center', fontStyle: 'bold' } },
             { content: data.onDuty, styles: { halign: 'center' } },
             { content: data.reserve, styles: { halign: 'center' } },
@@ -172,8 +172,8 @@ export default function StatementPage() {
                 { content: totalStrength, styles: { halign: 'center', fontStyle: 'bold' } },
                 ...statementLeaveTypes.map(type => ({ content: totalLeaveByType[type] || 0, styles: { halign: 'center', fontStyle: 'bold' } })),
                 { content: totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
-                { content: totalSuspended, styles: { halign: 'center', fontStyle: 'bold' } },
                 { content: totalAbsent, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: totalSuspended, styles: { halign: 'center', fontStyle: 'bold' } },
                 { content: totalPresent, styles: { halign: 'center', fontStyle: 'bold' } },
                 { content: totalOnDuty, styles: { halign: 'center', fontStyle: 'bold' } },
                 { content: totalReserve, styles: { halign: 'center', fontStyle: 'bold' } },
@@ -213,8 +213,8 @@ export default function StatementPage() {
                                     <TableHead rowSpan={2} className="sticky left-0 bg-background z-10 min-w-[150px]">{t.rank}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.postedStrength}</TableHead>
                                     <TableHead colSpan={statementLeaveTypes.length + 1} className="text-center border-x">{t.statement.onLeave}</TableHead>
-                                    <TableHead rowSpan={2} className="text-center">{t.statement.suspended}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.absent}</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">{t.statement.suspended}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.presentForDuty}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.onDuty}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.reserve}</TableHead>
@@ -231,8 +231,8 @@ export default function StatementPage() {
                                         <TableCell className="text-center">{data.strength}</TableCell>
                                         {statementLeaveTypes.map(type => <TableCell key={type} className="text-center border-x">{data.leaveCounts[type]}</TableCell>)}
                                         <TableCell className="text-center font-bold border-x">{data.totalOnLeave}</TableCell>
-                                        <TableCell className="text-center">{data.suspended}</TableCell>
                                         <TableCell className="text-center">{data.absent}</TableCell>
+                                        <TableCell className="text-center">{data.suspended}</TableCell>
                                         <TableCell className="text-center font-bold">{data.present}</TableCell>
                                         <TableCell className="text-center">{data.onDuty}</TableCell>
                                         <TableCell className="text-center">{data.reserve}</TableCell>
@@ -245,8 +245,8 @@ export default function StatementPage() {
                                     <TableHead className="text-center">{totalStrength}</TableHead>
                                     {statementLeaveTypes.map(type => <TableHead key={type} className="text-center border-x">{totalLeaveByType[type]}</TableHead>)}
                                     <TableHead className="text-center font-bold border-x">{totalOnLeave}</TableHead>
-                                    <TableHead className="text-center">{totalSuspended}</TableHead>
                                     <TableHead className="text-center">{totalAbsent}</TableHead>
+                                    <TableHead className="text-center">{totalSuspended}</TableHead>
                                     <TableHead className="text-center font-bold">{totalPresent}</TableHead>
                                     <TableHead className="text-center font-bold">{totalOnDuty}</TableHead>
                                     <TableHead className="text-center font-bold">{totalReserve}</TableHead>
@@ -259,3 +259,5 @@ export default function StatementPage() {
         </>
     );
 }
+
+    

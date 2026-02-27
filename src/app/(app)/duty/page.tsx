@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -174,7 +175,7 @@ export default function DutyPage() {
 
   const handleExport = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
+    doc.addFileToVFS('Hind-Regular.ttf', font.replace(/\s/g, ''));
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
     doc.setFont('Hind');
     
@@ -681,3 +682,5 @@ export default function DutyPage() {
     </>
   )
 }
+
+    
