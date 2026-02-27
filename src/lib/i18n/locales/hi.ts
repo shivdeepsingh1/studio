@@ -263,9 +263,11 @@ export const hi = {
     postedStrength: 'तैनात संख्या',
     onLeave: 'अवकाश पर',
     total: 'कुल',
-    suspended: 'निलंबित',
     absent: 'अनुपस्थित',
+    suspended: 'निलंबित',
     presentForDuty: 'ड्यूटी पर उपस्थित',
+    onDuty: 'ड्यूटी पर',
+    reserve: 'रिज़र्व',
   },
 
   // Duty Report Page
@@ -299,11 +301,11 @@ export const hi = {
   },
   leaveTypes: {
     Casual: 'आकस्मिक',
-    Sick: 'बीमारी',
     Earned: 'अर्जित',
-    Absent: 'अनुपस्थित',
     Medical: 'चिकित्सा',
     CCL: 'सीसीएल',
+    Sick: 'बीमारी',
+    Absent: 'अनुपस्थित',
   },
   leaveStatuses: {
     Pending: 'लंबित',

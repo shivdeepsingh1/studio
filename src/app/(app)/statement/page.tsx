@@ -29,9 +29,10 @@ export default function StatementPage() {
     
     const today = new Date();
     const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-
+    
+    const dutiesToday = duties.filter(d => d.date === todayString);
     const displayRanks = employeeRanks.filter(rank => rank !== 'Administrator');
-    const statementLeaveTypes = leaveTypes.filter(type => type !== 'Absent' && type !== 'Sick');
+    const statementLeaveTypes: (keyof typeof t.leaveTypes)[] = ['Casual', 'Earned', 'CCL', 'Medical'];
 
     // Strength Calculation
     const rankStrength = displayRanks.reduce((acc, rank) => {
@@ -60,7 +61,7 @@ export default function StatementPage() {
     }, {} as Record<EmployeeRank, number>);
 
     // Absent Calculation (Unaccounted for + 'Absent' Leave Type)
-    const onDutyTodayIds = new Set(duties.filter(d => d.date === todayString).map(d => d.employeeId));
+    const onDutyTodayIds = new Set(dutiesToday.map(d => d.employeeId));
     const unaccountedAbsentEmployees = employees.filter(e => 
         e.rank !== 'Administrator' &&
         (e.status === 'Active' || !e.status) &&
@@ -90,18 +91,26 @@ export default function StatementPage() {
         });
         const totalOnLeave = onLeaveRank.length;
 
-        const suspended = suspendedByRank[rank] || 0;
         const absent = absentByRank[rank] || 0;
-        const present = strength - totalOnLeave - suspended - absent;
+        const suspended = suspendedByRank[rank] || 0;
+        const present = strength - totalOnLeave - absent - suspended;
+
+        const employeesInRankIds = employees.filter(e => e.rank === rank).map(e => e.id);
+        const dutiesForRank = dutiesToday.filter(d => employeesInRankIds.includes(d.employeeId));
+        const onDuty = dutiesForRank.filter(d => d.location.toLowerCase() !== 'reserve').length;
+        const reserve = dutiesForRank.filter(d => d.location.toLowerCase() === 'reserve').length;
+
 
         return {
             rank,
             strength,
             leaveCounts,
             totalOnLeave,
-            suspended,
             absent,
+            suspended,
             present,
+            onDuty,
+            reserve,
         };
     });
 
@@ -112,9 +121,11 @@ export default function StatementPage() {
         return acc;
     }, {} as Record<string, number>);
     const totalOnLeave = onLeaveForStatement.length;
-    const totalSuspended = Object.values(suspendedByRank).reduce((a, b) => a + b, 0);
     const totalAbsent = unaccountedAbsentEmployees.length + onAbsentLeave.length;
-    const totalPresent = totalStrength - totalOnLeave - totalSuspended - totalAbsent;
+    const totalSuspended = Object.values(suspendedByRank).reduce((a, b) => a + b, 0);
+    const totalPresent = totalStrength - totalOnLeave - totalAbsent - totalSuspended;
+    const totalOnDuty = dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length;
+    const totalReserve = dutiesToday.filter(d => d.location.toLowerCase() === 'reserve').length;
 
     const handleExportPdf = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
@@ -128,6 +139,8 @@ export default function StatementPage() {
                 { content: t.statement.absent, rowSpan: 2, styles: { halign: 'center' } },
                 { content: t.statement.suspended, rowSpan: 2, styles: { halign: 'center' } },
                 { content: t.statement.presentForDuty, rowSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: t.statement.onDuty, rowSpan: 2, styles: { halign: 'center' } },
+                { content: t.statement.reserve, rowSpan: 2, styles: { halign: 'center' } },
             ],
             [
                 ...statementLeaveTypes.map(type => ({ content: t.leaveTypes[type], styles: { halign: 'center' } })),
@@ -143,6 +156,8 @@ export default function StatementPage() {
             { content: data.absent, styles: { halign: 'center' } },
             { content: data.suspended, styles: { halign: 'center' } },
             { content: data.present, styles: { halign: 'center', fontStyle: 'bold' } },
+            { content: data.onDuty, styles: { halign: 'center' } },
+            { content: data.reserve, styles: { halign: 'center' } },
         ]);
         
         const foot = [
@@ -154,6 +169,8 @@ export default function StatementPage() {
                 { content: totalAbsent, styles: { halign: 'center', fontStyle: 'bold' } },
                 { content: totalSuspended, styles: { halign: 'center', fontStyle: 'bold' } },
                 { content: totalPresent, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: totalOnDuty, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: totalReserve, styles: { halign: 'center', fontStyle: 'bold' } },
             ]
         ];
 
@@ -192,6 +209,8 @@ export default function StatementPage() {
                                     <TableHead rowSpan={2} className="text-center">{t.statement.absent}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.suspended}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.presentForDuty}</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">{t.statement.onDuty}</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">{t.statement.reserve}</TableHead>
                                 </TableRow>
                                 <TableRow>
                                     {statementLeaveTypes.map(type => <TableHead key={type} className="text-center border-x">{t.leaveTypes[type]}</TableHead>)}
@@ -208,6 +227,8 @@ export default function StatementPage() {
                                         <TableCell className="text-center">{data.absent}</TableCell>
                                         <TableCell className="text-center">{data.suspended}</TableCell>
                                         <TableCell className="text-center font-bold">{data.present}</TableCell>
+                                        <TableCell className="text-center">{data.onDuty}</TableCell>
+                                        <TableCell className="text-center">{data.reserve}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -220,6 +241,8 @@ export default function StatementPage() {
                                     <TableHead className="text-center">{totalAbsent}</TableHead>
                                     <TableHead className="text-center">{totalSuspended}</TableHead>
                                     <TableHead className="text-center font-bold">{totalPresent}</TableHead>
+                                    <TableHead className="text-center font-bold">{totalOnDuty}</TableHead>
+                                    <TableHead className="text-center font-bold">{totalReserve}</TableHead>
                                 </TableRow>
                             </TableFooter>
                         </Table>

@@ -263,9 +263,11 @@ export const en = {
     postedStrength: 'Posted Strength',
     onLeave: 'On Leave',
     total: 'Total',
-    suspended: 'Suspended',
     absent: 'Absent',
+    suspended: 'Suspended',
     presentForDuty: 'Present for Duty',
+    onDuty: 'On Duty',
+    reserve: 'Reserve',
   },
 
   // Duty Report Page
@@ -299,11 +301,11 @@ export const en = {
   },
   leaveTypes: {
     Casual: 'Casual',
-    Sick: 'Sick',
     Earned: 'Earned',
-    Absent: 'Absent',
     Medical: 'Medical',
     CCL: 'CCL',
+    Sick: 'Sick',
+    Absent: 'Absent',
   },
   leaveStatuses: {
     Pending: 'Pending',
