@@ -45,7 +45,7 @@ export const hi = {
     duty: 'ड्यूटी',
     leave: 'अवकाश',
     employees: 'कर्मचारी',
-    absentEmployees: 'अनुपस्थित कर्मचारी',
+    absentEmployees: 'दैनिक उपस्थिति',
     dutyReport: 'ड्यूटी रिपोर्ट',
     statement: 'विवरण',
     profile: 'प्रोफ़ाइल',
@@ -98,10 +98,6 @@ export const hi = {
       description: (date: string) => `${date} के लिए स्थिति अवलोकन`,
     },
     permissionDenied: 'आपको यह पृष्ठ देखने की अनुमति नहीं है।',
-    absentEmployees: {
-        title: 'अनुपस्थित कर्मचारी',
-        description: 'कर्मचारियों को अनुपस्थित के रूप में चिह्नित करें और आज की अनुपस्थित सूची देखें।',
-    },
   },
 
   // Dashboard
@@ -295,17 +291,35 @@ export const hi = {
   
   // Absent Employees Page
   absentEmployeesPage: {
-    title: 'अनुपस्थित कर्मचारी',
-    description: 'कर्मचारियों को अनुपस्थित के रूप में चिह्नित करें और आज के लिए अनुपस्थितों की सूची देखें।',
-    markAbsent: 'कर्मचारी को अनुपस्थित चिह्नित करें',
-    markAbsentDescription: 'किसी कर्मचारी को आज के लिए अनुपस्थित चिह्नित करने के लिए उसके PNO से खोजें। यह उन्हें किसी भी ड्यूटी पर असाइन किए जाने से रोकेगा।',
+    title: 'दैनिक उपस्थिति',
+    description: 'दैनिक उपस्थिति प्रबंधित करें और सभी कर्मचारियों की स्थिति देखें।',
+    updateAttendance: 'उपस्थिति अपडेट करें',
+    updateAttendanceDescription: 'किसी कर्मचारी को आज के लिए उपस्थित या अनुपस्थित के रूप में चिह्नित करने के लिए PNO द्वारा खोजें।',
+    markAsPresentButton: 'उपस्थित चिह्नित करें',
     markAsAbsentButton: 'अनुपस्थित चिह्नित करें',
     employeePno: 'कर्मचारी PNO',
     enterEmployeePno: 'कर्मचारी PNO दर्ज करें',
-    absentList: 'आज की अनुपस्थित सूची',
+    todaysAttendanceList: 'आज की उपस्थिति सूची',
+    attendanceListDescription: (date: string) => `${date} के लिए उपस्थिति स्थिति दिखाई जा रही है।`,
     noAbsentees: 'आज कोई भी कर्मचारी अनुपस्थित नहीं है।',
+    noEmployeesFound: 'वर्तमान फ़िल्टर के लिए कोई कर्मचारी नहीं मिला।',
     alreadyAbsentTitle: 'पहले से ही अनुपस्थित',
     alreadyAbsentDescription: (name: string) => `${name} आज के लिए पहले से ही अनुपस्थित के रूप में चिह्नित है।`,
+    actionProhibitedDescription: (name: string, status: string) => `${name} को अनुपस्थित चिह्नित नहीं किया जा सकता क्योंकि वे वर्तमान में हैं: ${status}।`,
+    markedPresentTitle: 'उपस्थिति अपडेट की गई',
+    markedPresentDescription: (name: string) => `${name} को उपस्थित के रूप में चिह्नित किया गया है।`,
+    alreadyPresentTitle: 'पहले से उपस्थित',
+    alreadyPresentDescription: (name: string) => `${name} अनुपस्थित के रूप में चिह्नित नहीं है।`,
+    employeeStatus: 'स्थिति',
+    contactNumber: 'मोबाइल नंबर',
+  },
+
+  statusTypes: {
+    OnDuty: 'ड्यूटी पर',
+    OnLeave: 'अवकाश पर',
+    Absent: 'अनुपस्थित',
+    Suspended: 'निलंबित',
+    Available: 'उपलब्ध',
   },
 
   // Translations for types

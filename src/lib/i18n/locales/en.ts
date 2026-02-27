@@ -45,7 +45,7 @@ export const en = {
     duty: 'Duty',
     leave: 'Leave',
     employees: 'Employees',
-    absentEmployees: 'Absent Employees',
+    absentEmployees: 'Daily Attendance',
     dutyReport: 'Duty Report',
     statement: 'Statement',
     profile: 'Profile',
@@ -98,10 +98,6 @@ export const en = {
       description: (date: string) => `Status overview for ${date}`,
     },
     permissionDenied: 'You do not have permission to view this page.',
-    absentEmployees: {
-        title: 'Absent Employees',
-        description: 'Mark employees as absent and view today\'s absentee list.',
-    },
   },
   
   // Dashboard
@@ -295,17 +291,35 @@ export const en = {
 
   // Absent Employees Page
   absentEmployeesPage: {
-    title: 'Absent Employees',
-    description: 'Mark employees as absent and view the list of absentees for today.',
-    markAbsent: 'Mark Employee Absent',
-    markAbsentDescription: 'Search for an employee by their PNO to mark them as absent for today. This will prevent them from being assigned any duties.',
+    title: 'Daily Attendance',
+    description: 'Manage daily attendance and view the status of all employees.',
+    updateAttendance: 'Update Attendance',
+    updateAttendanceDescription: 'Search for an employee by PNO to mark them as present or absent for today.',
+    markAsPresentButton: 'Mark as Present',
     markAsAbsentButton: 'Mark as Absent',
     employeePno: 'Employee PNO',
     enterEmployeePno: 'Enter employee PNO',
-    absentList: 'Today\'s Absentee List',
+    todaysAttendanceList: "Today's Attendance List",
+    attendanceListDescription: (date: string) => `Showing attendance status for ${date}.`,
     noAbsentees: 'No employees are marked as absent today.',
+    noEmployeesFound: 'No employees found for the current filter.',
     alreadyAbsentTitle: 'Already Absent',
     alreadyAbsentDescription: (name: string) => `${name} is already marked as absent for today.`,
+    actionProhibitedDescription: (name: string, status: string) => `${name} cannot be marked absent as they are currently: ${status}.`,
+    markedPresentTitle: 'Attendance Updated',
+    markedPresentDescription: (name: string) => `${name} has been marked as present.`,
+    alreadyPresentTitle: 'Already Present',
+    alreadyPresentDescription: (name: string) => `${name} is not marked as absent.`,
+    employeeStatus: 'Status',
+    contactNumber: 'Contact No.',
+  },
+  
+  statusTypes: {
+    OnDuty: 'On Duty',
+    OnLeave: 'On Leave',
+    Absent: 'Absent',
+    Suspended: 'Suspended',
+    Available: 'Available',
   },
 
   // Translations for types
