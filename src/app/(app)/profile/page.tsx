@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -113,6 +112,17 @@ export default function ProfilePage() {
                             <Input
                               id="name"
                               value={editingProfile.name ?? ""}
+                              onChange={handleEditInputChange}
+                              className="col-span-3"
+                            />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="pno" className="text-right">
+                              PNO / Username
+                            </Label>
+                            <Input
+                              id="pno"
+                              value={editingProfile.pno ?? ""}
                               onChange={handleEditInputChange}
                               className="col-span-3"
                             />

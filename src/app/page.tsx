@@ -46,23 +46,7 @@ export default function LoginPage() {
       return;
     }
 
-    // 1. Admin special case login
-    if (pno === 'ADMIN' && password === 'admin') {
-      const adminUser: UserType = {
-        id: '0',
-        pno: 'ADMIN',
-        name: 'Chief Administrator',
-        rank: 'Administrator',
-        avatarUrl: 'https://picsum.photos/seed/admin/100/100',
-        email: 'admin@police.gov',
-        role: 'admin',
-        status: 'Active',
-      };
-      _setUser(adminUser);
-      return;
-    }
-
-    // 2. Find the employee from context
+    // Find the employee from context
     const employee = employees.find(emp => emp.pno === pno);
     if (!employee) {
         toast({
@@ -73,7 +57,7 @@ export default function LoginPage() {
         return;
     }
 
-    // 3. Determine the correct password
+    // Determine the correct password
     const hasExplicitPassword = employee.password && employee.password.length > 0;
     
     let correctPassword;
@@ -86,7 +70,7 @@ export default function LoginPage() {
         }
     }
 
-    // 4. Check if passwords match
+    // Check if passwords match
     if (correctPassword && password === correctPassword) {
       const employeeUser: UserType = {
           id: employee.id,
