@@ -1,4 +1,3 @@
-
 export const hi = {
   // Common
   loading: 'लोड हो रहा है...',
@@ -49,6 +48,7 @@ export const hi = {
     dutyReport: 'ड्यूटी रिपोर्ट',
     statement: 'विवरण',
     todayOnDuty: "आज ड्यूटी पर",
+    todayOnLeave: "आज अवकाश पर",
     todayReserve: "आज रिज़र्व में",
     profile: 'प्रोफ़ाइल',
     logout: 'लॉग आउट',
@@ -102,6 +102,10 @@ export const hi = {
     todayOnDuty: {
       title: "आज ड्यूटी पर कर्मचारी",
       description: (date: string) => `${date} के लिए सक्रिय ड्यूटी पर कर्मचारियों को दिखाया जा रहा है`,
+    },
+    todayOnLeave: {
+      title: "आज अवकाश पर कर्मचारी",
+      description: (date: string) => `${date} के लिए अवकाश पर कर्मचारियों को दिखाया जा रहा है`,
     },
     todayReserve: {
       title: "आज रिज़र्व में कर्मचारी",

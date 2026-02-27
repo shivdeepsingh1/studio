@@ -1,4 +1,3 @@
-
 export const en = {
   // Common
   loading: 'Loading...',
@@ -49,6 +48,7 @@ export const en = {
     dutyReport: 'Duty Report',
     statement: 'Statement',
     todayOnDuty: "Today's On Duty",
+    todayOnLeave: "Today's On Leave",
     todayReserve: "Today's Reserve",
     profile: 'Profile',
     logout: 'Log Out',
@@ -102,6 +102,10 @@ export const en = {
     todayOnDuty: {
       title: "Today's On Duty Employees",
       description: (date: string) => `Showing employees on active duty for ${date}`,
+    },
+    todayOnLeave: {
+      title: "Today's On Leave Employees",
+      description: (date: string) => `Showing employees on leave for ${date}`,
     },
     todayReserve: {
       title: "Today's Reserve Employees",
