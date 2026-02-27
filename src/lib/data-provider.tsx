@@ -50,24 +50,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateEmployees = useCallback((updater: Employee[] | ((prev: Employee[]) => Employee[])) => {
-    const currentData = getFromStorage("line-command-employees", mockEmployees);
-    const newData = typeof updater === 'function' ? (updater as (prev: Employee[]) => Employee[])(currentData) : updater;
-    setInStorage("line-command-employees", newData);
-    setEmployees(newData);
+    setEmployees(prev => {
+        const newData = typeof updater === 'function' ? updater(prev) : updater;
+        setInStorage("line-command-employees", newData);
+        return newData;
+    });
   }, []);
 
   const updateDuties = useCallback((updater: Duty[] | ((prev: Duty[]) => Duty[])) => {
-    const currentData = getFromStorage("line-command-duties", mockDuties);
-    const newData = typeof updater === 'function' ? (updater as (prev: Duty[]) => Duty[])(currentData) : updater;
-    setInStorage("line-command-duties", newData);
-    setDuties(newData);
+    setDuties(prev => {
+        const newData = typeof updater === 'function' ? updater(prev) : updater;
+        setInStorage("line-command-duties", newData);
+        return newData;
+    });
   }, []);
 
   const updateLeaves = useCallback((updater: Leave[] | ((prev: Leave[]) => Leave[])) => {
-    const currentData = getFromStorage("line-command-leaves", mockLeaves);
-    const newData = typeof updater === 'function' ? (updater as (prev: Leave[]) => Leave[])(currentData) : updater;
-    setInStorage("line-command-leaves", newData);
-    setLeaves(newData);
+    setLeaves(prev => {
+        const newData = typeof updater === 'function' ? updater(prev) : updater;
+        setInStorage("line-command-leaves", newData);
+        return newData;
+    });
   }, []);
 
 
