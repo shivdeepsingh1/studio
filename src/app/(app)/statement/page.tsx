@@ -30,7 +30,8 @@ export default function StatementPage() {
     }
     
     const today = new Date();
-    const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+    today.setHours(0, 0, 0, 0);
+    const todayString = format(today, "yyyy-MM-dd");
     
     const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
     const displayRanks = employeeRanks.filter(rank => rank !== 'Administrator');
@@ -53,8 +54,6 @@ export default function StatementPage() {
     });
 
     const onLeaveForStatement = onLeaveToday.filter(l => l.type !== 'Absent');
-    const onAbsentLeave = onLeaveToday.filter(l => l.type === 'Absent');
-    const onLeaveTodayIds = new Set(onLeaveToday.map(l => l.employeeId));
     
     // Suspended Calculation
     const suspendedByRank = displayRanks.reduce((acc, rank) => {
@@ -62,18 +61,13 @@ export default function StatementPage() {
         return acc;
     }, {} as Record<EmployeeRank, number>);
 
-    // Absent Calculation (Unaccounted for + 'Absent' Leave Type)
-    const onDutyTodayIds = new Set(dutiesToday.map(d => d.employeeId));
-    const unaccountedAbsentEmployees = employees.filter(e => 
-        e.rank !== 'Administrator' &&
-        (e.status === 'Active' || !e.status) &&
-        !onLeaveTodayIds.has(e.id) &&
-        !onDutyTodayIds.has(e.id)
-    );
+    // Absent Calculation (Only 'Absent' Leave Type)
     const absentByRank = displayRanks.reduce((acc, rank) => {
-        const unaccounted = unaccountedAbsentEmployees.filter(e => e.rank === rank).length;
-        const onAbsent = onAbsentLeave.filter(l => employees.find(e => e.id === l.employeeId)?.rank === rank).length;
-        acc[rank] = unaccounted + onAbsent;
+        const onAbsent = onLeaveToday.filter(l => {
+            const emp = employees.find(e => e.id === l.employeeId);
+            return emp?.rank === rank && l.type === 'Absent';
+        }).length;
+        acc[rank] = onAbsent;
         return acc;
     }, {} as Record<EmployeeRank, number>);
 
@@ -123,7 +117,7 @@ export default function StatementPage() {
         return acc;
     }, {} as Record<string, number>);
     const totalOnLeave = onLeaveForStatement.length;
-    const totalAbsent = unaccountedAbsentEmployees.length + onAbsentLeave.length;
+    const totalAbsent = Object.values(absentByRank).reduce((a, b) => a + b, 0);
     const totalSuspended = Object.values(suspendedByRank).reduce((a, b) => a + b, 0);
     const totalPresent = totalStrength - totalOnLeave - totalAbsent - totalSuspended;
     const totalOnDuty = dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length;

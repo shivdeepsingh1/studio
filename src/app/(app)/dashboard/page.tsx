@@ -3,6 +3,7 @@
 
 import { Users, CalendarOff, Send, Plus, Anchor, Globe, Calendar, CalendarPlus, CalendarHeart, UserX, UserMinus } from 'lucide-react';
 import Link from 'next/link';
+import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,49 +30,45 @@ export default function DashboardPage() {
   const { employees, duties, leaves } = useData();
   
   const today = new Date();
-  const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+  today.setHours(0, 0, 0, 0);
+  const todayString = format(today, "yyyy-MM-dd");
 
-  const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
-  
-  const onLeaveToday = leaves.filter(l => {
-     if (l.status !== 'Approved' || !l.startDate || !l.endDate) return false;
-     const startDate = new Date(l.startDate.replace(/-/g, '/'));
-     const endDate = new Date(l.endDate.replace(/-/g, '/'));
-     startDate.setHours(0,0,0,0);
-     endDate.setHours(23,59,59,999);
-     return today >= startDate && today <= endDate;
-  });
-
+  // 1. Employee sets
   const totalEmployees = employees.filter(e => e.rank !== 'Administrator').length;
-  const suspendedEmployeesCount = employees.filter(e => e.status === 'Suspended' && e.rank !== 'Administrator').length;
-  
-  const onLeaveForStatement = onLeaveToday.filter(l => l.type !== 'Absent');
-  const onAbsentLeave = onLeaveToday.filter(l => l.type === 'Absent');
+  const suspendedEmployees = employees.filter(e => e.status === 'Suspended' && e.rank !== 'Administrator');
+  const suspendedEmployeesCount = suspendedEmployees.length;
+  const suspendedIds = new Set(suspendedEmployees.map(e => e.id));
 
+  // 2. Leave sets
+  const onLeaveToday = leaves.filter(l => {
+      if (l.status !== 'Approved' || !l.startDate || !l.endDate) return false;
+      const startDate = new Date(l.startDate.replace(/-/g, '/'));
+      const endDate = new Date(l.endDate.replace(/-/g, '/'));
+      startDate.setHours(0,0,0,0);
+      endDate.setHours(23,59,59,999);
+      return today >= startDate && today <= endDate;
+  });
   const onLeaveTodayIds = new Set(onLeaveToday.map(l => l.employeeId));
+
+  // 3. Duty sets
+  const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
   const onDutyTodayIds = new Set(dutiesToday.map(d => d.employeeId));
   
-  const unaccountedAbsentEmployees = employees.filter(e => 
+  // 4. Reserve Employees (available but not on duty/leave/suspended)
+  const reserveEmployees = employees.filter(e => 
       e.rank !== 'Administrator' &&
-      (e.status === 'Active' || !e.status) &&
+      !suspendedIds.has(e.id) &&
       !onLeaveTodayIds.has(e.id) &&
       !onDutyTodayIds.has(e.id)
   );
-  
-  const totalAbsent = unaccountedAbsentEmployees.length + onAbsentLeave.length;
-  const totalOnLeaveForStatement = onLeaveForStatement.length;
-  
-  const totalPresentForDuty = totalEmployees - suspendedEmployeesCount - totalOnLeaveForStatement - totalAbsent;
-  
-  const outOfDistrict = dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length;
-  const reserve = totalPresentForDuty - outOfDistrict;
 
+  // 5. Calculate stats for dashboard cards
   const stats = {
     totalEmployees: totalEmployees,
     suspended: suspendedEmployeesCount,
-    absent: totalAbsent,
-    reserve: reserve,
-    outOfDistrict: outOfDistrict,
+    absent: onLeaveToday.filter(l => l.type === 'Absent').length,
+    reserve: reserveEmployees.length,
+    outOfDistrict: dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length,
     casualLeave: onLeaveToday.filter(l => l.type === 'Casual').length,
     earnedLeave: onLeaveToday.filter(l => l.type === 'Earned').length,
     otherLeave: onLeaveToday.filter(l => l.type !== 'Casual' && l.type !== 'Earned' && l.type !== 'Absent').length,
