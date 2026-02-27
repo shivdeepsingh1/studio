@@ -126,6 +126,8 @@ export const hi = {
     leaveBalance: 'अवकाश शेष',
     days: 'दिन',
     casualLeaveAvailable: 'आकस्मिक अवकाश उपलब्ध',
+    suspendedEmployees: 'निलंबित कर्मचारी',
+    absentToday: 'आज अनुपस्थित',
   },
 
   // Duty Page

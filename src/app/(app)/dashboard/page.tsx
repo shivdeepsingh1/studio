@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Users, CalendarOff, Send, Plus, Anchor, Globe, Calendar, CalendarPlus, CalendarHeart } from 'lucide-react';
+import { Users, CalendarOff, Send, Plus, Anchor, Globe, Calendar, CalendarPlus, CalendarHeart, UserX, UserMinus } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -34,13 +34,34 @@ export default function DashboardPage() {
   const dutiesToday = duties.filter(d => d.date === todayString);
   const leavesToday = leaves.filter(l => l.status === 'Approved' && l.startDate <= todayString && l.endDate >= todayString);
 
+  const onLeaveToday = leaves.filter(l => {
+     if (l.status !== 'Approved' || !l.startDate || !l.endDate) return false;
+     const startDate = new Date(l.startDate.replace(/-/g, '/'));
+     const endDate = new Date(l.endDate.replace(/-/g, '/'));
+     startDate.setHours(0,0,0,0);
+     endDate.setHours(23,59,59,999);
+     return today >= startDate && today <= endDate;
+  });
+  const onAbsentLeave = onLeaveToday.filter(l => l.type === 'Absent');
+  const onLeaveTodayIds = new Set(onLeaveToday.map(l => l.employeeId));
+  const onDutyTodayIds = new Set(dutiesToday.map(d => d.employeeId));
+  const unaccountedAbsentEmployees = employees.filter(e => 
+      e.rank !== 'Administrator' &&
+      (e.status === 'Active' || !e.status) &&
+      !onLeaveTodayIds.has(e.id) &&
+      !onDutyTodayIds.has(e.id)
+  );
+  const totalAbsent = unaccountedAbsentEmployees.length + onAbsentLeave.length;
+
   const stats = {
     totalEmployees: employees.length,
+    suspended: employees.filter(e => e.status === 'Suspended').length,
+    absent: totalAbsent,
     reserve: dutiesToday.filter(d => d.location.toLowerCase() === 'reserve').length,
     outOfDistrict: dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length,
     casualLeave: leavesToday.filter(l => l.type === 'Casual').length,
     earnedLeave: leavesToday.filter(l => l.type === 'Earned').length,
-    otherLeave: leavesToday.filter(l => l.type !== 'Casual' && l.type !== 'Earned').length,
+    otherLeave: leavesToday.filter(l => l.type !== 'Casual' && l.type !== 'Earned' && l.type !== 'Absent').length,
   };
   
   const rankCounts = employeeRanks.reduce((acc, rank) => {
@@ -67,7 +88,7 @@ export default function DashboardPage() {
 
       {user?.role === 'admin' ? (
         <div className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{t.dashboard.totalEmployees}</CardTitle>
@@ -76,6 +97,26 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalEmployees}</div>
                 <p className="text-xs text-muted-foreground">{t.dashboard.totalStrength}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{t.statement.suspended}</CardTitle>
+                <UserX className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.suspended}</div>
+                <p className="text-xs text-muted-foreground">{t.dashboard.suspendedEmployees}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{t.statement.absent}</CardTitle>
+                <UserMinus className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.absent}</div>
+                <p className="text-xs text-muted-foreground">{t.dashboard.absentToday}</p>
               </CardContent>
             </Card>
             <Card>
@@ -209,5 +250,3 @@ export default function DashboardPage() {
     </>
   );
 }
-
-    

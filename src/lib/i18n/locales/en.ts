@@ -126,6 +126,8 @@ export const en = {
     leaveBalance: 'Leave Balance',
     days: 'days',
     casualLeaveAvailable: 'Casual leave available',
+    suspendedEmployees: 'Employees suspended',
+    absentToday: 'Absent today',
   },
 
   // Duty Page
