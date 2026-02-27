@@ -817,4 +817,8 @@ export default function EmployeesPage() {
             </Button>
             <Button onClick={handleUpdateEmployee}>{t.save}</Button>
           </DialogFooter>
-        </Dialog
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
