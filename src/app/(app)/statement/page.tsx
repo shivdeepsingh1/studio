@@ -100,7 +100,7 @@ export default function StatementPage() {
         const employeesInRankIds = employees.filter(e => e.rank === rank).map(e => e.id);
         const dutiesForRank = dutiesToday.filter(d => employeesInRankIds.includes(d.employeeId));
         const onDuty = dutiesForRank.filter(d => d.location.toLowerCase() !== 'reserve').length;
-        const reserve = dutiesForRank.filter(d => d.location.toLowerCase() === 'reserve').length;
+        const reserve = present - onDuty;
 
 
         return {
@@ -127,7 +127,7 @@ export default function StatementPage() {
     const totalSuspended = Object.values(suspendedByRank).reduce((a, b) => a + b, 0);
     const totalPresent = totalStrength - totalOnLeave - totalAbsent - totalSuspended;
     const totalOnDuty = dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length;
-    const totalReserve = dutiesToday.filter(d => d.location.toLowerCase() === 'reserve').length;
+    const totalReserve = totalPresent - totalOnDuty;
 
     const handleExportPdf = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
