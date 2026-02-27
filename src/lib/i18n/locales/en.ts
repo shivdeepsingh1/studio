@@ -308,6 +308,7 @@ export const en = {
     CCL: 'CCL',
     Sick: 'Sick',
     Absent: 'Absent',
+    Other: 'Other',
   },
   leaveStatuses: {
     Pending: 'Pending',

@@ -308,6 +308,7 @@ export const hi = {
     Medical: 'चिकित्सा',
     Sick: 'बीमारी',
     Absent: 'अनुपस्थित',
+    Other: 'अन्य',
   },
   leaveStatuses: {
     Pending: 'लंबित',
