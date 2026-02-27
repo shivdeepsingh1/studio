@@ -27,6 +27,8 @@ import {
   BookCheck,
   FileText,
   UserX,
+  ClipboardCheck,
+  ShieldHalf,
 } from 'lucide-react';
 import { SidebarLogo } from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -54,6 +56,8 @@ function MainSidebar() {
     { href: '/absent-employees', label: t.sidebar.absentEmployees, icon: UserX, adminOnly: true },
     { href: '/duty-report', label: t.sidebar.dutyReport, icon: BookCheck, adminOnly: true },
     { href: '/statement', label: t.sidebar.statement, icon: FileText, adminOnly: true },
+    { href: '/today-on-duty', label: t.sidebar.todayOnDuty, icon: ClipboardCheck, adminOnly: true },
+    { href: '/today-reserve', label: t.sidebar.todayReserve, icon: ShieldHalf, adminOnly: true },
     { href: '/profile', label: t.sidebar.profile, icon: User },
   ];
 

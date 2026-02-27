@@ -48,6 +48,8 @@ export const hi = {
     absentEmployees: 'अनुपस्थित कर्मचारी',
     dutyReport: 'ड्यूटी रिपोर्ट',
     statement: 'विवरण',
+    todayOnDuty: "आज ड्यूटी पर",
+    todayReserve: "आज रिज़र्व में",
     profile: 'प्रोफ़ाइल',
     logout: 'लॉग आउट',
     language: 'भाषा',
@@ -97,6 +99,14 @@ export const hi = {
       title: 'दैनिक विवरण',
       description: (date: string) => `${date} के लिए स्थिति अवलोकन`,
     },
+    todayOnDuty: {
+      title: "आज ड्यूटी पर कर्मचारी",
+      description: (date: string) => `${date} के लिए सक्रिय ड्यूटी पर कर्मचारियों को दिखाया जा रहा है`,
+    },
+    todayReserve: {
+      title: "आज रिज़र्व में कर्मचारी",
+      description: (date: string) => `${date} के लिए रिज़र्व ड्यूटी पर कर्मचारियों को दिखाया जा रहा है`,
+    },
     absentEmployees: {
       title: 'अनुपस्थित कर्मचारी',
       description: 'दैनिक अनुपस्थिति का प्रबंधन करें और अनुपस्थित लोगों की सूची देखें।',
@@ -144,6 +154,8 @@ export const hi = {
     calendarView: 'कैलेंडर देखें',
     dutiesForDate: (date: string) => `${date} के लिए ड्यूटियां`,
     noDutiesForDate: 'इस तारीख के लिए कोई ड्यूटी नहीं सौंपी गई है।',
+    noReserveEmployees: 'आज कोई भी कर्मचारी रिज़र्व में नहीं है।',
+    noOnDutyEmployees: 'आज कोई भी कर्मचारी सक्रिय ड्यूटी पर नहीं है।',
     employee: 'कर्मचारी',
     actions: 'कार्रवाई',
     selectDate: 'चयनित तिथि',

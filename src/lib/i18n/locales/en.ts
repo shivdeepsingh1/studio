@@ -48,6 +48,8 @@ export const en = {
     absentEmployees: 'Absent Employees',
     dutyReport: 'Duty Report',
     statement: 'Statement',
+    todayOnDuty: "Today's On Duty",
+    todayReserve: "Today's Reserve",
     profile: 'Profile',
     logout: 'Log Out',
     language: 'Language',
@@ -97,6 +99,14 @@ export const en = {
       title: 'Daily Statement',
       description: (date: string) => `Status overview for ${date}`,
     },
+    todayOnDuty: {
+      title: "Today's On Duty Employees",
+      description: (date: string) => `Showing employees on active duty for ${date}`,
+    },
+    todayReserve: {
+      title: "Today's Reserve Employees",
+      description: (date: string) => `Showing employees on reserve duty for ${date}`,
+    },
     absentEmployees: {
       title: 'Absent Employees',
       description: 'Manage daily absences and view the list of absentees.',
@@ -144,6 +154,8 @@ export const en = {
     calendarView: 'Calendar View',
     dutiesForDate: (date: string) => `Duties for ${date}`,
     noDutiesForDate: 'No duties have been assigned for this date.',
+    noReserveEmployees: 'No employees are on reserve today.',
+    noOnDutyEmployees: 'No employees are on active duty today.',
     employee: 'Employee',
     actions: 'Actions',
     selectDate: 'Selected Date',
