@@ -33,18 +33,10 @@ export default function StatementPage() {
     today.setHours(0, 0, 0, 0);
     const todayString = format(today, "yyyy-MM-dd");
     
-    const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
     const displayRanks = employeeRanks.filter(rank => rank !== 'Administrator');
     const statementLeaveTypes: (keyof typeof t.leaveTypes)[] = ['Casual', 'Earned', 'CCL', 'Medical'];
 
-    // Strength Calculation
-    const rankStrength = displayRanks.reduce((acc, rank) => {
-        acc[rank] = employees.filter(e => e.rank === rank).length;
-        return acc;
-    }, {} as Record<EmployeeRank, number>);
-
-    // Leave Calculation
-    const onLeaveToday = leaves.filter(l => {
+    const allLeavesToday = leaves.filter(l => {
          if (l.status !== 'Approved' || !l.startDate || !l.endDate) return false;
          const startDate = new Date(l.startDate.replace(/-/g, '/'));
          const endDate = new Date(l.endDate.replace(/-/g, '/'));
@@ -53,49 +45,32 @@ export default function StatementPage() {
          return today >= startDate && today <= endDate;
     });
 
-    const onLeaveForStatement = onLeaveToday.filter(l => l.type !== 'Absent');
-    
-    // Suspended Calculation
-    const suspendedByRank = displayRanks.reduce((acc, rank) => {
-        acc[rank] = employees.filter(e => e.rank === rank && e.status === 'Suspended').length;
-        return acc;
-    }, {} as Record<EmployeeRank, number>);
-
-    // Absent Calculation (Only 'Absent' Leave Type)
-    const absentByRank = displayRanks.reduce((acc, rank) => {
-        const onAbsent = onLeaveToday.filter(l => {
-            const emp = employees.find(e => e.id === l.employeeId);
-            return emp?.rank === rank && l.type === 'Absent';
-        }).length;
-        acc[rank] = onAbsent;
-        return acc;
-    }, {} as Record<EmployeeRank, number>);
-
+    const onLeaveTodayIds = new Set(allLeavesToday.map(l => l.employeeId));
+    const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
 
     // Combine data for the table
     const statementData = displayRanks.map(rank => {
-        const strength = rankStrength[rank] || 0;
+        const employeesInRank = employees.filter(e => e.rank === rank);
+        const strength = employeesInRank.length;
 
-        const onLeaveRank = onLeaveForStatement.filter(l => {
-            const emp = employees.find(e => e.id === l.employeeId);
-            return emp?.rank === rank;
-        });
+        const suspended = employeesInRank.filter(e => e.status === 'Suspended').length;
+        
+        const leavesForRank = allLeavesToday.filter(l => employeesInRank.some(e => e.id === l.employeeId));
         
         const leaveCounts: Record<string, number> = {};
         statementLeaveTypes.forEach(type => {
-            leaveCounts[type] = onLeaveRank.filter(l => l.type === type).length;
+            leaveCounts[type] = leavesForRank.filter(l => l.type === type).length;
         });
-        const totalOnLeave = onLeaveRank.length;
+        const totalOnLeave = leavesForRank.filter(l => l.type !== 'Absent').length;
+        const absent = leavesForRank.filter(l => l.type === 'Absent').length;
 
-        const absent = absentByRank[rank] || 0;
-        const suspended = suspendedByRank[rank] || 0;
         const present = strength - totalOnLeave - absent - suspended;
 
-        const employeesInRankIds = employees.filter(e => e.rank === rank).map(e => e.id);
-        const dutiesForRank = dutiesToday.filter(d => employeesInRankIds.includes(d.employeeId));
-        const onDuty = dutiesForRank.filter(d => d.location.toLowerCase() !== 'reserve').length;
+        const presentEmployeeIds = new Set(employeesInRank.filter(e => e.status !== 'Suspended' && !onLeaveTodayIds.has(e.id)).map(e => e.id));
+        
+        const onDuty = dutiesToday.filter(d => presentEmployeeIds.has(d.employeeId) && d.location.toLowerCase() !== 'reserve').length;
+        
         const reserve = present - onDuty;
-
 
         return {
             rank,
@@ -111,17 +86,17 @@ export default function StatementPage() {
     });
 
     // Calculate totals for the footer
-    const totalStrength = displayRanks.reduce((sum, rank) => sum + (rankStrength[rank] || 0), 0);
+    const totalStrength = statementData.reduce((sum, data) => sum + data.strength, 0);
     const totalLeaveByType = statementLeaveTypes.reduce((acc, type) => {
-        acc[type] = onLeaveForStatement.filter(l => l.type === type).length;
+        acc[type] = statementData.reduce((sum, data) => sum + (data.leaveCounts[type] || 0), 0);
         return acc;
     }, {} as Record<string, number>);
-    const totalOnLeave = onLeaveForStatement.length;
-    const totalAbsent = Object.values(absentByRank).reduce((a, b) => a + b, 0);
-    const totalSuspended = Object.values(suspendedByRank).reduce((a, b) => a + b, 0);
-    const totalPresent = totalStrength - totalOnLeave - totalAbsent - totalSuspended;
-    const totalOnDuty = dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length;
-    const totalReserve = totalPresent - totalOnDuty;
+    const totalOnLeave = statementData.reduce((sum, data) => sum + data.totalOnLeave, 0);
+    const totalAbsent = statementData.reduce((sum, data) => sum + data.absent, 0);
+    const totalSuspended = statementData.reduce((sum, data) => sum + data.suspended, 0);
+    const totalPresent = statementData.reduce((sum, data) => sum + data.present, 0);
+    const totalOnDuty = statementData.reduce((sum, data) => sum + data.onDuty, 0);
+    const totalReserve = statementData.reduce((sum, data) => sum + data.reserve, 0);
 
     const handleExportPdf = () => {
         const doc = new jsPDF({ orientation: 'landscape' });

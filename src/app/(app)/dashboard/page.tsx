@@ -34,10 +34,10 @@ export default function DashboardPage() {
   const todayString = format(today, "yyyy-MM-dd");
 
   // 1. Employee sets
-  const totalEmployees = employees.filter(e => e.rank !== 'Administrator').length;
-  const suspendedEmployees = employees.filter(e => e.status === 'Suspended' && e.rank !== 'Administrator');
+  const activeEmployees = employees.filter(e => e.rank !== 'Administrator');
+  const totalEmployeesCount = activeEmployees.length;
+  const suspendedEmployees = activeEmployees.filter(e => e.status === 'Suspended');
   const suspendedEmployeesCount = suspendedEmployees.length;
-  const suspendedIds = new Set(suspendedEmployees.map(e => e.id));
 
   // 2. Leave sets
   const onLeaveToday = leaves.filter(l => {
@@ -52,23 +52,24 @@ export default function DashboardPage() {
 
   // 3. Duty sets
   const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
-  const onDutyTodayIds = new Set(dutiesToday.map(d => d.employeeId));
   
-  // 4. Reserve Employees (available but not on duty/leave/suspended)
-  const reserveEmployees = employees.filter(e => 
-      e.rank !== 'Administrator' &&
-      !suspendedIds.has(e.id) &&
-      !onLeaveTodayIds.has(e.id) &&
-      !onDutyTodayIds.has(e.id)
-  );
+  // 4. Calculate stats for dashboard cards
+  const presentEmployees = activeEmployees.filter(e => e.status !== 'Suspended' && !onLeaveTodayIds.has(e.id));
+  const presentCount = presentEmployees.length;
 
-  // 5. Calculate stats for dashboard cards
+  const onDutyNonReserveEmployees = presentEmployees.filter(e => 
+    dutiesToday.some(d => d.employeeId === e.id && d.location.toLowerCase() !== 'reserve')
+  );
+  const outOfDistrictCount = onDutyNonReserveEmployees.length;
+  
+  const reserveCount = presentCount - outOfDistrictCount;
+
   const stats = {
-    totalEmployees: totalEmployees,
+    totalEmployees: totalEmployeesCount,
     suspended: suspendedEmployeesCount,
     absent: onLeaveToday.filter(l => l.type === 'Absent').length,
-    reserve: reserveEmployees.length,
-    outOfDistrict: dutiesToday.filter(d => d.location.toLowerCase() !== 'reserve').length,
+    reserve: reserveCount,
+    outOfDistrict: outOfDistrictCount,
     casualLeave: onLeaveToday.filter(l => l.type === 'Casual').length,
     earnedLeave: onLeaveToday.filter(l => l.type === 'Earned').length,
     otherLeave: onLeaveToday.filter(l => l.type !== 'Casual' && l.type !== 'Earned' && l.type !== 'Absent').length,
