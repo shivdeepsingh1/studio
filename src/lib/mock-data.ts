@@ -24,6 +24,4 @@ export const mockDuties: Duty[] = [
 
 export const mockLeaves: Leave[] = [
     { id: '1', employeeId: '4', employeeName: 'Priya Patel', type: 'Casual', startDate: '2024-08-05', endDate: '2024-08-07', reason: 'Family function', status: 'Approved' },
-    { id: '2', employeeId: '5', employeeName: 'Vikram Rathore', type: 'Sick', startDate: '2024-07-20', endDate: '2024-07-21', reason: 'Fever', status: 'Approved' },
-    { id: '3', employeeId: '1', employeeName: 'Ravi Kumar', type: 'Earned', startDate: '2024-09-01', endDate: '2024-09-10', reason: 'Vacation', status: 'Pending' },
 ];
