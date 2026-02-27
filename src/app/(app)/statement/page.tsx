@@ -1,4 +1,3 @@
-
 "use client";
 
 import { format } from 'date-fns';
@@ -32,6 +31,7 @@ export default function StatementPage() {
     const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
     const displayRanks = employeeRanks.filter(rank => rank !== 'Administrator');
+    const statementLeaveTypes = leaveTypes.filter(type => type !== 'Absent');
 
     // Strength Calculation
     const rankStrength = displayRanks.reduce((acc, rank) => {
@@ -48,6 +48,9 @@ export default function StatementPage() {
          endDate.setHours(23,59,59,999);
          return today >= startDate && today <= endDate;
     });
+
+    const onLeaveForStatement = onLeaveToday.filter(l => l.type !== 'Absent');
+    const onAbsentLeave = onLeaveToday.filter(l => l.type === 'Absent');
     const onLeaveTodayIds = new Set(onLeaveToday.map(l => l.employeeId));
     
     // Suspended Calculation
@@ -56,16 +59,18 @@ export default function StatementPage() {
         return acc;
     }, {} as Record<EmployeeRank, number>);
 
-    // Absent Calculation (Unaccounted for)
+    // Absent Calculation (Unaccounted for + 'Absent' Leave Type)
     const onDutyTodayIds = new Set(duties.filter(d => d.date === todayString).map(d => d.employeeId));
-    const absentEmployees = employees.filter(e => 
+    const unaccountedAbsentEmployees = employees.filter(e => 
         e.rank !== 'Administrator' &&
         (e.status === 'Active' || !e.status) &&
         !onLeaveTodayIds.has(e.id) &&
         !onDutyTodayIds.has(e.id)
     );
     const absentByRank = displayRanks.reduce((acc, rank) => {
-        acc[rank] = absentEmployees.filter(e => e.rank === rank).length;
+        const unaccounted = unaccountedAbsentEmployees.filter(e => e.rank === rank).length;
+        const onAbsent = onAbsentLeave.filter(l => employees.find(e => e.id === l.employeeId)?.rank === rank).length;
+        acc[rank] = unaccounted + onAbsent;
         return acc;
     }, {} as Record<EmployeeRank, number>);
 
@@ -74,13 +79,13 @@ export default function StatementPage() {
     const statementData = displayRanks.map(rank => {
         const strength = rankStrength[rank] || 0;
 
-        const onLeaveRank = onLeaveToday.filter(l => {
+        const onLeaveRank = onLeaveForStatement.filter(l => {
             const emp = employees.find(e => e.id === l.employeeId);
             return emp?.rank === rank;
         });
         
         const leaveCounts: Record<string, number> = {};
-        leaveTypes.forEach(type => {
+        statementLeaveTypes.forEach(type => {
             leaveCounts[type] = onLeaveRank.filter(l => l.type === type).length;
         });
         const totalOnLeave = onLeaveRank.length;
@@ -102,13 +107,13 @@ export default function StatementPage() {
 
     // Calculate totals for the footer
     const totalStrength = displayRanks.reduce((sum, rank) => sum + (rankStrength[rank] || 0), 0);
-    const totalLeaveByType = leaveTypes.reduce((acc, type) => {
-        acc[type] = onLeaveToday.filter(l => l.type === type).length;
+    const totalLeaveByType = statementLeaveTypes.reduce((acc, type) => {
+        acc[type] = onLeaveForStatement.filter(l => l.type === type).length;
         return acc;
     }, {} as Record<string, number>);
-    const totalOnLeave = onLeaveToday.length;
+    const totalOnLeave = onLeaveForStatement.length;
     const totalSuspended = Object.values(suspendedByRank).reduce((a, b) => a + b, 0);
-    const totalAbsent = absentEmployees.length;
+    const totalAbsent = unaccountedAbsentEmployees.length + onAbsentLeave.length;
     const totalPresent = totalStrength - totalOnLeave - totalSuspended - totalAbsent;
 
     const handleExportPdf = () => {
@@ -119,13 +124,13 @@ export default function StatementPage() {
             [
                 { content: t.rank, rowSpan: 2 },
                 { content: t.statement.postedStrength, rowSpan: 2, styles: { halign: 'center' } },
-                { content: t.statement.onLeave, colSpan: leaveTypes.length + 1, styles: { halign: 'center' } },
+                { content: t.statement.onLeave, colSpan: statementLeaveTypes.length + 1, styles: { halign: 'center' } },
                 { content: t.statement.suspended, rowSpan: 2, styles: { halign: 'center' } },
                 { content: t.statement.absent, rowSpan: 2, styles: { halign: 'center' } },
                 { content: t.statement.presentForDuty, rowSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
             ],
             [
-                ...leaveTypes.map(type => ({ content: t.leaveTypes[type], styles: { halign: 'center' } })),
+                ...statementLeaveTypes.map(type => ({ content: t.leaveTypes[type], styles: { halign: 'center' } })),
                 { content: t.statement.total, styles: { halign: 'center', fontStyle: 'bold' } },
             ]
         ];
@@ -133,7 +138,7 @@ export default function StatementPage() {
         const body = statementData.map(data => [
             t.ranks[data.rank],
             { content: data.strength, styles: { halign: 'center' } },
-            ...leaveTypes.map(type => ({ content: data.leaveCounts[type] || 0, styles: { halign: 'center' } })),
+            ...statementLeaveTypes.map(type => ({ content: data.leaveCounts[type] || 0, styles: { halign: 'center' } })),
             { content: data.totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
             { content: data.suspended, styles: { halign: 'center' } },
             { content: data.absent, styles: { halign: 'center' } },
@@ -144,7 +149,7 @@ export default function StatementPage() {
             [
                 { content: t.statement.total, styles: { fontStyle: 'bold' } },
                 { content: totalStrength, styles: { halign: 'center', fontStyle: 'bold' } },
-                ...leaveTypes.map(type => ({ content: totalLeaveByType[type] || 0, styles: { halign: 'center', fontStyle: 'bold' } })),
+                ...statementLeaveTypes.map(type => ({ content: totalLeaveByType[type] || 0, styles: { halign: 'center', fontStyle: 'bold' } })),
                 { content: totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
                 { content: totalSuspended, styles: { halign: 'center', fontStyle: 'bold' } },
                 { content: totalAbsent, styles: { halign: 'center', fontStyle: 'bold' } },
@@ -183,13 +188,13 @@ export default function StatementPage() {
                                 <TableRow>
                                     <TableHead rowSpan={2} className="sticky left-0 bg-background z-10 min-w-[150px]">{t.rank}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.postedStrength}</TableHead>
-                                    <TableHead colSpan={leaveTypes.length + 1} className="text-center border-x">{t.statement.onLeave}</TableHead>
+                                    <TableHead colSpan={statementLeaveTypes.length + 1} className="text-center border-x">{t.statement.onLeave}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.suspended}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.absent}</TableHead>
                                     <TableHead rowSpan={2} className="text-center">{t.statement.presentForDuty}</TableHead>
                                 </TableRow>
                                 <TableRow>
-                                    {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{t.leaveTypes[type]}</TableHead>)}
+                                    {statementLeaveTypes.map(type => <TableHead key={type} className="text-center border-x">{t.leaveTypes[type]}</TableHead>)}
                                     <TableHead className="text-center font-bold border-x">{t.statement.total}</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -198,7 +203,7 @@ export default function StatementPage() {
                                     <TableRow key={data.rank}>
                                         <TableCell className="font-medium sticky left-0 bg-background z-10">{t.ranks[data.rank]}</TableCell>
                                         <TableCell className="text-center">{data.strength}</TableCell>
-                                        {leaveTypes.map(type => <TableCell key={type} className="text-center border-x">{data.leaveCounts[type]}</TableCell>)}
+                                        {statementLeaveTypes.map(type => <TableCell key={type} className="text-center border-x">{data.leaveCounts[type]}</TableCell>)}
                                         <TableCell className="text-center font-bold border-x">{data.totalOnLeave}</TableCell>
                                         <TableCell className="text-center">{data.suspended}</TableCell>
                                         <TableCell className="text-center">{data.absent}</TableCell>
@@ -210,7 +215,7 @@ export default function StatementPage() {
                                 <TableRow>
                                     <TableHead className="sticky left-0 bg-muted/50 z-10">{t.statement.total}</TableHead>
                                     <TableHead className="text-center">{totalStrength}</TableHead>
-                                    {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{totalLeaveByType[type]}</TableHead>)}
+                                    {statementLeaveTypes.map(type => <TableHead key={type} className="text-center border-x">{totalLeaveByType[type]}</TableHead>)}
                                     <TableHead className="text-center font-bold border-x">{totalOnLeave}</TableHead>
                                     <TableHead className="text-center">{totalSuspended}</TableHead>
                                     <TableHead className="text-center">{totalAbsent}</TableHead>
@@ -224,5 +229,3 @@ export default function StatementPage() {
         </>
     );
 }
-
-    
