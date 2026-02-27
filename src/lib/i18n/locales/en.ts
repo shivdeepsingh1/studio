@@ -1,3 +1,4 @@
+
 export const en = {
   // Common
   loading: 'Loading...',
@@ -302,6 +303,9 @@ export const en = {
     Earned: 'Earned',
     Maternity: 'Maternity',
     Absent: 'Absent',
+    Medical: 'Medical',
+    CCL: 'CCL',
+    'Bhe Jodo': 'Bhe Jodo',
   },
   leaveStatuses: {
     Pending: 'Pending',
@@ -314,5 +318,3 @@ export const en = {
     Night: 'Night',
   }
 };
-
-    

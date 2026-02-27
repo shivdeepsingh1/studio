@@ -1,3 +1,4 @@
+
 export const hi = {
   // Common
   loading: 'लोड हो रहा है...',
@@ -302,6 +303,9 @@ export const hi = {
     Earned: 'अर्जित',
     Maternity: 'मातृत्व',
     Absent: 'अनुपस्थित',
+    Medical: 'चिकित्सा',
+    CCL: 'सीसीएल',
+    'Bhe Jodo': 'भे जोड़ो',
   },
   leaveStatuses: {
     Pending: 'लंबित',
@@ -314,5 +318,3 @@ export const hi = {
     Night: 'रात',
   }
 };
-
-    
