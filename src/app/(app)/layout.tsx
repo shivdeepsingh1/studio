@@ -31,12 +31,15 @@ import {
 import { SidebarLogo } from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/lib/i18n/language-provider';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 function MainSidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const router = useRouter();
   const { isMobile } = useSidebar();
+  const { t } = useLanguage();
 
   const handleLogout = () => {
     logout();
@@ -44,13 +47,13 @@ function MainSidebar() {
   };
 
   const navItems = [
-    { href: '/dashboard', label: 'डैशबोर्ड', icon: LayoutGrid },
-    { href: '/duty', label: 'ड्यूटी', icon: ClipboardList },
-    { href: '/leave', label: 'अवकाश', icon: CalendarOff },
-    { href: '/employees', label: 'कर्मचारी', icon: Users, adminOnly: true },
-    { href: '/duty-report', label: 'ड्यूटी रिपोर्ट', icon: BookCheck, adminOnly: true },
-    { href: '/statement', label: 'विवरण', icon: FileText, adminOnly: true },
-    { href: '/profile', label: 'प्रोफ़ाइल', icon: User },
+    { href: '/dashboard', label: t.sidebar.dashboard, icon: LayoutGrid },
+    { href: '/duty', label: t.sidebar.duty, icon: ClipboardList },
+    { href: '/leave', label: t.sidebar.leave, icon: CalendarOff },
+    { href: '/employees', label: t.sidebar.employees, icon: Users, adminOnly: true },
+    { href: '/duty-report', label: t.sidebar.dutyReport, icon: BookCheck, adminOnly: true },
+    { href: '/statement', label: t.sidebar.statement, icon: FileText, adminOnly: true },
+    { href: '/profile', label: t.sidebar.profile, icon: User },
   ];
 
   return (
@@ -93,9 +96,12 @@ function MainSidebar() {
                 <span className="text-sm font-semibold truncate">{user?.name}</span>
                 <span className="text-xs text-sidebar-foreground/70">{user?.pno}</span>
             </div>
-            <Button variant="ghost" size="icon" className="ml-auto" onClick={handleLogout}>
-                <LogOut className="w-4 h-4" />
-            </Button>
+            <div className="ml-auto flex items-center">
+              <LanguageSwitcher />
+              <Button variant="ghost" size="icon" onClick={handleLogout}>
+                  <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
         </div>
       </SidebarFooter>
     </Sidebar>
@@ -105,6 +111,7 @@ function MainSidebar() {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   useEffect(() => {
@@ -116,7 +123,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (loading || !user) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-lg font-semibold">लोड हो रहा है...</div>
+        <div className="text-lg font-semibold">{t.loading}</div>
       </div>
     );
   }
@@ -138,3 +145,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    

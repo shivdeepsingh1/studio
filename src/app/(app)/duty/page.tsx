@@ -32,7 +32,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Duty, Employee, Leave, employeeRankTranslations } from "@/lib/types"
+import { Duty, Employee, Leave } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
@@ -49,11 +49,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useData } from "@/lib/data-provider"
 import { useToast } from "@/hooks/use-toast"
+import { useLanguage } from "@/lib/i18n/language-provider"
 
 export default function DutyPage() {
   const { user } = useAuth()
   const { duties, employees: allEmployees, updateDuties, leaves, updateLeaves } = useData()
   const { toast } = useToast()
+  const { t } = useLanguage()
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
   const [attendanceStatus, setAttendanceStatus] = useState<"Present" | "Absent">("Present");
@@ -101,20 +103,14 @@ export default function DutyPage() {
     setNewDuty({ ...newDuty, [id]: value as any })
   }
 
-  const shiftTranslations = {
-    "Morning": "सुबह",
-    "Afternoon": "दोपहर",
-    "Night": "रात"
-  }
-
   const handleAssignDuty = () => {
     if (!foundEmployee) {
-      toast({ variant: 'destructive', title: 'कोई कर्मचारी चयनित नहीं है', description: "कृपया पहले एक कर्मचारी खोजें।" });
+      toast({ variant: 'destructive', title: t.duty.noEmployeeSelected, description: t.duty.noEmployeeSelectedDescription });
       return;
     }
 
     if (foundEmployee.status === 'Suspended') {
-        toast({ variant: 'destructive', title: 'कार्रवाई निषिद्ध', description: "निलंबित कर्मचारी के लिए ड्यूटी नहीं सौंपी जा सकती या उपस्थिति दर्ज नहीं की जा सकती।" });
+        toast({ variant: 'destructive', title: t.duty.actionProhibited, description: t.duty.actionProhibitedDescription });
         return;
     }
 
@@ -126,18 +122,18 @@ export default function DutyPage() {
         type: 'Absent',
         startDate: newDuty.date,
         endDate: newDuty.date,
-        reason: 'ड्यूटी रोस्टर से अनुपस्थित चिह्नित।',
+        reason: 'Marked absent from duty roster.',
         status: 'Approved'
       };
       updateLeaves([...leaves, absentLeave]);
-      toast({ title: "कर्मचारी अनुपस्थित चिह्नित", description: `${foundEmployee.name} को ${format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')} के लिए अनुपस्थित चिह्नित किया गया है।` });
+      toast({ title: t.duty.employeeMarkedAbsent, description: t.duty.employeeMarkedAbsentDescription(foundEmployee.name, format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')) });
       setIsAssignDialogOpen(false);
       return;
     }
     
     // This is for 'Present'
     if (!newDuty.employeeId || !newDuty.date || !newDuty.location) {
-      toast({ variant: 'destructive', title: 'जानकारी अधूरी है', description: "कृपया ड्यूटी असाइनमेंट के लिए सभी आवश्यक फ़ील्ड भरें।" });
+      toast({ variant: 'destructive', title: t.duty.incompleteInformation, description: t.duty.incompleteInformationDescription });
       return
     }
 
@@ -151,7 +147,7 @@ export default function DutyPage() {
       details: newDuty.details,
     }
     updateDuties([...duties, dutyToAdd])
-    toast({ title: "ड्यूटी सौंपी गई", description: `ड्यूटी ${foundEmployee.name} को ${format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')} के लिए सौंपी गई है।` });
+    toast({ title: t.duty.dutyAssigned, description: t.duty.dutyAssignedDescription(foundEmployee.name, format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')) });
     setIsAssignDialogOpen(false)
   }
 
@@ -170,7 +166,7 @@ export default function DutyPage() {
 
   const handleDeleteDuty = (id: string) => {
     if (user?.rank !== 'Administrator') return;
-    if(window.confirm("क्या आप वाकई इस ड्यूटी रिकॉर्ड को हटाना चाहते हैं?")){
+    if(window.confirm(t.confirmDelete)){
       updateDuties(duties.filter(d => d.id !== id));
     }
   };
@@ -178,7 +174,7 @@ export default function DutyPage() {
 
   const handleExport = () => {
     const doc = new jsPDF();
-    doc.text("ड्यूटी रोस्टर", 14, 16);
+    doc.text(t.pageHeaders.dutyAdmin.title, 14, 16);
 
     const isEmployee = user?.role !== 'admin';
     
@@ -186,19 +182,19 @@ export default function DutyPage() {
     let body;
 
     if (isEmployee) {
-      head = [['क्र.सं.', 'दिनांक', 'शिफ्ट', 'स्थान', 'विवरण']];
+      head = [[t.serialNumber, t.date, t.shift, t.location, t.details]];
       body = employeeDuties.map((duty, index) => {
         const dutyDateValid = duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime());
         return [
             index + 1,
             dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
-            shiftTranslations[duty.shift],
+            t.shifts[duty.shift],
             duty.location,
             duty.details
         ]
       });
     } else {
-      head = [['क्र.सं.', 'बैज नंबर', 'PNO', 'पद', 'नाम', 'दिनांक', 'शिफ्ट', 'स्थान']];
+      head = [[t.serialNumber, t.badgeNumber, t.pno, t.rank, t.name, t.date, t.shift, t.location]];
       body = duties.map((duty, index) => {
         const employee = allEmployees.find(e => e.id === duty.employeeId);
         const dutyDateValid = duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime());
@@ -206,10 +202,10 @@ export default function DutyPage() {
           index + 1,
           employee?.badgeNumber || 'N/A',
           employee?.pno || 'N/A',
-          employee?.rank ? employeeRankTranslations[employee.rank] : 'N/A',
+          employee?.rank ? t.ranks[employee.rank] : 'N/A',
           duty.employeeName,
           dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
-          shiftTranslations[duty.shift],
+          t.shifts[duty.shift],
           duty.location
         ];
       });
@@ -237,12 +233,8 @@ export default function DutyPage() {
   return (
     <>
       <PageHeader
-        title="ड्यूटी रोस्टर"
-        description={
-          user?.role === "admin"
-            ? "सभी कर्मचारियों के लिए दैनिक ड्यूटी सौंपें और प्रबंधित करें।"
-            : "अपने आगामी और पिछले ड्यूटी असाइनमेंट देखें।"
-        }
+        title={user?.role === "admin" ? t.pageHeaders.dutyAdmin.title : t.pageHeaders.dutyEmployee.title}
+        description={user?.role === "admin" ? t.pageHeaders.dutyAdmin.description : t.pageHeaders.dutyEmployee.description}
       >
         {user?.role === "admin" && (
           <Dialog
@@ -268,27 +260,27 @@ export default function DutyPage() {
             <DialogTrigger asChild>
               <Button>
                 <PlusCircle className="mr-2" />
-                ड्यूटी सौंपें
+                {t.duty.assignDuty}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>नई ड्यूटी सौंपें</DialogTitle>
+                <DialogTitle>{t.duty.assignNewDuty}</DialogTitle>
                 <DialogDescription>
-                  कर्मचारी को खोजने और ड्यूटी सौंपने के लिए उसका PNO दर्ज करें।
+                  {t.duty.assignNewDutyDescription}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="pno" className="text-right">
-                    PNO
+                    {t.duty.pno}
                   </Label>
                   <Input
                     id="pno"
                     value={pnoInput}
                     onChange={(e) => handlePnoSearch(e.target.value)}
                     className="col-span-3"
-                    placeholder="कर्मचारी PNO दर्ज करें"
+                    placeholder={t.duty.pnoPlaceholder}
                   />
                 </div>
 
@@ -296,40 +288,40 @@ export default function DutyPage() {
                   <div className="col-span-4 rounded-md border bg-muted p-3 grid grid-cols-4 items-center gap-4 -mt-2">
                     <div className="col-span-4">
                         <p className="font-semibold">{foundEmployee.name}</p>
-                        <p className="text-sm text-muted-foreground">{employeeRankTranslations[foundEmployee.rank]}</p>
+                        <p className="text-sm text-muted-foreground">{t.ranks[foundEmployee.rank]}</p>
                         {foundEmployee.status === 'Suspended' && (
                            <p className="text-sm text-white bg-destructive/80 p-2 rounded-md mt-2">
-                               यह कर्मचारी निलंबित है और उसे ड्यूटी नहीं सौंपी जा सकती।
+                               {t.duty.employeeSuspended}
                            </p>
                         )}
                     </div>
                   </div>
                 ) : pnoInput && (
                     <div className="col-span-4 text-center text-sm text-white bg-destructive/80 p-2 rounded-md -mt-2">
-                        <p>कर्मचारी नहीं मिला।</p>
+                        <p>{t.duty.employeeNotFound}</p>
                     </div>
                 )}
 
                 <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="attendance" className="text-right">उपस्थिति</Label>
+                    <Label htmlFor="attendance" className="text-right">{t.duty.attendance}</Label>
                     <Select
                         onValueChange={(value) => setAttendanceStatus(value as 'Present' | 'Absent')}
                         value={attendanceStatus}
                         disabled={!foundEmployee || foundEmployee.status === 'Suspended'}
                     >
                         <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="उपस्थिति चुनें" />
+                            <SelectValue placeholder={t.duty.selectAttendance} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Present">उपस्थित</SelectItem>
-                            <SelectItem value="Absent">अनुपस्थित</SelectItem>
+                            <SelectItem value="Present">{t.duty.present}</SelectItem>
+                            <SelectItem value="Absent">{t.duty.absent}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
                 
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="date" className="text-right">
-                    दिनांक
+                    {t.duty.date}
                   </Label>
                   <Input
                     id="date"
@@ -342,7 +334,7 @@ export default function DutyPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="shift" className="text-right">
-                    शिफ्ट
+                    {t.duty.shift}
                   </Label>
                   <Select
                     onValueChange={(value) =>
@@ -352,18 +344,18 @@ export default function DutyPage() {
                     disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="शिफ्ट चुनें" />
+                      <SelectValue placeholder={t.duty.selectShift} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Morning">सुबह</SelectItem>
-                      <SelectItem value="Afternoon">दोपहर</SelectItem>
-                      <SelectItem value="Night">रात</SelectItem>
+                      <SelectItem value="Morning">{t.duty.morning}</SelectItem>
+                      <SelectItem value="Afternoon">{t.duty.afternoon}</SelectItem>
+                      <SelectItem value="Night">{t.duty.night}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="location" className="text-right">
-                    स्थान
+                    {t.duty.location}
                   </Label>
                   <Input
                     id="location"
@@ -375,7 +367,7 @@ export default function DutyPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="details" className="text-right">
-                    विवरण
+                    {t.duty.details}
                   </Label>
                   <Textarea
                     id="details"
@@ -392,39 +384,39 @@ export default function DutyPage() {
                   variant="secondary"
                   onClick={() => setIsAssignDialogOpen(false)}
                 >
-                  रद्द करें
+                  {t.cancel}
                 </Button>
-                <Button onClick={handleAssignDuty} disabled={!foundEmployee || foundEmployee.status === 'Suspended'}>सहेजें</Button>
+                <Button onClick={handleAssignDuty} disabled={!foundEmployee || foundEmployee.status === 'Suspended'}>{t.save}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         )}
         <Button variant="outline" onClick={handleExport}>
           <FileDown className="mr-2" />
-          PDF निर्यात करें
+          {t.exportPdf}
         </Button>
       </PageHeader>
 
       {user?.role === "admin" ? (
         <Tabs defaultValue="list">
           <TabsList>
-            <TabsTrigger value="list">ड्यूटी सूची</TabsTrigger>
-            <TabsTrigger value="calendar">कैलेंडर देखें</TabsTrigger>
+            <TabsTrigger value="list">{t.duty.dutyList}</TabsTrigger>
+            <TabsTrigger value="calendar">{t.duty.calendarView}</TabsTrigger>
           </TabsList>
           <TabsContent value="list">
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>क्र.सं.</TableHead>
-                    <TableHead>बैज नंबर</TableHead>
-                    <TableHead>PNO</TableHead>
-                    <TableHead>पद</TableHead>
-                    <TableHead>नाम</TableHead>
-                    <TableHead>दिनांक</TableHead>
-                    <TableHead>शिफ्ट</TableHead>
-                    <TableHead>स्थान</TableHead>
-                    {user?.rank === 'Administrator' && <TableHead className="text-right">कार्रवाई</TableHead>}
+                    <TableHead>{t.serialNumber}</TableHead>
+                    <TableHead>{t.badgeNumber}</TableHead>
+                    <TableHead>{t.pno}</TableHead>
+                    <TableHead>{t.rank}</TableHead>
+                    <TableHead>{t.name}</TableHead>
+                    <TableHead>{t.date}</TableHead>
+                    <TableHead>{t.shift}</TableHead>
+                    <TableHead>{t.location}</TableHead>
+                    {user?.rank === 'Administrator' && <TableHead className="text-right">{t.actions}</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -438,7 +430,7 @@ export default function DutyPage() {
                         <TableCell>{index + 1}</TableCell>
                         <TableCell>{employee?.badgeNumber}</TableCell>
                         <TableCell>{employee?.pno}</TableCell>
-                        <TableCell>{employee ? employeeRankTranslations[employee.rank] : ''}</TableCell>
+                        <TableCell>{employee ? t.ranks[employee.rank] : ''}</TableCell>
                         <TableCell>{duty.employeeName}</TableCell>
                         <TableCell>{dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                         <TableCell>
@@ -449,7 +441,7 @@ export default function DutyPage() {
                                 : "secondary"
                             }
                           >
-                            {shiftTranslations[duty.shift]}
+                            {t.shifts[duty.shift]}
                           </Badge>
                         </TableCell>
                         <TableCell>{duty.location}</TableCell>
@@ -458,19 +450,19 @@ export default function DutyPage() {
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0" disabled={user?.rank !== 'Administrator'}>
-                                  <span className="sr-only">मेनू खोलें</span>
+                                  <span className="sr-only">{t.employees.openMenu}</span>
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => openEditDialog(duty)}>
-                                  संपादित करें
+                                  {t.edit}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="text-red-500"
                                   onClick={() => handleDeleteDuty(duty.id)}
                                 >
-                                  हटाएं
+                                  {t.delete}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -505,7 +497,7 @@ export default function DutyPage() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  {date ? format(date, "dd-MM-yyyy") : "चयनित तिथि"} के लिए ड्यूटियां
+                  {date ? t.duty.dutiesForDate(format(date, "dd-MM-yyyy")) : t.duty.dutiesForDate(t.duty.selectDate)}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -513,10 +505,10 @@ export default function DutyPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>क्र.सं.</TableHead>
-                        <TableHead>कर्मचारी</TableHead>
-                        <TableHead>शिफ्ट</TableHead>
-                        <TableHead>स्थान</TableHead>
+                        <TableHead>{t.serialNumber}</TableHead>
+                        <TableHead>{t.duty.employee}</TableHead>
+                        <TableHead>{t.duty.shift}</TableHead>
+                        <TableHead>{t.duty.location}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -532,7 +524,7 @@ export default function DutyPage() {
                                   : "secondary"
                               }
                             >
-                              {shiftTranslations[duty.shift]}
+                              {t.shifts[duty.shift]}
                             </Badge>
                           </TableCell>
                           <TableCell>{duty.location}</TableCell>
@@ -542,7 +534,7 @@ export default function DutyPage() {
                   </Table>
                 ) : (
                   <p className="text-muted-foreground">
-                    इस तारीख के लिए कोई ड्यूटी नहीं सौंपी गई है।
+                    {t.duty.noDutiesForDate}
                   </p>
                 )}
               </CardContent>
@@ -554,11 +546,11 @@ export default function DutyPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>क्र.सं.</TableHead>
-                <TableHead>दिनांक</TableHead>
-                <TableHead>शिफ्ट</TableHead>
-                <TableHead>स्थान</TableHead>
-                <TableHead>विवरण</TableHead>
+                <TableHead>{t.serialNumber}</TableHead>
+                <TableHead>{t.date}</TableHead>
+                <TableHead>{t.shift}</TableHead>
+                <TableHead>{t.location}</TableHead>
+                <TableHead>{t.details}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -574,7 +566,7 @@ export default function DutyPage() {
                           duty.shift === "Night" ? "destructive" : "secondary"
                         }
                       >
-                        {shiftTranslations[duty.shift]}
+                        {t.shifts[duty.shift]}
                       </Badge>
                     </TableCell>
                     <TableCell>{duty.location}</TableCell>
@@ -585,7 +577,7 @@ export default function DutyPage() {
               {employeeDuties.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center">
-                    कोई ड्यूटी नहीं सौंपी गई।
+                    {t.duty.noDutyAssignedYet}
                   </TableCell>
                 </TableRow>
               )}
@@ -597,15 +589,15 @@ export default function DutyPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>ड्यूटी संपादित करें</DialogTitle>
+            <DialogTitle>{t.duty.editDuty}</DialogTitle>
             <DialogDescription>
-              इस ड्यूटी असाइनमेंट के लिए विवरण अपडेट करें।
+              {t.duty.editDutyDescription}
             </DialogDescription>
           </DialogHeader>
           {editingDuty && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">कर्मचारी</Label>
+                  <Label className="text-right">{t.duty.employee}</Label>
                   <Input
                     value={editingDuty.employeeName}
                     disabled
@@ -614,7 +606,7 @@ export default function DutyPage() {
                 </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="date-edit" className="text-right">
-                  दिनांक
+                  {t.duty.date}
                 </Label>
                 <Input
                   id="date-edit"
@@ -626,7 +618,7 @@ export default function DutyPage() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="shift-edit" className="text-right">
-                  शिफ्ट
+                  {t.duty.shift}
                 </Label>
                 <Select
                   onValueChange={(value) =>
@@ -635,18 +627,18 @@ export default function DutyPage() {
                   value={editingDuty.shift}
                 >
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="शिफ्ट चुनें" />
+                    <SelectValue placeholder={t.duty.selectShift} />
                   </SelectTrigger>
                   <SelectContent>
-                      <SelectItem value="Morning">सुबह</SelectItem>
-                      <SelectItem value="Afternoon">दोपहर</SelectItem>
-                      <SelectItem value="Night">रात</SelectItem>
+                      <SelectItem value="Morning">{t.duty.morning}</SelectItem>
+                      <SelectItem value="Afternoon">{t.duty.afternoon}</SelectItem>
+                      <SelectItem value="Night">{t.duty.night}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="location-edit" className="text-right">
-                  स्थान
+                  {t.duty.location}
                 </Label>
                 <Input
                   id="location-edit"
@@ -657,7 +649,7 @@ export default function DutyPage() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="details-edit" className="text-right">
-                  विवरण
+                  {t.duty.details}
                 </Label>
                 <Textarea
                   id="details-edit"
@@ -674,12 +666,14 @@ export default function DutyPage() {
               variant="secondary"
               onClick={() => setIsEditDialogOpen(false)}
             >
-              रद्द करें
+              {t.cancel}
             </Button>
-            <Button onClick={handleUpdateDuty}>बदलाव सहेजें</Button>
+            <Button onClick={handleUpdateDuty}>{t.duty.saveChanges}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
   )
 }
+
+    

@@ -19,13 +19,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Employee, Duty, employeeRankTranslations } from "@/lib/types";
+import { Employee, Duty } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
+import { useLanguage } from "@/lib/i18n/language-provider";
 
 export default function DutyReportPage() {
   const { user } = useAuth();
   const { employees, duties } = useData();
+  const { t } = useLanguage();
   const [pnoInput, setPnoInput] = useState<string>("");
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [dateFrom, setDateFrom] = useState<string>(
@@ -60,22 +62,22 @@ export default function DutyReportPage() {
 
   const handleExportPdf = () => {
     if (!selectedEmployee || filteredDuties.length === 0 || !dateFrom || !dateTo) {
-      alert("No data to export.");
+      alert(t.dutyReport.noDataToExport);
       return;
     }
     const doc = new jsPDF();
-    doc.text(`Duty Report for ${selectedEmployee.name}`, 14, 16);
-    doc.text(`From: ${format(new Date(dateFrom.replace(/-/g, '/')), "dd-MM-yyyy")} To: ${format(new Date(dateTo.replace(/-/g, '/')), "dd-MM-yyyy")}`, 14, 22);
+    doc.text(`${t.pageHeaders.dutyReport.title} for ${selectedEmployee.name}`, 14, 16);
+    doc.text(`${t.dutyReport.dateFrom}: ${format(new Date(dateFrom.replace(/-/g, '/')), "dd-MM-yyyy")} ${t.dutyReport.dateTo}: ${format(new Date(dateTo.replace(/-/g, '/')), "dd-MM-yyyy")}`, 14, 22);
 
     autoTable(doc, {
       startY: 28,
-      head: [['क्र.सं.', 'बैज नं.', 'नाम', 'दिनांक', 'शिफ्ट', 'स्थान', 'विवरण']],
+      head: [[t.serialNumber, t.badgeNumber, t.name, t.date, t.shift, t.location, t.details]],
       body: filteredDuties.map((duty, index) => [
         index + 1,
         selectedEmployee.badgeNumber,
         selectedEmployee.name,
         format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy'),
-        duty.shift,
+        t.shifts[duty.shift],
         duty.location,
         duty.details,
       ]),
@@ -86,7 +88,7 @@ export default function DutyReportPage() {
   if (user?.role !== 'admin') {
       return (
           <div className="flex items-center justify-center h-full">
-              <p>आपको यह पृष्ठ देखने की अनुमति नहीं है।</p>
+              <p>{t.pageHeaders.permissionDenied}</p>
           </div>
       )
   }
@@ -94,8 +96,8 @@ export default function DutyReportPage() {
   return (
     <>
       <PageHeader
-        title="ड्यूटी रिपोर्ट"
-        description="एक विशिष्ट तिथि सीमा के भीतर एक विशिष्ट कर्मचारी के लिए ड्यूटी रिपोर्ट तैयार करें।"
+        title={t.pageHeaders.dutyReport.title}
+        description={t.pageHeaders.dutyReport.description}
       >
         <Button
           variant="outline"
@@ -103,34 +105,34 @@ export default function DutyReportPage() {
           disabled={!selectedEmployee || filteredDuties.length === 0 || !dateFrom || !dateTo}
         >
           <FileDown className="mr-2" />
-          PDF निर्यात करें
+          {t.exportPdf}
         </Button>
       </PageHeader>
 
       <div className="space-y-6">
         <Card>
             <CardHeader>
-                <CardTitle>फ़िल्टर</CardTitle>
+                <CardTitle>{t.dutyReport.filter}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                     <div className="space-y-2">
-                        <Label htmlFor="pno-search">कर्मचारी PNO</Label>
+                        <Label htmlFor="pno-search">{t.dutyReport.employeePno}</Label>
                         <div className="flex items-center gap-2">
                             <Input
                                 id="pno-search"
-                                placeholder="कर्मचारी PNO दर्ज करें"
+                                placeholder={t.dutyReport.enterEmployeePno}
                                 value={pnoInput}
                                 onChange={(e) => setPnoInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handlePnoSearch()}
                             />
                             <Button onClick={handlePnoSearch}>
-                                <Search className="mr-2 h-4 w-4" /> खोजें
+                                <Search className="mr-2 h-4 w-4" /> {t.search}
                             </Button>
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="date-from">दिनांक से</Label>
+                        <Label htmlFor="date-from">{t.dutyReport.dateFrom}</Label>
                         <Input
                           id="date-from"
                           type="date"
@@ -140,7 +142,7 @@ export default function DutyReportPage() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="date-to">दिनांक तक</Label>
+                        <Label htmlFor="date-to">{t.dutyReport.dateTo}</Label>
                         <Input
                           id="date-to"
                           type="date"
@@ -158,43 +160,43 @@ export default function DutyReportPage() {
                 <>
                 <Card>
                     <CardHeader>
-                        <CardTitle>कर्मचारी विवरण</CardTitle>
+                        <CardTitle>{t.dutyReport.employeeDetails}</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-6">
                         <div>
-                            <p className="text-sm font-medium">नाम</p>
+                            <p className="text-sm font-medium">{t.name}</p>
                             <p className="text-muted-foreground">{selectedEmployee.name}</p>
                         </div>
                         <div>
-                            <p className="text-sm font-medium">PNO</p>
+                            <p className="text-sm font-medium">{t.pno}</p>
                             <p className="text-muted-foreground">{selectedEmployee.pno}</p>
                         </div>
                         <div>
-                            <p className="text-sm font-medium">पद</p>
-                            <p className="text-muted-foreground">{employeeRankTranslations[selectedEmployee.rank]}</p>
+                            <p className="text-sm font-medium">{t.rank}</p>
+                            <p className="text-muted-foreground">{t.ranks[selectedEmployee.rank]}</p>
                         </div>
                          <div>
-                            <p className="text-sm font-medium">बैज नंबर</p>
+                            <p className="text-sm font-medium">{t.badgeNumber}</p>
                             <p className="text-muted-foreground">{selectedEmployee.badgeNumber}</p>
                         </div>
                     </CardContent>
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>रिपोर्ट परिणाम</CardTitle>
+                    <CardTitle>{t.dutyReport.reportResults}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="border rounded-lg">
                       <Table>
                         <TableHeader>
                             <TableRow>
-                            <TableHead>क्र.सं.</TableHead>
-                            <TableHead>बैज नं.</TableHead>
-                            <TableHead>नाम</TableHead>
-                            <TableHead>दिनांक</TableHead>
-                            <TableHead>शिफ्ट</TableHead>
-                            <TableHead>स्थान</TableHead>
-                            <TableHead>विवरण</TableHead>
+                            <TableHead>{t.serialNumber}</TableHead>
+                            <TableHead>{t.badgeNumber}</TableHead>
+                            <TableHead>{t.name}</TableHead>
+                            <TableHead>{t.date}</TableHead>
+                            <TableHead>{t.shift}</TableHead>
+                            <TableHead>{t.location}</TableHead>
+                            <TableHead>{t.details}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -205,7 +207,7 @@ export default function DutyReportPage() {
                                 <TableCell>{selectedEmployee.badgeNumber}</TableCell>
                                 <TableCell>{selectedEmployee.name}</TableCell>
                                 <TableCell>{duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime()) ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
-                                <TableCell>{duty.shift}</TableCell>
+                                <TableCell>{t.shifts[duty.shift]}</TableCell>
                                 <TableCell>{duty.location}</TableCell>
                                 <TableCell>{duty.details}</TableCell>
                                 </TableRow>
@@ -213,7 +215,7 @@ export default function DutyReportPage() {
                             ) : (
                             <TableRow>
                                 <TableCell colSpan={7} className="text-center">
-                                चयनित कर्मचारी और दिनांक सीमा के लिए कोई ड्यूटी नहीं मिली।
+                                {t.dutyReport.noDutiesFound}
                                 </TableCell>
                             </TableRow>
                             )}
@@ -226,7 +228,7 @@ export default function DutyReportPage() {
             ) : (
                 <Card className="flex items-center justify-center min-h-48">
                   <CardContent className="text-center p-8 text-muted-foreground">
-                      <p>कृपया उनकी ड्यूटी रिपोर्ट देखने के लिए PNO द्वारा कर्मचारी खोजें।</p>
+                      <p>{t.dutyReport.searchForReport}</p>
                   </CardContent>
                 </Card>
             )}
@@ -235,3 +237,5 @@ export default function DutyReportPage() {
     </>
   );
 }
+
+    

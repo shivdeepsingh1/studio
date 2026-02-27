@@ -6,22 +6,24 @@ import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { useAuth } from '@/lib/auth';
-import { EmployeeRank, employeeRanks, leaveTypes, employeeRankTranslations, leaveTypeTranslations } from '@/lib/types';
+import { EmployeeRank, employeeRanks, leaveTypes } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useData } from '@/lib/data-provider';
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useLanguage } from '@/lib/i18n/language-provider';
 
 export default function StatementPage() {
     const { user } = useAuth();
     const { employees, duties, leaves } = useData();
+    const { t } = useLanguage();
 
     if (user?.role !== 'admin') {
         return (
              <div className="flex items-center justify-center h-full">
-              <p>आपको यह पृष्ठ देखने की अनुमति नहीं है।</p>
+              <p>{t.pageHeaders.permissionDenied}</p>
           </div>
         );
     }
@@ -111,25 +113,25 @@ export default function StatementPage() {
 
     const handleExportPdf = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
-        doc.text(`Daily Force Statement for ${format(today, 'MMMM dd, yyyy')}`, 14, 16);
+        doc.text(t.pageHeaders.statement.description(format(today, 'MMMM dd, yyyy')), 14, 16);
 
         const head = [
             [
-                { content: 'पद', rowSpan: 2 },
-                { content: 'तैनात संख्या', rowSpan: 2, styles: { halign: 'center' } },
-                { content: 'अवकाश पर', colSpan: leaveTypes.length + 1, styles: { halign: 'center' } },
-                { content: 'निलंबित', rowSpan: 2, styles: { halign: 'center' } },
-                { content: 'अनुपस्थित', rowSpan: 2, styles: { halign: 'center' } },
-                { content: 'ड्यूटी पर उपस्थित', rowSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: t.rank, rowSpan: 2 },
+                { content: t.statement.postedStrength, rowSpan: 2, styles: { halign: 'center' } },
+                { content: t.statement.onLeave, colSpan: leaveTypes.length + 1, styles: { halign: 'center' } },
+                { content: t.statement.suspended, rowSpan: 2, styles: { halign: 'center' } },
+                { content: t.statement.absent, rowSpan: 2, styles: { halign: 'center' } },
+                { content: t.statement.presentForDuty, rowSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
             ],
             [
-                ...leaveTypes.map(type => ({ content: leaveTypeTranslations[type], styles: { halign: 'center' } })),
-                { content: 'कुल', styles: { halign: 'center', fontStyle: 'bold' } },
+                ...leaveTypes.map(type => ({ content: t.leaveTypes[type], styles: { halign: 'center' } })),
+                { content: t.statement.total, styles: { halign: 'center', fontStyle: 'bold' } },
             ]
         ];
 
         const body = statementData.map(data => [
-            employeeRankTranslations[data.rank],
+            t.ranks[data.rank],
             { content: data.strength, styles: { halign: 'center' } },
             ...leaveTypes.map(type => ({ content: data.leaveCounts[type] || 0, styles: { halign: 'center' } })),
             { content: data.totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
@@ -140,7 +142,7 @@ export default function StatementPage() {
         
         const foot = [
             [
-                { content: 'कुल', styles: { fontStyle: 'bold' } },
+                { content: t.statement.total, styles: { fontStyle: 'bold' } },
                 { content: totalStrength, styles: { halign: 'center', fontStyle: 'bold' } },
                 ...leaveTypes.map(type => ({ content: totalLeaveByType[type] || 0, styles: { halign: 'center', fontStyle: 'bold' } })),
                 { content: totalOnLeave, styles: { halign: 'center', fontStyle: 'bold' } },
@@ -166,35 +168,35 @@ export default function StatementPage() {
 
     return (
         <>
-            <PageHeader title="दैनिक विवरण" description={`${format(today, 'MMMM dd, yyyy')} के लिए स्थिति अवलोकन`} >
+            <PageHeader title={t.pageHeaders.statement.title} description={t.pageHeaders.statement.description(format(today, 'MMMM dd, yyyy'))} >
                 <Button onClick={handleExportPdf}>
                     <FileDown className="mr-2" />
-                    PDF निर्यात करें
+                    {t.exportPdf}
                 </Button>
             </PageHeader>
             <Card>
-                <CardHeader><CardTitle>दैनिक बल विवरण</CardTitle></CardHeader>
+                <CardHeader><CardTitle>{t.statement.dailyForceStatement}</CardTitle></CardHeader>
                 <CardContent>
                     <ScrollArea className="w-full whitespace-nowrap rounded-md border">
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead rowSpan={2} className="sticky left-0 bg-background z-10 min-w-[150px]">पद</TableHead>
-                                    <TableHead rowSpan={2} className="text-center">तैनात संख्या</TableHead>
-                                    <TableHead colSpan={leaveTypes.length + 1} className="text-center border-x">अवकाश पर</TableHead>
-                                    <TableHead rowSpan={2} className="text-center">निलंबित</TableHead>
-                                    <TableHead rowSpan={2} className="text-center">अनुपस्थित</TableHead>
-                                    <TableHead rowSpan={2} className="text-center">ड्यूटी पर उपस्थित</TableHead>
+                                    <TableHead rowSpan={2} className="sticky left-0 bg-background z-10 min-w-[150px]">{t.rank}</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">{t.statement.postedStrength}</TableHead>
+                                    <TableHead colSpan={leaveTypes.length + 1} className="text-center border-x">{t.statement.onLeave}</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">{t.statement.suspended}</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">{t.statement.absent}</TableHead>
+                                    <TableHead rowSpan={2} className="text-center">{t.statement.presentForDuty}</TableHead>
                                 </TableRow>
                                 <TableRow>
-                                    {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{leaveTypeTranslations[type]}</TableHead>)}
-                                    <TableHead className="text-center font-bold border-x">कुल</TableHead>
+                                    {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{t.leaveTypes[type]}</TableHead>)}
+                                    <TableHead className="text-center font-bold border-x">{t.statement.total}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {statementData.map(data => (
                                     <TableRow key={data.rank}>
-                                        <TableCell className="font-medium sticky left-0 bg-background z-10">{employeeRankTranslations[data.rank]}</TableCell>
+                                        <TableCell className="font-medium sticky left-0 bg-background z-10">{t.ranks[data.rank]}</TableCell>
                                         <TableCell className="text-center">{data.strength}</TableCell>
                                         {leaveTypes.map(type => <TableCell key={type} className="text-center border-x">{data.leaveCounts[type]}</TableCell>)}
                                         <TableCell className="text-center font-bold border-x">{data.totalOnLeave}</TableCell>
@@ -206,7 +208,7 @@ export default function StatementPage() {
                             </TableBody>
                             <TableFooter>
                                 <TableRow>
-                                    <TableHead className="sticky left-0 bg-muted/50 z-10">कुल</TableHead>
+                                    <TableHead className="sticky left-0 bg-muted/50 z-10">{t.statement.total}</TableHead>
                                     <TableHead className="text-center">{totalStrength}</TableHead>
                                     {leaveTypes.map(type => <TableHead key={type} className="text-center border-x">{totalLeaveByType[type]}</TableHead>)}
                                     <TableHead className="text-center font-bold border-x">{totalOnLeave}</TableHead>

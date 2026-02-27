@@ -4,6 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { Toaster } from "@/components/ui/toaster"
 import { DataProvider } from '@/lib/data-provider';
+import { LanguageProvider } from '@/lib/i18n/language-provider';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -25,13 +26,17 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className={`font-body antialiased ${inter.variable}`}>
-        <DataProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </DataProvider>
+        <LanguageProvider>
+          <DataProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </DataProvider>
+        </LanguageProvider>
         <Toaster />
       </body>
     </html>
   );
 }
+
+    
