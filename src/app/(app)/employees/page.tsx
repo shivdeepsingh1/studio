@@ -241,7 +241,7 @@ export default function EmployeesPage() {
   
   const handleExportPdf = () => {
     const doc = new jsPDF()
-    doc.addFileToVFS('Hind-Regular.ttf', font.replace(/\s/g, ''));
+    doc.addFileToVFS('Hind-Regular.ttf', font);
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
     doc.setFont('Hind');
 

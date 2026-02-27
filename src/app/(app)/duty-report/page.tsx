@@ -67,7 +67,7 @@ export default function DutyReportPage() {
       return;
     }
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font.replace(/\s/g, ''));
+    doc.addFileToVFS('Hind-Regular.ttf', font);
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
     doc.setFont('Hind');
     
@@ -244,5 +244,3 @@ export default function DutyReportPage() {
     </>
   );
 }
-
-    

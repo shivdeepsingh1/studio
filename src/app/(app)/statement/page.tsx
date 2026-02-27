@@ -131,7 +131,7 @@ export default function StatementPage() {
 
     const handleExportPdf = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
-        doc.addFileToVFS('Hind-Regular.ttf', font.replace(/\s/g, ''));
+        doc.addFileToVFS('Hind-Regular.ttf', font);
         doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
         doc.setFont('Hind');
 
@@ -259,5 +259,3 @@ export default function StatementPage() {
         </>
     );
 }
-
-    
