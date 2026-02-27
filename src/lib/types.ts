@@ -69,7 +69,7 @@ export interface Leave {
   status: LeaveStatus;
 }
 
-export const leaveTypes: LeaveType[] = ["Casual", "CCL", "Earned", "Absent", "Medical", "Sick"];
+export const leaveTypes: LeaveType[] = ["Casual", "Earned", "CCL", "Absent", "Medical", "Sick"];
 
 export const leaveStatuses: LeaveStatus[] = ["Pending", "Approved", "Rejected"];
 

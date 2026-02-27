@@ -31,7 +31,7 @@ export default function StatementPage() {
     const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
     const displayRanks = employeeRanks.filter(rank => rank !== 'Administrator');
-    const statementLeaveTypes = leaveTypes.filter(type => type !== 'Absent');
+    const statementLeaveTypes = leaveTypes.filter(type => type !== 'Absent' && type !== 'Sick');
 
     // Strength Calculation
     const rankStrength = displayRanks.reduce((acc, rank) => {
