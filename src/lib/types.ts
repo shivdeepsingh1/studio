@@ -3,7 +3,7 @@ export interface User {
   id: string;
   pno: string;
   name: string;
-  rank: string;
+  rank: EmployeeRank;
   avatarUrl: string;
   email: string;
   role: 'admin' | 'employee';
@@ -69,7 +69,7 @@ export interface Leave {
   status: LeaveStatus;
 }
 
-export const leaveTypes: LeaveType[] = ["Casual", "Earned", "CCL", "Absent", "Medical", "Sick"];
+export const leaveTypes: LeaveType[] = ["Casual", "Earned", "CCL", "Medical", "Sick", "Absent"];
 
 export const leaveStatuses: LeaveStatus[] = ["Pending", "Approved", "Rejected"];
 

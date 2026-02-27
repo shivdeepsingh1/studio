@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -10,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { LogOut, Pencil, Eye, EyeOff } from "lucide-react"
-import { Employee, User } from "@/lib/types"
+import { Employee, User, EmployeeRank } from "@/lib/types"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -89,7 +88,7 @@ export default function ProfilePage() {
                 </Avatar>
                 <div>
                     <CardTitle className="text-2xl">{user.name}</CardTitle>
-                    <p className="text-muted-foreground">{user.rank in t.ranks ? t.ranks[user.rank as keyof typeof t.ranks] : user.rank}</p>
+                    <p className="text-muted-foreground">{t.ranks[user.rank]}</p>
                 </div>
                 <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                   <DialogTrigger asChild>
@@ -270,5 +269,3 @@ export default function ProfilePage() {
     </>
   )
 }
-
-    
