@@ -11,16 +11,16 @@ interface LanguageContextType {
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const getInitialLocale = (): Locale => {
-  if (typeof window === 'undefined') {
-    return 'hi';
-  }
-  const savedLocale = localStorage.getItem('line-command-locale') as Locale | null;
-  return savedLocale && locales[savedLocale] ? savedLocale : 'hi';
-};
-
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(getInitialLocale());
+  const [locale, setLocaleState] = useState<Locale>('hi'); // Default for server-side rendering
+
+  useEffect(() => {
+    // This effect runs only on the client, after hydration
+    const savedLocale = localStorage.getItem('line-command-locale') as Locale | null;
+    if (savedLocale && locales[savedLocale]) {
+      setLocaleState(savedLocale);
+    }
+  }, []);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
@@ -49,5 +49,3 @@ export function useLanguage() {
   }
   return context;
 }
-
-    
