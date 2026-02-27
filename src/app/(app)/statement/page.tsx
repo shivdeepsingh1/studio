@@ -32,7 +32,7 @@ export default function StatementPage() {
     const today = new Date();
     const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
     
-    const dutiesToday = duties.filter(d => d.date === todayString);
+    const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
     const displayRanks = employeeRanks.filter(rank => rank !== 'Administrator');
     const statementLeaveTypes: (keyof typeof t.leaveTypes)[] = ['Casual', 'Earned', 'CCL', 'Medical'];
 

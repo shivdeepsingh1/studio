@@ -200,6 +200,9 @@ export const en = {
     saveChanges: 'Save Changes',
     // Table
     noDutyAssignedYet: 'No duty assigned yet.',
+    endDutyAndMarkReserve: 'End Duty & Mark Reserve',
+    dutyEnded: 'Duty Ended',
+    dutyEndedDescription: (name: string) => `${name} has been moved to reserve.`,
   },
 
   // Employees Page

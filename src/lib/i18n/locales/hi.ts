@@ -200,6 +200,9 @@ export const hi = {
     saveChanges: 'बदलाव सहेजें',
     // Table
     noDutyAssignedYet: 'कोई ड्यूटी नहीं सौंपी गई।',
+    endDutyAndMarkReserve: 'ड्यूटी समाप्त करें और रिज़र्व चिह्नित करें',
+    dutyEnded: 'ड्यूटी समाप्त',
+    dutyEndedDescription: (name: string) => `${name} को रिज़र्व में भेज दिया गया है।`,
   },
 
   // Employees Page

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -134,7 +135,8 @@ export default function DutyPage() {
     
     const alreadyOnDuty = duties.find(d => 
         d.employeeId === foundEmployee.id &&
-        d.date === newDuty.date
+        d.date === newDuty.date &&
+        d.status !== 'Completed'
     );
 
     if (alreadyOnDuty) {
@@ -178,6 +180,7 @@ export default function DutyPage() {
       shift: newDuty.shift,
       location: newDuty.location,
       details: newDuty.details,
+      status: 'Active',
     }
     updateDuties(prevDuties => [...prevDuties, dutyToAdd]);
     toast({ title: t.duty.dutyAssigned, description: t.duty.dutyAssignedDescription(foundEmployee.name, format(new Date(newDuty.date.replace(/-/g, '\/')), 'dd-MM-yyyy')) });

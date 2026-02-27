@@ -31,7 +31,7 @@ export default function DashboardPage() {
   const today = new Date();
   const todayString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
-  const dutiesToday = duties.filter(d => d.date === todayString);
+  const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
   
   const onLeaveToday = leaves.filter(l => {
      if (l.status !== 'Approved' || !l.startDate || !l.endDate) return false;
@@ -82,7 +82,7 @@ export default function DashboardPage() {
     return acc;
   }, {} as Record<EmployeeRank, number>);
 
-  const employeeDuty = duties.find(d => d.employeeId === user?.id && d.date === todayString)
+  const employeeDuty = duties.find(d => d.employeeId === user?.id && d.date === todayString && d.status !== 'Completed');
   const employeeLeaveBalance = 12; // Mock data
 
   const chartConfig = {

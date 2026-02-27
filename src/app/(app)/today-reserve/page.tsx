@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -65,7 +66,7 @@ export default function TodayReservePage() {
 
     const suspendedIds = new Set(employees.filter(e => e.status === 'Suspended').map(e => e.id));
 
-    const onActiveDutyIds = new Set(duties.filter(d => d.date === todayString).map(d => d.employeeId));
+    const onActiveDutyIds = new Set(duties.filter(d => d.date === todayString && d.status !== 'Completed').map(d => d.employeeId));
 
     const reserve = employees.filter(employee =>
         employee.rank !== 'Administrator' &&
@@ -117,7 +118,8 @@ export default function TodayReservePage() {
     
     const alreadyOnDuty = duties.find(d => 
         d.employeeId === selectedEmployee.id &&
-        d.date === todayString
+        d.date === todayString &&
+        d.status !== 'Completed'
     );
 
     if (alreadyOnDuty) {
@@ -139,6 +141,7 @@ export default function TodayReservePage() {
         shift: newDuty.shift,
         location: newDuty.location,
         details: newDuty.details,
+        status: 'Active',
     };
 
     updateDuties(prevDuties => [...prevDuties, dutyToAdd]);

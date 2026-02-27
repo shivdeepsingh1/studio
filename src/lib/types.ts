@@ -81,6 +81,5 @@ export interface Duty {
   shift: 'Morning' | 'Afternoon' | 'Night';
   location: string;
   details: string;
+  status?: 'Active' | 'Completed';
 }
-
-    

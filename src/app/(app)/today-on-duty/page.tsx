@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -6,7 +7,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, MoreHorizontal } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -15,6 +16,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Employee, Duty } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
@@ -22,6 +29,7 @@ import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
 import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
 
 type OnDutyEmployee = {
   employee: Employee;
@@ -30,13 +38,18 @@ type OnDutyEmployee = {
 
 export default function TodayOnDutyPage() {
   const { user } = useAuth();
-  const { employees, duties } = useData();
+  const { employees, duties, updateDuties } = useData();
   const { t } = useLanguage();
+  const { toast } = useToast();
 
   const todayString = useMemo(() => format(new Date(), "yyyy-MM-dd"), []);
 
   const onDutyEmployees = useMemo(() => {
-    const dutiesToday = duties.filter(d => d.date === todayString && d.location.toLowerCase() !== 'reserve');
+    const dutiesToday = duties.filter(d => 
+        d.date === todayString && 
+        d.location.toLowerCase() !== 'reserve' &&
+        d.status !== 'Completed'
+    );
     
     return dutiesToday.map(duty => {
       const employee = employees.find(e => e.id === duty.employeeId);
@@ -44,6 +57,18 @@ export default function TodayOnDutyPage() {
     }).filter(item => item.employee) as OnDutyEmployee[];
 
   }, [duties, employees, todayString]);
+
+  const handleEndDuty = (dutyId: string, employeeName: string) => {
+    updateDuties(prevDuties =>
+      prevDuties.map(duty =>
+        duty.id === dutyId ? { ...duty, status: 'Completed' } : duty
+      )
+    );
+    toast({
+      title: t.duty.dutyEnded,
+      description: t.duty.dutyEndedDescription(employeeName),
+    });
+  };
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
@@ -108,6 +133,7 @@ export default function TodayOnDutyPage() {
                           <TableHead>{t.absentEmployeesPage.contactNumber}</TableHead>
                           <TableHead>{t.location}</TableHead>
                           <TableHead>{t.date}</TableHead>
+                          <TableHead className="text-right">{t.actions}</TableHead>
                       </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -134,11 +160,28 @@ export default function TodayOnDutyPage() {
                               <TableCell>{employee.contact}</TableCell>
                               <TableCell>{duty.location}</TableCell>
                               <TableCell>{format(new Date(duty.date.replace(/-/g, '/')), 'dd-MM-yyyy')}</TableCell>
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                      <span className="sr-only">{t.employees.openMenu}</span>
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                      onClick={() => handleEndDuty(duty.id, employee.name)}
+                                    >
+                                      {t.duty.endDutyAndMarkReserve}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
                           </TableRow>
                       ))
                       ) : (
                       <TableRow>
-                          <TableCell colSpan={8} className="text-center h-24">
+                          <TableCell colSpan={9} className="text-center h-24">
                               {t.duty.noOnDutyEmployees}
                           </TableCell>
                       </TableRow>

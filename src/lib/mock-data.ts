@@ -16,10 +16,10 @@ export const mockEmployees: Employee[] = [
 ];
 
 export const mockDuties: Duty[] = [
-  { id: '1', employeeId: '1', employeeName: 'Ravi Kumar', date: '2024-07-28', shift: 'Morning', location: 'City Center', details: 'Patrol duty' },
-  { id: '2', employeeId: '2', employeeName: 'Sita Sharma', date: '2024-07-28', shift: 'Night', location: 'Control Room', details: 'Monitoring CCTV' },
-  { id: '3', employeeId: '3', employeeName: 'Amit Singh', date: '2024-07-29', shift: 'Afternoon', location: 'South Gate', details: 'Security check' },
-  { id: '4', employeeId: '1', employeeName: 'Ravi Kumar', date: '2024-07-29', shift: 'Morning', location: 'Main Market', details: 'Traffic control' },
+  { id: '1', employeeId: '1', employeeName: 'Ravi Kumar', date: '2024-07-28', shift: 'Morning', location: 'City Center', details: 'Patrol duty', status: 'Active' },
+  { id: '2', employeeId: '2', employeeName: 'Sita Sharma', date: '2024-07-28', shift: 'Night', location: 'Control Room', details: 'Monitoring CCTV', status: 'Active' },
+  { id: '3', employeeId: '3', employeeName: 'Amit Singh', date: '2024-07-29', shift: 'Afternoon', location: 'South Gate', details: 'Security check', status: 'Active' },
+  { id: '4', employeeId: '1', employeeName: 'Ravi Kumar', date: '2024-07-29', shift: 'Morning', location: 'Main Market', details: 'Traffic control', status: 'Active' },
 ];
 
 export const mockLeaves: Leave[] = [
