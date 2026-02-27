@@ -273,6 +273,13 @@ export const hi = {
     suspendedLeaveError: 'निलंबित कर्मचारी के लिए अवकाश संसाधित नहीं किया जा सकता है।',
     // Table
     noLeaveRecords: 'कोई अवकाश रिकॉर्ड नहीं मिला।',
+    addLeaveEntry: 'अवकाश प्रविष्टि जोड़ें',
+    leaveAdded: 'अवकाश जोड़ा गया',
+    leaveAddedDescription: (name: string) => `${name} के लिए अवकाश जोड़ा गया है।`,
+    addLeaveFor: (name: string) => `${name} के लिए अवकाश जोड़ें`,
+    markAsReserve: 'रिज़र्व के रूप में चिह्नित करें',
+    leaveEnded: 'अवकाश समाप्त',
+    employeeMarkedReserve: (name: string) => `${name} को रिज़र्व के रूप में चिह्नित किया गया है।`,
   },
 
   // Profile Page

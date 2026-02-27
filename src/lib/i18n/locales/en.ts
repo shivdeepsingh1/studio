@@ -273,6 +273,13 @@ export const en = {
     suspendedLeaveError: 'Leave cannot be processed for a suspended employee.',
     // Table
     noLeaveRecords: 'No leave records found.',
+    addLeaveEntry: 'Add Leave Entry',
+    leaveAdded: 'Leave Added',
+    leaveAddedDescription: (name: string) => `Leave has been added for ${name}.`,
+    addLeaveFor: (name: string) => `Add Leave for ${name}`,
+    markAsReserve: 'Mark as Reserve',
+    leaveEnded: 'Leave Ended',
+    employeeMarkedReserve: (name: string) => `${name} has been marked as reserve.`,
   },
 
   // Profile Page

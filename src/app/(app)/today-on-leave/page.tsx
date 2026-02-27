@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, MoreHorizontal } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,6 +22,13 @@ import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
 import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 type OnLeaveEmployee = {
   employee: Employee;
@@ -30,8 +37,9 @@ type OnLeaveEmployee = {
 
 export default function TodayOnLeavePage() {
   const { user } = useAuth();
-  const { employees, leaves } = useData();
+  const { employees, leaves, updateLeaves } = useData();
   const { t } = useLanguage();
+  const { toast } = useToast();
 
   const today = useMemo(() => new Date(), []);
 
@@ -54,6 +62,23 @@ export default function TodayOnLeavePage() {
     }).filter(item => item.employee) as OnLeaveEmployee[];
 
   }, [leaves, employees, today]);
+
+  const handleReturnFromLeave = (leaveId: string, employeeName: string) => {
+    const yesterday = subDays(new Date(), 1);
+    const yesterdayString = format(yesterday, "yyyy-MM-dd");
+
+    updateLeaves(prevLeaves =>
+      prevLeaves.map(l =>
+        l.id === leaveId ? { ...l, endDate: yesterdayString } : l
+      )
+    );
+
+    toast({
+      title: t.leave.leaveEnded,
+      description: t.leave.employeeMarkedReserve(employeeName),
+    });
+  };
+
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
@@ -120,6 +145,7 @@ export default function TodayOnLeavePage() {
                           <TableHead>{t.leave.leaveType}</TableHead>
                           <TableHead>{t.leave.endDate}</TableHead>
                           <TableHead>{t.leave.reason}</TableHead>
+                          <TableHead className="text-right">{t.actions}</TableHead>
                       </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -147,11 +173,26 @@ export default function TodayOnLeavePage() {
                               <TableCell>{t.leaveTypes[leave.type]}</TableCell>
                               <TableCell>{format(new Date(leave.endDate.replace(/-/g, '/')), 'dd-MM-yyyy')}</TableCell>
                               <TableCell>{leave.reason}</TableCell>
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                      <span className="sr-only">{t.employees.openMenu}</span>
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleReturnFromLeave(leave.id, employee.name)}>
+                                      {t.leave.markAsReserve}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
                           </TableRow>
                       ))
                       ) : (
                       <TableRow>
-                          <TableCell colSpan={9} className="text-center h-24">
+                          <TableCell colSpan={10} className="text-center h-24">
                               {t.leave.noLeaveRecords}
                           </TableCell>
                       </TableRow>

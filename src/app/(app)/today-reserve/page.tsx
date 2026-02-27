@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -7,7 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown, PlusCircle } from "lucide-react";
+import { FileDown, MoreHorizontal } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -17,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Employee, Duty } from "@/lib/types";
+import { Employee, Duty, Leave, LeaveType, leaveTypes } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
@@ -29,15 +28,23 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function TodayReservePage() {
   const { user } = useAuth();
-  const { employees, duties, leaves, updateDuties } = useData();
+  const { employees, duties, leaves, updateDuties, updateLeaves } = useData();
   const { t } = useLanguage();
   const { toast } = useToast();
 
-  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [isAssignDutyDialogOpen, setIsAssignDutyDialogOpen] = useState(false);
+  const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+
   const [newDuty, setNewDuty] = useState<{
     shift: 'Morning' | 'Afternoon' | 'Night';
     location: string;
@@ -47,6 +54,17 @@ export default function TodayReservePage() {
     location: '',
     details: '',
   });
+
+  const initialNewLeaveState = {
+    employeeId: "",
+    type: "Casual" as LeaveType,
+    startDate: "",
+    endDate: "",
+    reason: "",
+    status: "Approved" as const,
+  };
+  const [newLeave, setNewLeave] = useState(initialNewLeaveState);
+
 
   const today = useMemo(() => new Date(), []);
   const todayString = useMemo(() => format(today, "yyyy-MM-dd"), [today]);
@@ -104,10 +122,10 @@ export default function TodayReservePage() {
     doc.save(`reserve_employees_${todayString}.pdf`);
   };
 
-  const handleOpenAssignDialog = (employee: Employee) => {
+  const handleOpenAssignDutyDialog = (employee: Employee) => {
     setSelectedEmployee(employee);
     setNewDuty({ shift: 'Morning', location: '', details: '' });
-    setIsAssignDialogOpen(true);
+    setIsAssignDutyDialogOpen(true);
   };
   
   const handleAssignDuty = () => {
@@ -128,10 +146,9 @@ export default function TodayReservePage() {
             title: t.duty.employeeAlreadyOnDutyTitle,
             description: t.duty.employeeAlreadyOnDutyDescription(selectedEmployee.name, format(new Date(todayString.replace(/-/g, '\/')), 'dd-MM-yyyy')),
         });
-        setIsAssignDialogOpen(false);
+        setIsAssignDutyDialogOpen(false);
         return;
     }
-
 
     const dutyToAdd: Duty = {
         id: Date.now().toString(),
@@ -146,10 +163,44 @@ export default function TodayReservePage() {
 
     updateDuties(prevDuties => [...prevDuties, dutyToAdd]);
     toast({ title: t.duty.dutyAssigned, description: t.duty.dutyAssignedDescription(selectedEmployee.name, format(new Date(), 'dd-MM-yyyy')) });
-    setIsAssignDialogOpen(false);
+    setIsAssignDutyDialogOpen(false);
     setSelectedEmployee(null);
   };
   
+  const handleOpenLeaveDialog = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    const today = new Date().toISOString().split("T")[0];
+    setNewLeave({
+      ...initialNewLeaveState,
+      employeeId: employee.id,
+      startDate: today,
+      endDate: today,
+      status: 'Approved'
+    });
+    setIsLeaveDialogOpen(true);
+  };
+
+  const handleSaveLeave = () => {
+    if (!selectedEmployee || !newLeave.startDate || !newLeave.endDate || !newLeave.reason) {
+        toast({ variant: 'destructive', title: t.leave.fillAllFields });
+        return;
+    }
+    const leaveToAdd: Leave = {
+        id: Date.now().toString(),
+        employeeId: selectedEmployee.id,
+        employeeName: selectedEmployee.name,
+        type: newLeave.type,
+        startDate: newLeave.startDate,
+        endDate: newLeave.endDate,
+        reason: newLeave.reason,
+        status: newLeave.status,
+    };
+    updateLeaves(prevLeaves => [...prevLeaves, leaveToAdd]);
+    toast({ title: t.leave.leaveAdded, description: t.leave.leaveAddedDescription(selectedEmployee.name) });
+    setIsLeaveDialogOpen(false);
+    setSelectedEmployee(null);
+  };
+
   if (user?.role !== 'admin') {
       return (
           <div className="flex items-center justify-center h-full">
@@ -184,7 +235,8 @@ export default function TodayReservePage() {
                           <TableHead>{t.name}</TableHead>
                           <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.absentEmployeesPage.contactNumber}</TableHead>
-                          <TableHead>{t.location}</TableHead>
+                          <TableHead>{t.status}</TableHead>
+                          <TableHead className="text-right">{t.actions}</TableHead>
                       </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -209,16 +261,30 @@ export default function TodayReservePage() {
                               </TableCell>
                               <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.contact}</TableCell>
-                              <TableCell>
-                                <Button variant="link" onClick={() => handleOpenAssignDialog(employee)}>
-                                  {t.statement.reserve}
-                                </Button>
+                              <TableCell>{t.statement.reserve}</TableCell>
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                      <span className="sr-only">{t.employees.openMenu}</span>
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleOpenAssignDutyDialog(employee)}>
+                                      {t.dashboard.assignDuty}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleOpenLeaveDialog(employee)}>
+                                      {t.leave.addLeaveEntry}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </TableCell>
                           </TableRow>
                       ))
                       ) : (
                       <TableRow>
-                          <TableCell colSpan={7} className="text-center h-24">
+                          <TableCell colSpan={8} className="text-center h-24">
                               {t.duty.noReserveEmployees}
                           </TableCell>
                       </TableRow>
@@ -229,7 +295,7 @@ export default function TodayReservePage() {
           </CardContent>
       </Card>
 
-      <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+      <Dialog open={isAssignDutyDialogOpen} onOpenChange={setIsAssignDutyDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t.duty.assignDutyTo(selectedEmployee?.name || '')}</DialogTitle>
@@ -281,12 +347,82 @@ export default function TodayReservePage() {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => setIsAssignDialogOpen(false)}
+              onClick={() => setIsAssignDutyDialogOpen(false)}
             >
               {t.cancel}
             </Button>
             <Button onClick={handleAssignDuty}>{t.duty.assignDuty}</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isLeaveDialogOpen} onOpenChange={setIsLeaveDialogOpen}>
+        <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t.leave.addLeaveFor(selectedEmployee?.name || "")}</DialogTitle>
+              <DialogDescription>{t.leave.requestLeaveDescription}</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">{t.leave.employee}</Label>
+                    <Input
+                        value={selectedEmployee?.name || ""}
+                        disabled
+                        className="col-span-3"
+                    />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="type" className="text-right">{t.leave.leaveType}</Label>
+                    <Select
+                        onValueChange={(value) => setNewLeave(prev => ({...prev, type: value as LeaveType}))}
+                        value={newLeave.type}
+                    >
+                        <SelectTrigger className="col-span-3">
+                            <SelectValue placeholder={t.leave.selectType} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {leaveTypes.map((type) => (
+                                <SelectItem key={type} value={type}>{t.leaveTypes[type]}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="startDate" className="text-right">{t.leave.startDate}</Label>
+                    <Input
+                        id="startDate"
+                        type="date"
+                        value={newLeave.startDate}
+                        onChange={(e) => setNewLeave(prev => ({...prev, startDate: e.target.value}))}
+                        className="col-span-3"
+                    />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="endDate" className="text-right">{t.leave.endDate}</Label>
+                    <Input
+                        id="endDate"
+                        type="date"
+                        value={newLeave.endDate}
+                        onChange={(e) => setNewLeave(prev => ({...prev, endDate: e.target.value}))}
+                        className="col-span-3"
+                    />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="reason" className="text-right">{t.leave.reason}</Label>
+                    <Textarea
+                        id="reason"
+                        value={newLeave.reason}
+                        onChange={(e) => setNewLeave(prev => ({...prev, reason: e.target.value}))}
+                        className="col-span-3"
+                    />
+                </div>
+            </div>
+            <DialogFooter>
+                <Button type="button" variant="secondary" onClick={() => setIsLeaveDialogOpen(false)}>
+                    {t.cancel}
+                </Button>
+                <Button onClick={handleSaveLeave}>{t.save}</Button>
+            </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
