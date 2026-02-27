@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect } from 'react';
@@ -27,6 +26,7 @@ import {
   LogOut,
   BookCheck,
   FileText,
+  UserX,
 } from 'lucide-react';
 import { SidebarLogo } from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -51,6 +51,7 @@ function MainSidebar() {
     { href: '/duty', label: t.sidebar.duty, icon: ClipboardList },
     { href: '/leave', label: t.sidebar.leave, icon: CalendarOff },
     { href: '/employees', label: t.sidebar.employees, icon: Users, adminOnly: true },
+    { href: '/absent-employees', label: t.sidebar.absentEmployees, icon: UserX, adminOnly: true },
     { href: '/duty-report', label: t.sidebar.dutyReport, icon: BookCheck, adminOnly: true },
     { href: '/statement', label: t.sidebar.statement, icon: FileText, adminOnly: true },
     { href: '/profile', label: t.sidebar.profile, icon: User },
@@ -145,5 +146,3 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    

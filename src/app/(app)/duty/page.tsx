@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -112,6 +111,24 @@ export default function DutyPage() {
 
     if (foundEmployee.status === 'Suspended') {
         toast({ variant: 'destructive', title: t.duty.actionProhibited, description: t.duty.actionProhibitedDescription });
+        return;
+    }
+    
+    const dutyDate = new Date(newDuty.date.replace(/-/g, '/'));
+    dutyDate.setHours(0,0,0,0);
+    const isOnLeave = leaves.find(l => 
+        l.employeeId === foundEmployee.id &&
+        l.status === 'Approved' &&
+        new Date(l.startDate.replace(/-/g, '/')) <= dutyDate &&
+        new Date(l.endDate.replace(/-/g, '/')) >= dutyDate
+    );
+
+    if (isOnLeave) {
+        toast({
+            variant: 'destructive',
+            title: t.duty.employeeOnLeaveTitle,
+            description: t.duty.employeeOnLeaveDescription(foundEmployee.name, t.leaveTypes[isOnLeave.type]),
+        });
         return;
     }
 
