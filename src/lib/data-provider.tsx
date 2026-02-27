@@ -8,9 +8,9 @@ interface DataContextType {
   employees: Employee[];
   duties: Duty[];
   leaves: Leave[];
-  updateEmployees: (updater: (prev: Employee[]) => Employee[]) => void;
-  updateDuties: (updater: (prev: Duty[]) => Duty[]) => void;
-  updateLeaves: (updater: (prev: Leave[]) => Leave[]) => void;
+  updateEmployees: (updater: Employee[] | ((prev: Employee[]) => Employee[])) => void;
+  updateDuties: (updater: Duty[] | ((prev: Duty[]) => Duty[])) => void;
+  updateLeaves: (updater: Leave[] | ((prev: Leave[]) => Leave[])) => void;
   loading: boolean;
 }
 
@@ -64,25 +64,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  const updateEmployees = useCallback((updater: (prev: Employee[]) => Employee[]) => {
+  const updateEmployees = useCallback((updater: Employee[] | ((prev: Employee[]) => Employee[])) => {
     setEmployees(prev => {
-        const newState = updater(prev);
+        const newState = typeof updater === 'function' ? (updater as (prev: Employee[]) => Employee[])(prev) : updater;
         setInStorage("line-command-employees", newState);
         return newState;
     });
   }, []);
 
-  const updateDuties = useCallback((updater: (prev: Duty[]) => Duty[]) => {
+  const updateDuties = useCallback((updater: Duty[] | ((prev: Duty[]) => Duty[])) => {
     setDuties(prev => {
-        const newState = updater(prev);
+        const newState = typeof updater === 'function' ? (updater as (prev: Duty[]) => Duty[])(prev) : updater;
         setInStorage("line-command-duties", newState);
         return newState;
     });
   }, []);
 
-  const updateLeaves = useCallback((updater: (prev: Leave[]) => Leave[]) => {
+  const updateLeaves = useCallback((updater: Leave[] | ((prev: Leave[]) => Leave[])) => {
     setLeaves(prev => {
-        const newState = updater(prev);
+        const newState = typeof updater === 'function' ? (updater as (prev: Leave[]) => Leave[])(prev) : updater;
         setInStorage("line-command-leaves", newState);
         return newState;
     });
