@@ -21,6 +21,8 @@ export const hi = {
   details: 'विवरण',
   serialNumber: 'क्र.सं.',
   confirmDelete: 'क्या आप वाकई इस रिकॉर्ड को हटाना चाहते हैं?',
+  confirmDeleteDescription: 'यह कार्रवाई पूर्ववत नहीं की जा सकती। यह रिकॉर्ड स्थायी रूप से हटा दिया जाएगा।',
+  deleteConfirm: 'हाँ, हटाएं',
 
   // Login Page
   login: {

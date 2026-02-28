@@ -6,7 +6,7 @@ import { format } from "date-fns"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { FileDown, PlusCircle, MoreHorizontal } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import {
@@ -32,6 +32,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Duty, Employee, Leave } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -63,6 +73,8 @@ export default function DutyPage() {
   
   const [editingDuty, setEditingDuty] = useState<Duty | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [dutyToDelete, setDutyToDelete] = useState<string | null>(null);
 
 
   const initialNewDutyState = {
@@ -202,9 +214,15 @@ export default function DutyPage() {
 
   const handleDeleteDuty = (id: string) => {
     if (user?.rank !== 'Administrator') return;
-    if(window.confirm(t.confirmDelete)){
-      updateDuties(prevDuties => prevDuties.filter(d => d.id !== id));
-    }
+    setDutyToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteDuty = () => {
+    if (!dutyToDelete) return;
+    updateDuties(prevDuties => prevDuties.filter(d => d.id !== dutyToDelete));
+    setIsDeleteDialogOpen(false);
+    setDutyToDelete(null);
   };
 
 
@@ -715,6 +733,20 @@ export default function DutyPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.confirmDelete}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.confirmDeleteDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDutyToDelete(null)}>{t.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteDuty} className={buttonVariants({ variant: "destructive" })}>{t.deleteConfirm}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

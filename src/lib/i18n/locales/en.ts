@@ -21,6 +21,8 @@ export const en = {
   details: 'Details',
   serialNumber: 'S.No.',
   confirmDelete: 'Are you sure you want to delete this record?',
+  confirmDeleteDescription: 'This action cannot be undone. This will permanently delete the record.',
+  deleteConfirm: 'Yes, delete',
   
   // Login Page
   login: {

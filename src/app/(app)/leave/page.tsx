@@ -6,7 +6,7 @@ import { format } from "date-fns"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { FileDown, PlusCircle, MoreHorizontal } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import {
@@ -26,6 +26,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +68,8 @@ export default function LeavePage() {
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false)
   const [editingLeave, setEditingLeave] = useState<Leave | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [leaveToDelete, setLeaveToDelete] = useState<string | null>(null)
 
   const initialNewLeaveState = {
     employeeId: "",
@@ -149,9 +161,15 @@ export default function LeavePage() {
 
   const handleDeleteLeave = (id: string) => {
     if (user?.pno !== 'ADMIN') return;
-    if(window.confirm(t.confirmDelete)){
-      updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== id));
-    }
+    setLeaveToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteLeave = () => {
+    if (!leaveToDelete) return;
+    updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== leaveToDelete));
+    setIsDeleteDialogOpen(false);
+    setLeaveToDelete(null);
   };
 
   const handleUpdateLeave = () => {
@@ -599,6 +617,18 @@ export default function LeavePage() {
             </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>{t.confirmDelete}</AlertDialogTitle>
+                <AlertDialogDescription>{t.confirmDeleteDescription}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setLeaveToDelete(null)}>{t.cancel}</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDeleteLeave} className={buttonVariants({ variant: "destructive" })}>{t.deleteConfirm}</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

@@ -7,7 +7,7 @@ import * as XLSX from "xlsx"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp, FileDown } from "lucide-react"
 import {
   Table,
@@ -26,6 +26,16 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
 import { Employee, EmployeeRank, employeeRanks } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -60,6 +70,8 @@ export default function EmployeesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
 
   const initialNewEmployeeState = {
     badgeNumber: "",
@@ -84,11 +96,17 @@ export default function EmployeesPage() {
       employee.badgeNumber.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const deleteEmployee = (id: string) => {
+  const handleDeleteClick = (id: string) => {
     if (user?.rank !== 'Administrator') return;
-    if(window.confirm(t.confirmDelete)){
-      updateEmployees(prevEmployees => prevEmployees.filter((e) => e.id !== id));
-    }
+    setEmployeeToDelete(id);
+    setIsDeleteDialogOpen(true);
+  }
+
+  const confirmDelete = () => {
+    if (!employeeToDelete) return;
+    updateEmployees(prevEmployees => prevEmployees.filter((e) => e.id !== employeeToDelete));
+    setIsDeleteDialogOpen(false);
+    setEmployeeToDelete(null);
   }
 
   const handleUpdateEmployee = () => {
@@ -593,7 +611,7 @@ export default function EmployeesPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-red-500"
-                          onClick={() => deleteEmployee(employee.id)}
+                          onClick={() => handleDeleteClick(employee.id)}
                           disabled={!isCurrentUserAdministrator || employee.rank === 'Administrator'}
                         >
                           {t.delete}
@@ -826,6 +844,20 @@ export default function EmployeesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.confirmDelete}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.confirmDeleteDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setEmployeeToDelete(null)}>{t.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className={buttonVariants({ variant: "destructive" })}>{t.deleteConfirm}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
