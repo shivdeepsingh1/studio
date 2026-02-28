@@ -50,22 +50,28 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateEmployees = useCallback((updater: Employee[] | ((prev: Employee[]) => Employee[])) => {
-    const newEmployees = typeof updater === 'function' ? updater(employees) : updater;
-    setInStorage('line-command-employees', newEmployees);
-    setEmployees(newEmployees);
-  }, [employees]);
+    setEmployees(prevEmployees => {
+      const newEmployees = typeof updater === 'function' ? updater(prevEmployees) : updater;
+      setInStorage('line-command-employees', newEmployees);
+      return newEmployees;
+    });
+  }, []);
 
   const updateDuties = useCallback((updater: Duty[] | ((prev: Duty[]) => Duty[])) => {
-    const newDuties = typeof updater === 'function' ? updater(duties) : updater;
-    setInStorage('line-command-duties', newDuties);
-    setDuties(newDuties);
-  }, [duties]);
+    setDuties(prevDuties => {
+        const newDuties = typeof updater === 'function' ? updater(prevDuties) : updater;
+        setInStorage('line-command-duties', newDuties);
+        return newDuties;
+    });
+  }, []);
 
   const updateLeaves = useCallback((updater: Leave[] | ((prev: Leave[]) => Leave[])) => {
-    const newLeaves = typeof updater === 'function' ? updater(leaves) : updater;
-    setInStorage('line-command-leaves', newLeaves);
-    setLeaves(newLeaves);
-  }, [leaves]);
+    setLeaves(prevLeaves => {
+        const newLeaves = typeof updater === 'function' ? updater(prevLeaves) : updater;
+        setInStorage('line-command-leaves', newLeaves);
+        return newLeaves;
+    });
+  }, []);
 
 
   const value = useMemo(() => ({
