@@ -102,8 +102,8 @@ export default function LoginPage() {
 
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-2xl">
+    <div className="login-background flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-2xl bg-background/70 backdrop-blur-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4">
             <Logo />

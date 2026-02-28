@@ -6,6 +6,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.login-background {
+  background-image: url('https://images.unsplash.com/photo-1563897762-234719275819?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+}
+
 @layer base {
   :root {
     --background: 270 14% 95%;
