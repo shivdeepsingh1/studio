@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useData } from "@/lib/data-provider"
 import { useLanguage } from "@/lib/i18n/language-provider"
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth()
@@ -31,6 +32,7 @@ export default function ProfilePage() {
   const [editingProfile, setEditingProfile] = useState<Partial<User & Employee> | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [adminList, setAdminList] = useState<Employee[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -107,6 +109,29 @@ export default function ProfilePage() {
     doc.save(`profile_${user.pno}.pdf`);
   };
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const newAvatarUrl = event.target?.result as string;
+        if (newAvatarUrl && user) {
+          updateUser({ avatarUrl: newAvatarUrl });
+          updateEmployees(prevEmployees =>
+            prevEmployees.map(emp =>
+              emp.id === user.id ? { ...emp, avatarUrl: newAvatarUrl } : emp
+            )
+          );
+          toast({
+            title: t.profile.pictureUpdated,
+            description: t.profile.pictureUpdatedDescription,
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   if (!user) {
     return null
@@ -124,10 +149,26 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
              <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="person portrait" />
-                  <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <div className="relative group">
+                    <Avatar className="h-20 w-20">
+                      <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="person portrait" />
+                      <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <label
+                        htmlFor="avatar-upload"
+                        className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
+                    >
+                        <Pencil className="w-6 h-6" />
+                        <span className="sr-only">{t.profile.changePicture}</span>
+                    </label>
+                    <input
+                        type="file"
+                        id="avatar-upload"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                    />
+                </div>
                 <div>
                     <CardTitle className="text-2xl">{user.name}</CardTitle>
                     <p className="text-muted-foreground">{t.ranks[user.rank]}</p>

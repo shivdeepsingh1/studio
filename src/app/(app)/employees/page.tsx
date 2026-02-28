@@ -8,7 +8,7 @@ import autoTable from "jspdf-autotable"
 import { font } from "@/lib/fonts/Hind-Regular";
 import { PageHeader } from "@/components/page-header"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp, Printer } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp, Printer, Pencil } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -301,6 +301,20 @@ export default function EmployeesPage() {
     })
     doc.save("employees.pdf")
   }
+
+  const handleEmployeeAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && editingEmployee) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const newAvatarUrl = event.target?.result as string;
+        if (newAvatarUrl) {
+          setEditingEmployee({ ...editingEmployee, avatarUrl: newAvatarUrl });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
 
   return (
@@ -675,6 +689,28 @@ export default function EmployeesPage() {
           </DialogHeader>
           {editingEmployee && (
             <ScrollArea className="max-h-[70vh] pr-6">
+              <div className="flex justify-center mb-4">
+                <div className="relative group">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={editingEmployee.avatarUrl ?? ''} alt={editingEmployee.name ?? ''} />
+                    <AvatarFallback className="text-4xl">{editingEmployee.name?.charAt(0) ?? ''}</AvatarFallback>
+                  </Avatar>
+                  <label
+                    htmlFor="employee-avatar-upload"
+                    className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
+                  >
+                    <Pencil className="w-6 h-6" />
+                    <span className="sr-only">Change Picture</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="employee-avatar-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleEmployeeAvatarChange}
+                  />
+                </div>
+              </div>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">

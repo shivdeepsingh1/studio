@@ -336,6 +336,9 @@ export const hi = {
     passwordPlaceholder: 'डिफ़ॉल्ट के लिए खाली छोड़ दें',
     saveChanges: 'बदलाव सहेजें',
     otherAdmins: 'अन्य प्रशासक',
+    changePicture: 'चित्र बदलें',
+    pictureUpdated: 'प्रोफ़ाइल चित्र अपडेट किया गया',
+    pictureUpdatedDescription: 'आपका नया प्रोफ़ाइल चित्र सहेज लिया गया है।',
   },
 
   // Statement Page

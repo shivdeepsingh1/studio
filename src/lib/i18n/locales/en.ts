@@ -336,6 +336,9 @@ export const en = {
     passwordPlaceholder: 'Leave blank for default',
     saveChanges: 'Save Changes',
     otherAdmins: 'Other Administrators',
+    changePicture: 'Change Picture',
+    pictureUpdated: 'Profile Picture Updated',
+    pictureUpdatedDescription: 'Your new profile picture has been saved.',
   },
 
   // Statement Page
