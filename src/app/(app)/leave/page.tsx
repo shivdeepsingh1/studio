@@ -164,7 +164,7 @@ export default function LeavePage() {
         }
     }
     
-    const femaleOnlyLeaves: LeaveType[] = ['CCL', 'Medical', 'Sick', 'Other'];
+    const femaleOnlyLeaves: LeaveType[] = ['CCL'];
     const femaleRanks: EmployeeRank[] = ['Lady Inspector', 'Lady Sub Inspector', 'Lady Head Constable', 'Lady Constable'];
     
     if (femaleOnlyLeaves.includes(newLeave.type) && !femaleRanks.includes(employee.rank)) {
@@ -277,7 +277,7 @@ export default function LeavePage() {
         }
     }
     
-    const femaleOnlyLeaves: LeaveType[] = ['CCL', 'Medical', 'Sick', 'Other'];
+    const femaleOnlyLeaves: LeaveType[] = ['CCL'];
     const femaleRanks: EmployeeRank[] = ['Lady Inspector', 'Lady Sub Inspector', 'Lady Head Constable', 'Lady Constable'];
     
     if (femaleOnlyLeaves.includes(editingLeave.type) && !femaleRanks.includes(employee.rank)) {
@@ -747,3 +747,5 @@ export default function LeavePage() {
     </>
   )
 }
+
+    
