@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays, getYear } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Employee, Duty, Leave, LeaveType, leaveTypes } from "@/lib/types";
+import { Employee, Duty, Leave, LeaveType, leaveTypes, EmployeeRank } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
@@ -105,7 +105,7 @@ export default function TodayReservePage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.absentEmployeesPage.contactNumber, t.location]],
+      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.absentEmployeesPage.contactNumber, t.status]],
       body: reserveEmployees.map((employee, index) => [
         index + 1,
         t.ranks[employee.rank],
@@ -184,6 +184,59 @@ export default function TodayReservePage() {
         toast({ variant: 'destructive', title: t.leave.fillAllFields });
         return;
     }
+
+    const leaveStartDate = new Date(newLeave.startDate.replace(/-/g, '/'));
+    const leaveEndDate = new Date(newLeave.endDate.replace(/-/g, '/'));
+
+    if (leaveEndDate < leaveStartDate) {
+        toast({ variant: 'destructive', title: t.leave.invalidDateRange, description: t.leave.invalidDateRangeDescription });
+        return;
+    }
+
+    const currentYear = getYear(leaveStartDate);
+    const newLeaveDuration = differenceInCalendarDays(leaveEndDate, leaveStartDate) + 1;
+
+    if (newLeave.type === 'Casual' || newLeave.type === 'Earned') {
+        const existingLeavesThisYear = leaves.filter(l =>
+            l.employeeId === selectedEmployee.id &&
+            l.type === newLeave.type &&
+            l.status === 'Approved' &&
+            getYear(new Date(l.startDate.replace(/-/g, '/'))) === currentYear
+        );
+        
+        const totalDaysTaken = existingLeavesThisYear.reduce((acc, l) => {
+            const start = new Date(l.startDate.replace(/-/g, '/'));
+            const end = new Date(l.endDate.replace(/-/g, '/'));
+            if (start <= end) {
+                return acc + (differenceInCalendarDays(end, start) + 1);
+            }
+            return acc;
+        }, 0);
+        
+        const limit = 30;
+        if (totalDaysTaken + newLeaveDuration > limit) {
+            const remaining = limit - totalDaysTaken;
+            toast({
+                variant: 'destructive',
+                title: t.leave.limitExceededTitle,
+                description: t.leave.limitExceededDescription(t.leaveTypes[newLeave.type], limit, remaining > 0 ? remaining : 0),
+            });
+            return;
+        }
+    }
+
+    const femaleOnlyLeaves: LeaveType[] = ['CCL'];
+    const femaleRanks: EmployeeRank[] = ['Lady Inspector', 'Lady Sub Inspector', 'Lady Head Constable', 'Lady Constable'];
+    
+    if (femaleOnlyLeaves.includes(newLeave.type) && !femaleRanks.includes(selectedEmployee.rank)) {
+        toast({
+            variant: 'destructive',
+            title: t.leave.genderRestrictedLeaveTitle,
+            description: t.leave.genderRestrictedLeaveDescription(t.leaveTypes[newLeave.type]),
+        });
+        return;
+    }
+
     const leaveToAdd: Leave = {
         id: Date.now().toString(),
         employeeId: selectedEmployee.id,
@@ -470,3 +523,5 @@ export default function TodayReservePage() {
     </>
   );
 }
+
+    
