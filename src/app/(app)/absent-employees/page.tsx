@@ -35,9 +35,9 @@ export default function AbsentEmployeesPage() {
   const handleExportPdf = () => {
     const doc = new jsPDF();
     if (font) {
-      doc.addFileToVFS("Hind-Regular.ttf", font);
-      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
-      doc.setFont("Hind");
+      doc.addFileToVFS("Mangal.ttf", font);
+      doc.addFont("Mangal.ttf", "Mangal", "normal");
+      doc.setFont("Mangal");
     }
     
     doc.text(`${t.pageHeaders.absentEmployees.title}`, 14, 16);
@@ -57,7 +57,7 @@ export default function AbsentEmployeesPage() {
           absence.reason,
         ];
       }),
-      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
+      ...(font && { styles: { font: "Mangal" }, headStyles: {font: "Mangal"}, bodyStyles: {font: "Mangal"} })
     });
     doc.save(`absence_records.pdf`);
   };

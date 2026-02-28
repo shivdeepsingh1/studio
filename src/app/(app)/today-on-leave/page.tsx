@@ -125,9 +125,9 @@ export default function TodayOnLeavePage() {
     const doc = new jsPDF();
     const todayString = format(new Date(), "yyyy-MM-dd");
     if (font) {
-      doc.addFileToVFS("Hind-Regular.ttf", font);
-      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
-      doc.setFont("Hind");
+      doc.addFileToVFS("Mangal.ttf", font);
+      doc.addFont("Mangal.ttf", "Mangal", "normal");
+      doc.setFont("Mangal");
     }
     
     doc.text(`${t.pageHeaders.todayOnLeave.title} - ${format(new Date(), 'dd-MM-yyyy')}`, 14, 16);
@@ -145,7 +145,7 @@ export default function TodayOnLeavePage() {
         t.leaveTypes[leave.type],
         format(new Date(leave.endDate.replace(/-/g, '/')), 'dd-MM-yyyy'),
       ]),
-      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
+      ...(font && { styles: { font: "Mangal" }, headStyles: {font: "Mangal"}, bodyStyles: {font: "Mangal"} })
     });
     doc.save(`on_leave_employees_${todayString}.pdf`);
   };
