@@ -207,6 +207,8 @@ export const hi = {
     endDutyAndMarkReserve: 'ड्यूटी समाप्त करें और रिज़र्व चिह्नित करें',
     dutyEnded: 'ड्यूटी समाप्त',
     dutyEndedDescription: (name: string) => `${name} को रिज़र्व में भेज दिया गया है।`,
+    absentFromDuty: 'ड्यूटी से अनुपस्थित',
+    absentFromReserve: 'रिज़र्व से अनुपस्थित',
   },
 
   // Employees Page
@@ -392,5 +394,3 @@ export const hi = {
     Night: 'रात',
   }
 };
-
-    

@@ -201,6 +201,46 @@ export default function TodayReservePage() {
     setSelectedEmployee(null);
   };
 
+  const handleMarkAbsent = (employee: Employee) => {
+    const todayString = format(new Date(), "yyyy-MM-dd");
+
+    const isAlreadyAbsent = leaves.some(
+      (l) =>
+        l.employeeId === employee.id &&
+        l.type === "Absent" &&
+        l.startDate === todayString
+    );
+
+    if (isAlreadyAbsent) {
+      toast({
+        variant: "destructive",
+        title: t.absentEmployeesPage.alreadyAbsentTitle,
+        description: t.absentEmployeesPage.alreadyAbsentDescription(employee.name),
+      });
+      return;
+    }
+
+    const absentLeave: Leave = {
+      id: Date.now().toString(),
+      employeeId: employee.id,
+      employeeName: employee.name,
+      type: "Absent",
+      startDate: todayString,
+      endDate: todayString,
+      reason: "Marked absent from reserve.",
+      status: "Approved",
+    };
+
+    updateLeaves((prevLeaves) => [...prevLeaves, absentLeave]);
+    toast({
+      title: t.duty.employeeMarkedAbsent,
+      description: t.duty.employeeMarkedAbsentDescription(
+        employee.name,
+        format(new Date(), "dd-MM-yyyy")
+      ),
+    });
+  };
+
   if (user?.role !== 'admin') {
       return (
           <div className="flex items-center justify-center h-full">
@@ -276,6 +316,9 @@ export default function TodayReservePage() {
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => handleOpenLeaveDialog(employee)}>
                                       {t.leave.addLeaveEntry}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-destructive" onClick={() => handleMarkAbsent(employee)}>
+                                      {t.duty.absentFromReserve}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>

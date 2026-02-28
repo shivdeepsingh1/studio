@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo } from "react";
@@ -23,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Employee, Duty } from "@/lib/types";
+import { Employee, Duty, Leave } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
@@ -38,17 +37,31 @@ type OnDutyEmployee = {
 
 export default function TodayOnDutyPage() {
   const { user } = useAuth();
-  const { employees, duties, updateDuties } = useData();
+  const { employees, duties, leaves, updateDuties, updateLeaves } = useData();
   const { t } = useLanguage();
   const { toast } = useToast();
 
   const todayString = useMemo(() => format(new Date(), "yyyy-MM-dd"), []);
 
   const onDutyEmployees = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const onLeaveTodayIds = new Set(leaves.filter(l => {
+        if (l.status !== 'Approved' || !l.startDate || !l.endDate) return false;
+        const startDate = new Date(l.startDate.replace(/-/g, '/'));
+        const endDate = new Date(l.endDate.replace(/-/g, '/'));
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+        return today >= startDate && today <= endDate;
+    }).map(l => l.employeeId));
+
+
     const dutiesToday = duties.filter(d => 
         d.date === todayString && 
         d.location.toLowerCase() !== 'reserve' &&
-        d.status !== 'Completed'
+        d.status !== 'Completed' &&
+        !onLeaveTodayIds.has(d.employeeId)
     );
     
     return dutiesToday.map(duty => {
@@ -56,7 +69,7 @@ export default function TodayOnDutyPage() {
       return { employee, duty };
     }).filter(item => item.employee) as OnDutyEmployee[];
 
-  }, [duties, employees, todayString]);
+  }, [duties, employees, leaves, todayString]);
 
   const handleEndDuty = (dutyId: string, employeeName: string) => {
     updateDuties(prevDuties =>
@@ -67,6 +80,53 @@ export default function TodayOnDutyPage() {
     toast({
       title: t.duty.dutyEnded,
       description: t.duty.dutyEndedDescription(employeeName),
+    });
+  };
+
+  const handleMarkAbsent = (duty: Duty, employee: Employee) => {
+    const todayString = format(new Date(), "yyyy-MM-dd");
+
+    const isAlreadyAbsent = leaves.some(
+      (l) =>
+        l.employeeId === employee.id &&
+        l.type === "Absent" &&
+        l.startDate === todayString
+    );
+
+    if (isAlreadyAbsent) {
+      toast({
+        variant: "destructive",
+        title: t.absentEmployeesPage.alreadyAbsentTitle,
+        description: t.absentEmployeesPage.alreadyAbsentDescription(employee.name),
+      });
+      return;
+    }
+    
+    updateDuties(prevDuties =>
+      prevDuties.map(d =>
+        d.id === duty.id ? { ...d, status: 'Completed' } : d
+      )
+    );
+    
+    const absentLeave: Leave = {
+      id: Date.now().toString(),
+      employeeId: employee.id,
+      employeeName: employee.name,
+      type: "Absent",
+      startDate: todayString,
+      endDate: todayString,
+      reason: "Marked absent from duty.",
+      status: "Approved",
+    };
+
+    updateLeaves((prevLeaves) => [...prevLeaves, absentLeave]);
+
+    toast({
+      title: t.duty.employeeMarkedAbsent,
+      description: t.duty.employeeMarkedAbsentDescription(
+        employee.name,
+        format(new Date(), "dd-MM-yyyy")
+      ),
     });
   };
 
@@ -173,6 +233,9 @@ export default function TodayOnDutyPage() {
                                       onClick={() => handleEndDuty(duty.id, employee.name)}
                                     >
                                       {t.duty.endDutyAndMarkReserve}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-destructive" onClick={() => handleMarkAbsent(duty, employee)}>
+                                      {t.duty.absentFromDuty}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>

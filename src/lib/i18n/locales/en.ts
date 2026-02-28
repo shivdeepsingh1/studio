@@ -207,6 +207,8 @@ export const en = {
     endDutyAndMarkReserve: 'End Duty & Mark Reserve',
     dutyEnded: 'Duty Ended',
     dutyEndedDescription: (name: string) => `${name} has been moved to reserve.`,
+    absentFromDuty: 'Absent from Duty',
+    absentFromReserve: 'Absent from Reserve',
   },
 
   // Employees Page
@@ -392,5 +394,3 @@ export const en = {
     Night: 'Night',
   }
 };
-
-    
