@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { font } from "@/lib/fonts/Hind-Regular";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -33,6 +34,11 @@ export default function AbsentEmployeesPage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
+    if (font) {
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
+    }
     
     doc.text(`${t.pageHeaders.absentEmployees.title}`, 14, 16);
 
@@ -51,6 +57,7 @@ export default function AbsentEmployeesPage() {
           absence.reason,
         ];
       }),
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
     doc.save(`absence_records.pdf`);
   };

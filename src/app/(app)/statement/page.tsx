@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { font } from "@/lib/fonts/Hind-Regular";
 import { useLanguage } from '@/lib/i18n/language-provider';
 
 export default function StatementPage() {
@@ -123,6 +124,11 @@ export default function StatementPage() {
 
     const handleExportPdf = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
+        if (font) {
+          doc.addFileToVFS("Hind-Regular.ttf", font);
+          doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+          doc.setFont("Hind");
+        }
 
         doc.text(t.pageHeaders.statement.description(format(today, 'MMMM dd, yyyy')), 14, 16);
 
@@ -175,8 +181,9 @@ export default function StatementPage() {
             body: body as any,
             foot: foot as any,
             theme: 'grid',
-            headStyles: { fontStyle: 'bold', halign: 'center' },
-            footStyles: { fontStyle: 'bold' },
+            headStyles: { fontStyle: 'bold', halign: 'center', ...(font && {font: 'Hind'}) },
+            footStyles: { fontStyle: 'bold', ...(font && {font: 'Hind'}) },
+            ...(font && { styles: { font: "Hind" }, bodyStyles: {font: "Hind"} })
         });
 
         doc.save(`daily_force_statement_${todayString}.pdf`);

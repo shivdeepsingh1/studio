@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { format, subDays } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { font } from "@/lib/fonts/Hind-Regular";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Printer, MoreHorizontal } from "lucide-react";
@@ -123,6 +124,11 @@ export default function TodayOnLeavePage() {
   const handleExportPdf = () => {
     const doc = new jsPDF();
     const todayString = format(new Date(), "yyyy-MM-dd");
+    if (font) {
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
+    }
     
     doc.text(`${t.pageHeaders.todayOnLeave.title} - ${format(new Date(), 'dd-MM-yyyy')}`, 14, 16);
 
@@ -139,6 +145,7 @@ export default function TodayOnLeavePage() {
         t.leaveTypes[leave.type],
         format(new Date(leave.endDate.replace(/-/g, '/')), 'dd-MM-yyyy'),
       ]),
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
     doc.save(`on_leave_employees_${todayString}.pdf`);
   };

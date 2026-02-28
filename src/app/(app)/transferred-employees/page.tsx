@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { font } from "@/lib/fonts/Hind-Regular";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Printer, MoreHorizontal } from "lucide-react";
@@ -89,6 +90,11 @@ export default function TransferredEmployeesPage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
+    if (font) {
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
+    }
     
     doc.text(`${t.pageHeaders.transferredEmployees.title}`, 14, 16);
 
@@ -105,6 +111,7 @@ export default function TransferredEmployeesPage() {
         employee.transferDate ? format(new Date(employee.transferDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A',
         employee.transferLocation,
       ]),
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
     doc.save(`transferred_employees.pdf`);
   };

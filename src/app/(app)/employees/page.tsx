@@ -6,6 +6,7 @@ import { format } from "date-fns"
 import * as XLSX from "xlsx"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import { font } from "@/lib/fonts/Hind-Regular";
 import { PageHeader } from "@/components/page-header"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp, Printer } from "lucide-react"
@@ -270,6 +271,11 @@ export default function EmployeesPage() {
   
   const handleExportPdf = () => {
     const doc = new jsPDF()
+    if (font) {
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
+    }
 
     doc.text(t.pageHeaders.employees.title, 14, 16)
     autoTable(doc, {
@@ -291,6 +297,7 @@ export default function EmployeesPage() {
             t.statusTypes[employee.status]
         ]
       }),
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     })
     doc.save("employees.pdf")
   }

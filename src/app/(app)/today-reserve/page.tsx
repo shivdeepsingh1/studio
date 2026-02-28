@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { format, differenceInCalendarDays, getYear } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { font } from "@/lib/fonts/Hind-Regular";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Printer, MoreHorizontal } from "lucide-react";
@@ -96,6 +97,11 @@ export default function TodayReservePage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
+    if (font) {
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
+    }
     
     doc.text(`${t.pageHeaders.todayReserve.title} - ${format(new Date(), 'dd-MM-yyyy')}`, 14, 16);
 
@@ -111,6 +117,7 @@ export default function TodayReservePage() {
         employee.contact,
         t.statement.reserve,
       ]),
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
     doc.save(`reserve_employees_${todayString}.pdf`);
   };

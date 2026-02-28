@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import { font } from "@/lib/fonts/Hind-Regular";
 import { useAuth } from "@/lib/auth"
 import { PageHeader } from "@/components/page-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -76,6 +77,11 @@ export default function ProfilePage() {
     if (!user || !employeeDetails) return;
 
     const doc = new jsPDF();
+    if (font) {
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
+    }
 
     doc.text(`${t.pageHeaders.profile.title} - ${user.name}`, 14, 16);
 
@@ -95,6 +101,7 @@ export default function ProfilePage() {
       startY: 22,
       head: [[t.details, '']],
       body: profileData,
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
 
     doc.save(`profile_${user.pno}.pdf`);

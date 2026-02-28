@@ -5,6 +5,7 @@ import { useState } from "react"
 import { format } from "date-fns"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import { font } from "@/lib/fonts/Hind-Regular";
 import { PageHeader } from "@/components/page-header"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Printer, PlusCircle, MoreHorizontal } from "lucide-react"
@@ -230,6 +231,11 @@ export default function DutyPage() {
 
   const handleExport = () => {
     const doc = new jsPDF();
+    if (font) {
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
+    }
     
     doc.text(t.pageHeaders.dutyAdmin.title, 14, 16);
 
@@ -272,6 +278,7 @@ export default function DutyPage() {
       startY: 20,
       head: head,
       body: body as any,
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
     doc.save("duty_roster.pdf");
   }

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { font } from "@/lib/fonts/Hind-Regular";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Printer, Search } from "lucide-react";
@@ -66,6 +67,11 @@ export default function DutyReportPage() {
       return;
     }
     const doc = new jsPDF();
+    if (font) {
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
+    }
     
     doc.text(`${t.pageHeaders.dutyReport.title} for ${selectedEmployee.name}`, 14, 16);
     doc.text(`${t.dutyReport.dateFrom}: ${format(new Date(dateFrom.replace(/-/g, '/')), "dd-MM-yyyy")} ${t.dutyReport.dateTo}: ${format(new Date(dateTo.replace(/-/g, '/')), "dd-MM-yyyy")}`, 14, 22);
@@ -83,6 +89,7 @@ export default function DutyReportPage() {
         duty.location,
         duty.details,
       ]),
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
     doc.save(`duty_report_${selectedEmployee.pno}.pdf`);
   };
