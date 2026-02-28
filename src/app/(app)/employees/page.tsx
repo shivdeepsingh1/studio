@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -94,9 +93,10 @@ export default function EmployeesPage() {
 
   const filteredEmployees = employees.filter(
     (employee) =>
-      employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.status === 'Active' &&
+      (employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       employee.pno.includes(searchQuery) ||
-      employee.badgeNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      employee.badgeNumber.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   const handleDeleteClick = (id: string) => {
