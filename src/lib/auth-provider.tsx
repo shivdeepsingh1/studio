@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
@@ -17,6 +16,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     try {
@@ -29,16 +29,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('line-command-user');
     } finally {
         setLoading(false);
+        setIsInitialLoad(false);
     }
   }, []);
 
+  useEffect(() => {
+    if (!isInitialLoad) {
+      if (user) {
+        localStorage.setItem('line-command-user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('line-command-user');
+      }
+    }
+  }, [user, isInitialLoad]);
+
+
   const _setUser = useCallback((newUser: User | null) => {
     setUser(newUser);
-    if (newUser) {
-        localStorage.setItem('line-command-user', JSON.stringify(newUser));
-    } else {
-        localStorage.removeItem('line-command-user');
-    }
   }, []);
 
 
@@ -46,17 +53,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(prevUser => {
         if (!prevUser) return null;
         const newUser = { ...prevUser, ...updatedUserData };
-        localStorage.setItem('line-command-user', JSON.stringify(newUser));
         return newUser;
     });
   }, []);
 
 
   const logout = useCallback(() => {
-    _setUser(null);
-  }, [_setUser]);
+    setUser(null);
+  }, []);
 
-  const value = useMemo(() => ({ user, logout, loading, updateUser, _setUser }), [user, loading]);
+  const value = useMemo(() => ({ user, logout, loading, updateUser, _setUser }), [user, loading, logout, updateUser, _setUser]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
@@ -42,36 +41,45 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [duties, setDuties] = useState<Duty[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     setEmployees(getFromStorage("line-command-employees", mockEmployees));
     setDuties(getFromStorage("line-command-duties", mockDuties));
     setLeaves(getFromStorage("line-command-leaves", mockLeaves));
     setLoading(false);
+    setIsInitialLoad(false);
   }, []);
 
+  useEffect(() => {
+    if (!isInitialLoad) {
+      setInStorage('line-command-employees', employees);
+    }
+  }, [employees, isInitialLoad]);
+
+  useEffect(() => {
+    if (!isInitialLoad) {
+      setInStorage('line-command-duties', duties);
+    }
+  }, [duties, isInitialLoad]);
+
+  useEffect(() => {
+    if (!isInitialLoad) {
+      setInStorage('line-command-leaves', leaves);
+    }
+  }, [leaves, isInitialLoad]);
+
+
   const updateEmployees = useCallback((updater: Employee[] | ((prev: Employee[]) => Employee[])) => {
-    setEmployees(prevEmployees => {
-      const newEmployees = typeof updater === 'function' ? updater(prevEmployees) : updater;
-      setInStorage('line-command-employees', newEmployees);
-      return newEmployees;
-    });
+    setEmployees(updater);
   }, []);
 
   const updateDuties = useCallback((updater: Duty[] | ((prev: Duty[]) => Duty[])) => {
-    setDuties(prevDuties => {
-        const newDuties = typeof updater === 'function' ? updater(prevDuties) : updater;
-        setInStorage('line-command-duties', newDuties);
-        return newDuties;
-    });
+    setDuties(updater);
   }, []);
 
   const updateLeaves = useCallback((updater: Leave[] | ((prev: Leave[]) => Leave[])) => {
-    setLeaves(prevLeaves => {
-        const newLeaves = typeof updater === 'function' ? updater(prevLeaves) : updater;
-        setInStorage('line-command-leaves', newLeaves);
-        return newLeaves;
-    });
+    setLeaves(updater);
   }, []);
 
 
@@ -83,7 +91,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updateDuties,
       updateLeaves,
       loading
-  }), [employees, duties, leaves, loading]);
+  }), [employees, duties, leaves, loading, updateEmployees, updateDuties, updateLeaves]);
 
   return (
     <DataContext.Provider value={value}>
