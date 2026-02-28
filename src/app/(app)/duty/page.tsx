@@ -256,15 +256,15 @@ export default function DutyPage() {
         ]
       });
     } else {
-      head = [[t.serialNumber, t.badgeNumber, t.pno, t.rank, t.name, t.date, t.shift, t.location]];
+      head = [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.date, t.shift, t.location]];
       body = duties.map((duty, index) => {
         const employee = allEmployees.find(e => e.id === duty.employeeId);
         const dutyDateValid = duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime());
         return [
           index + 1,
+          employee?.rank ? t.ranks[employee.rank] : 'N/A',
           employee?.badgeNumber || 'N/A',
           employee?.pno || 'N/A',
-          employee?.rank ? t.ranks[employee.rank] : 'N/A',
           duty.employeeName,
           dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
           t.shifts[duty.shift],
@@ -478,9 +478,9 @@ export default function DutyPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t.serialNumber}</TableHead>
+                    <TableHead>{t.rank}</TableHead>
                     <TableHead>{t.badgeNumber}</TableHead>
                     <TableHead>{t.pno}</TableHead>
-                    <TableHead>{t.rank}</TableHead>
                     <TableHead>{t.name}</TableHead>
                     <TableHead>{t.date}</TableHead>
                     <TableHead>{t.shift}</TableHead>
@@ -497,9 +497,9 @@ export default function DutyPage() {
                     return (
                       <TableRow key={duty.id}>
                         <TableCell>{index + 1}</TableCell>
+                        <TableCell>{employee ? t.ranks[employee.rank] : ''}</TableCell>
                         <TableCell>{employee?.badgeNumber}</TableCell>
                         <TableCell>{employee?.pno}</TableCell>
-                        <TableCell>{employee ? t.ranks[employee.rank] : ''}</TableCell>
                         <TableCell>{duty.employeeName}</TableCell>
                         <TableCell>{dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                         <TableCell>

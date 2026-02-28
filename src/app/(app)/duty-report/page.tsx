@@ -76,9 +76,10 @@ export default function DutyReportPage() {
 
     autoTable(doc, {
       startY: 28,
-      head: [[t.serialNumber, t.badgeNumber, t.name, t.date, t.shift, t.location, t.details]],
+      head: [[t.serialNumber, t.rank, t.badgeNumber, t.name, t.date, t.shift, t.location, t.details]],
       body: filteredDuties.map((duty, index) => [
         index + 1,
+        t.ranks[selectedEmployee.rank],
         selectedEmployee.badgeNumber,
         selectedEmployee.name,
         format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy'),
@@ -198,6 +199,7 @@ export default function DutyReportPage() {
                         <TableHeader>
                             <TableRow>
                             <TableHead>{t.serialNumber}</TableHead>
+                            <TableHead>{t.rank}</TableHead>
                             <TableHead>{t.badgeNumber}</TableHead>
                             <TableHead>{t.name}</TableHead>
                             <TableHead>{t.date}</TableHead>
@@ -211,6 +213,7 @@ export default function DutyReportPage() {
                             filteredDuties.map((duty, index) => (
                                 <TableRow key={duty.id}>
                                 <TableCell>{index + 1}</TableCell>
+                                <TableCell>{t.ranks[selectedEmployee.rank]}</TableCell>
                                 <TableCell>{selectedEmployee.badgeNumber}</TableCell>
                                 <TableCell>{selectedEmployee.name}</TableCell>
                                 <TableCell>{duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime()) ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
@@ -221,7 +224,7 @@ export default function DutyReportPage() {
                             ))
                             ) : (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center">
+                                <TableCell colSpan={8} className="text-center">
                                 {t.dutyReport.noDutiesFound}
                                 </TableCell>
                             </TableRow>

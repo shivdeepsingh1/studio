@@ -59,13 +59,13 @@ export default function SuspendedEmployeesPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.employees.contactNumber, t.suspendedEmployeesPage.suspensionDate]],
+      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.employees.contactNumber, t.suspendedEmployeesPage.suspensionDate]],
       body: suspendedEmployees.map((employee, index) => [
         index + 1,
+        t.ranks[employee.rank],
         employee.badgeNumber,
         employee.pno,
         employee.name,
-        t.ranks[employee.rank],
         employee.contact,
         employee.suspensionDate ? format(new Date(employee.suspensionDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A',
       ]),
@@ -104,10 +104,10 @@ export default function SuspendedEmployeesPage() {
                   <TableHeader>
                       <TableRow>
                           <TableHead>{t.serialNumber}</TableHead>
+                          <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.badgeNumber}</TableHead>
                           <TableHead>{t.pno}</TableHead>
                           <TableHead>{t.name}</TableHead>
-                          <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.employees.contactNumber}</TableHead>
                           <TableHead>{t.suspendedEmployeesPage.suspensionDate}</TableHead>
                           <TableHead className="text-right">{t.actions}</TableHead>
@@ -118,6 +118,7 @@ export default function SuspendedEmployeesPage() {
                       suspendedEmployees.map((employee, index) => (
                           <TableRow key={employee.id}>
                               <TableCell>{index + 1}</TableCell>
+                              <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.badgeNumber}</TableCell>
                               <TableCell>{employee.pno}</TableCell>
                               <TableCell>
@@ -133,7 +134,6 @@ export default function SuspendedEmployeesPage() {
                                   <div className="font-medium">{employee.name}</div>
                                 </div>
                               </TableCell>
-                              <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.contact}</TableCell>
                               <TableCell>{employee.suspensionDate ? format(new Date(employee.suspensionDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                               <TableCell className="text-right">

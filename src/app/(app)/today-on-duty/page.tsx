@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -140,13 +141,13 @@ export default function TodayOnDutyPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.absentEmployeesPage.contactNumber, t.location, t.date]],
+      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.absentEmployeesPage.contactNumber, t.location, t.date]],
       body: onDutyEmployees.map(({ employee, duty }, index) => [
         index + 1,
+        t.ranks[employee.rank],
         employee.badgeNumber,
         employee.pno,
         employee.name,
-        t.ranks[employee.rank],
         employee.contact,
         duty.location,
         format(new Date(duty.date.replace(/-/g, '/')), 'dd-MM-yyyy'),
@@ -186,10 +187,10 @@ export default function TodayOnDutyPage() {
                   <TableHeader>
                       <TableRow>
                           <TableHead>{t.serialNumber}</TableHead>
+                          <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.badgeNumber}</TableHead>
                           <TableHead>{t.pno}</TableHead>
                           <TableHead>{t.name}</TableHead>
-                          <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.absentEmployeesPage.contactNumber}</TableHead>
                           <TableHead>{t.location}</TableHead>
                           <TableHead>{t.date}</TableHead>
@@ -201,6 +202,7 @@ export default function TodayOnDutyPage() {
                       onDutyEmployees.map(({ employee, duty }, index) => (
                           <TableRow key={employee.id}>
                               <TableCell>{index + 1}</TableCell>
+                              <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.badgeNumber}</TableCell>
                               <TableCell>{employee.pno}</TableCell>
                               <TableCell>
@@ -216,7 +218,6 @@ export default function TodayOnDutyPage() {
                                   <div className="font-medium">{employee.name}</div>
                                 </div>
                               </TableCell>
-                              <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.contact}</TableCell>
                               <TableCell>{duty.location}</TableCell>
                               <TableCell>{format(new Date(duty.date.replace(/-/g, '/')), 'dd-MM-yyyy')}</TableCell>

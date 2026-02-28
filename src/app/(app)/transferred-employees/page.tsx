@@ -98,13 +98,13 @@ export default function TransferredEmployeesPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.employees.contactNumber, t.transferredEmployeesPage.transferDate, t.transferredEmployeesPage.transferLocation]],
+      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.employees.contactNumber, t.transferredEmployeesPage.transferDate, t.transferredEmployeesPage.transferLocation]],
       body: transferredEmployees.map((employee, index) => [
         index + 1,
+        t.ranks[employee.rank],
         employee.badgeNumber,
         employee.pno,
         employee.name,
-        t.ranks[employee.rank],
         employee.contact,
         employee.transferDate ? format(new Date(employee.transferDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A',
         employee.transferLocation,
@@ -144,10 +144,10 @@ export default function TransferredEmployeesPage() {
                   <TableHeader>
                       <TableRow>
                           <TableHead>{t.serialNumber}</TableHead>
+                          <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.badgeNumber}</TableHead>
                           <TableHead>{t.pno}</TableHead>
                           <TableHead>{t.name}</TableHead>
-                          <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.employees.contactNumber}</TableHead>
                           <TableHead>{t.transferredEmployeesPage.transferDate}</TableHead>
                           <TableHead>{t.transferredEmployeesPage.transferLocation}</TableHead>
@@ -159,6 +159,7 @@ export default function TransferredEmployeesPage() {
                       transferredEmployees.map((employee, index) => (
                           <TableRow key={employee.id}>
                               <TableCell>{index + 1}</TableCell>
+                              <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.badgeNumber}</TableCell>
                               <TableCell>{employee.pno}</TableCell>
                               <TableCell>
@@ -174,7 +175,6 @@ export default function TransferredEmployeesPage() {
                                   <div className="font-medium">{employee.name}</div>
                                 </div>
                               </TableCell>
-                              <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.contact}</TableCell>
                               <TableCell>{employee.transferDate ? format(new Date(employee.transferDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                               <TableCell>{employee.transferLocation}</TableCell>

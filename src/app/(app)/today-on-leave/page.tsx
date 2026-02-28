@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -131,13 +132,13 @@ export default function TodayOnLeavePage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.absentEmployeesPage.contactNumber, t.leave.leaveType, t.leave.endDate]],
+      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.absentEmployeesPage.contactNumber, t.leave.leaveType, t.leave.endDate]],
       body: onLeaveEmployees.map(({ employee, leave }, index) => [
         index + 1,
+        t.ranks[employee.rank],
         employee.badgeNumber,
         employee.pno,
         employee.name,
-        t.ranks[employee.rank],
         employee.contact,
         t.leaveTypes[leave.type],
         format(new Date(leave.endDate.replace(/-/g, '/')), 'dd-MM-yyyy'),
@@ -177,10 +178,10 @@ export default function TodayOnLeavePage() {
                   <TableHeader>
                       <TableRow>
                           <TableHead>{t.serialNumber}</TableHead>
+                          <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.badgeNumber}</TableHead>
                           <TableHead>{t.pno}</TableHead>
                           <TableHead>{t.name}</TableHead>
-                          <TableHead>{t.rank}</TableHead>
                           <TableHead>{t.absentEmployeesPage.contactNumber}</TableHead>
                           <TableHead>{t.leave.leaveType}</TableHead>
                           <TableHead>{t.leave.endDate}</TableHead>
@@ -193,6 +194,7 @@ export default function TodayOnLeavePage() {
                       onLeaveEmployees.map(({ employee, leave }, index) => (
                           <TableRow key={employee.id}>
                               <TableCell>{index + 1}</TableCell>
+                              <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.badgeNumber}</TableCell>
                               <TableCell>{employee.pno}</TableCell>
                               <TableCell>
@@ -208,7 +210,6 @@ export default function TodayOnLeavePage() {
                                   <div className="font-medium">{employee.name}</div>
                                 </div>
                               </TableCell>
-                              <TableCell>{t.ranks[employee.rank]}</TableCell>
                               <TableCell>{employee.contact}</TableCell>
                               <TableCell>{t.leaveTypes[leave.type]}</TableCell>
                               <TableCell>{format(new Date(leave.endDate.replace(/-/g, '/')), 'dd-MM-yyyy')}</TableCell>
@@ -248,5 +249,3 @@ export default function TodayOnLeavePage() {
     </>
   );
 }
-
-    
