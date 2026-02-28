@@ -102,7 +102,10 @@ export default function LoginPage() {
 
 
   return (
-    <div className="login-background flex min-h-screen items-center justify-center p-4">
+    <div 
+      className="flex min-h-screen items-center justify-center p-4 bg-cover bg-center"
+      style={{ backgroundImage: "url('https://images.unsplash.com/photo-1628574163430-615272a91a99?q=80&w=2070&auto=format&fit=crop')" }}
+    >
       <Card className="w-full max-w-md shadow-2xl bg-background/70 backdrop-blur-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4">
