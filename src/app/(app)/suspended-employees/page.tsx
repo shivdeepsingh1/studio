@@ -59,13 +59,14 @@ export default function SuspendedEmployeesPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.suspendedEmployeesPage.suspensionDate]],
+      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.employees.contactNumber, t.suspendedEmployeesPage.suspensionDate]],
       body: suspendedEmployees.map((employee, index) => [
         index + 1,
         employee.badgeNumber,
         employee.pno,
         employee.name,
         t.ranks[employee.rank],
+        employee.contact,
         employee.suspensionDate ? format(new Date(employee.suspensionDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A',
       ]),
       styles: { font: 'Hind' },
@@ -107,6 +108,7 @@ export default function SuspendedEmployeesPage() {
                           <TableHead>{t.pno}</TableHead>
                           <TableHead>{t.name}</TableHead>
                           <TableHead>{t.rank}</TableHead>
+                          <TableHead>{t.employees.contactNumber}</TableHead>
                           <TableHead>{t.suspendedEmployeesPage.suspensionDate}</TableHead>
                           <TableHead className="text-right">{t.actions}</TableHead>
                       </TableRow>
@@ -132,6 +134,7 @@ export default function SuspendedEmployeesPage() {
                                 </div>
                               </TableCell>
                               <TableCell>{t.ranks[employee.rank]}</TableCell>
+                              <TableCell>{employee.contact}</TableCell>
                               <TableCell>{employee.suspensionDate ? format(new Date(employee.suspensionDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                               <TableCell className="text-right">
                                 <DropdownMenu>
@@ -152,7 +155,7 @@ export default function SuspendedEmployeesPage() {
                       ))
                       ) : (
                       <TableRow>
-                          <TableCell colSpan={7} className="text-center h-24">
+                          <TableCell colSpan={8} className="text-center h-24">
                               {t.suspendedEmployeesPage.noSuspended}
                           </TableCell>
                       </TableRow>
