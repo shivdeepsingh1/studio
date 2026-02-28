@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
@@ -12,7 +13,7 @@ interface LanguageContextType {
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('hi'); // Default for server-side rendering
+  const [locale, setLocaleState] = useState<Locale>('en'); // Default for server-side rendering
 
   useEffect(() => {
     // This effect runs only on the client, after hydration
