@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -147,7 +148,7 @@ export default function LeavePage() {
   };
 
   const handleDeleteLeave = (id: string) => {
-    if (user?.rank !== 'Administrator') return;
+    if (user?.pno !== 'ADMIN') return;
     if(window.confirm(t.confirmDelete)){
       updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== id));
     }
@@ -178,7 +179,7 @@ export default function LeavePage() {
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal')
     doc.setFont('Hind')
 
-    doc.text(t.pageHeaders.leaveAdmin.title, 14, 16)
+    doc.text(t.sidebar.leave, 14, 16)
     
     const isEmployeeView = user?.role !== "admin"
     const data = isEmployeeView ? employeeLeaves : leaves
@@ -241,10 +242,12 @@ export default function LeavePage() {
     }
   }
 
+  const isChiefAdmin = user?.pno === 'ADMIN';
+
   return (
     <>
       <PageHeader
-        title={user?.role === "admin" ? t.pageHeaders.leaveAdmin.title : t.pageHeaders.leaveEmployee.title}
+        title={t.sidebar.leave}
         description={user?.role === "admin" ? t.pageHeaders.leaveAdmin.description : t.pageHeaders.leaveEmployee.description}
       >
         <Dialog
@@ -474,6 +477,7 @@ export default function LeavePage() {
                           <DropdownMenuItem
                             className="text-red-500"
                             onClick={() => handleDeleteLeave(leave.id)}
+                            disabled={!isChiefAdmin}
                           >
                             {t.delete}
                           </DropdownMenuItem>
