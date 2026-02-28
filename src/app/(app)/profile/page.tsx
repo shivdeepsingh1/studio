@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -76,8 +77,7 @@ export default function ProfilePage() {
     if (!user || !employeeDetails) return;
 
     const doc = new jsPDF();
-    const cleanFont = font.replace(/\s/g, '');
-    doc.addFileToVFS('Hind-Regular.ttf', cleanFont);
+    doc.addFileToVFS('Hind-Regular.ttf', font);
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
     doc.setFont('Hind');
 

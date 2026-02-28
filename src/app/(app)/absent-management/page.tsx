@@ -123,8 +123,7 @@ export default function AbsentManagementPage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
-    const cleanFont = font.replace(/\s/g, '');
-    doc.addFileToVFS('Hind-Regular.ttf', cleanFont);
+    doc.addFileToVFS('Hind-Regular.ttf', font);
     doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
     doc.setFont('Hind');
     
