@@ -349,6 +349,7 @@ export const hi = {
     alreadyPresentTitle: 'पहले से उपस्थित',
     alreadyPresentDescription: (name: string) => `${name} अनुपस्थित के रूप में चिह्नित नहीं है।`,
     contactNumber: 'मोबाइल नंबर',
+    returnFromAbsent: 'अनुपस्थित से रिज़र्व करें',
   },
 
   statusTypes: {

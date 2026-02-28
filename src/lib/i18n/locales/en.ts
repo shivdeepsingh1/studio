@@ -349,6 +349,7 @@ export const en = {
     alreadyPresentTitle: 'Already Present',
     alreadyPresentDescription: (name: string) => `${name} is not marked as absent.`,
     contactNumber: 'Contact No.',
+    returnFromAbsent: 'Reserve from Absent',
   },
   
   statusTypes: {

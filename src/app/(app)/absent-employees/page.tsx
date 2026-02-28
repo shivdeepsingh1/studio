@@ -6,7 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown, Search, UserCheck, UserX } from "lucide-react";
+import { FileDown, Search, UserCheck, UserX, MoreHorizontal } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -25,7 +25,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/i18n/language-provider";
 import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type EmployeeWithStatus = {
   employee: Employee;
@@ -130,26 +135,29 @@ export default function AbsentEmployeesPage() {
     setSearchedEmployee(null);
     setPnoInput("");
   }
+
+  const handleReturnFromAbsent = (employeeId: string, employeeName: string) => {
+    const absentLeaveRecord = leaves.find(l => 
+      l.employeeId === employeeId && 
+      l.type === 'Absent' && 
+      l.startDate === todayString
+    );
+
+    if (!absentLeaveRecord) {
+        toast({ variant: 'default', title: t.absentEmployeesPage.alreadyPresentTitle, description: t.absentEmployeesPage.alreadyPresentDescription(employeeName) });
+        return;
+    }
+
+    updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== absentLeaveRecord.id));
+    toast({ title: t.absentEmployeesPage.markedPresentTitle, description: t.absentEmployeesPage.markedPresentDescription(employeeName) });
+  };
   
   const handleMarkPresent = () => {
     if (!searchedEmployee) {
         toast({ variant: 'destructive', title: t.duty.noEmployeeSelected, description: t.duty.noEmployeeSelectedDescription });
         return;
     }
-    
-    const absentLeaveRecord = leaves.find(l => 
-      l.employeeId === searchedEmployee.id && 
-      l.type === 'Absent' && 
-      l.startDate === todayString
-    );
-
-    if (!absentLeaveRecord) {
-        toast({ variant: 'default', title: t.absentEmployeesPage.alreadyPresentTitle, description: t.absentEmployeesPage.alreadyPresentDescription(searchedEmployee.name) });
-        return;
-    }
-
-    updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== absentLeaveRecord.id));
-    toast({ title: t.absentEmployeesPage.markedPresentTitle, description: t.absentEmployeesPage.markedPresentDescription(searchedEmployee.name) });
+    handleReturnFromAbsent(searchedEmployee.id, searchedEmployee.name);
     setSearchedEmployee(null);
     setPnoInput("");
   }
@@ -293,6 +301,7 @@ export default function AbsentEmployeesPage() {
                             <TableHead>{t.pno}</TableHead>
                             <TableHead>{t.rank}</TableHead>
                             <TableHead>{t.absentEmployeesPage.contactNumber}</TableHead>
+                            <TableHead className="text-right">{t.actions}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -316,11 +325,26 @@ export default function AbsentEmployeesPage() {
                                 <TableCell>{employee.pno}</TableCell>
                                 <TableCell>{t.ranks[employee.rank]}</TableCell>
                                 <TableCell>{employee.contact}</TableCell>
+                                <TableCell className="text-right">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                          <span className="sr-only">{t.employees.openMenu}</span>
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => handleReturnFromAbsent(employee.id, employee.name)}>
+                                          {t.absentEmployeesPage.returnFromAbsent}
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
                             </TableRow>
                         ))
                         ) : (
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center h-24">
+                            <TableCell colSpan={6} className="text-center h-24">
                                 {t.absentEmployeesPage.noAbsentees}
                             </TableCell>
                         </TableRow>
