@@ -87,6 +87,8 @@ export default function DutyPage() {
   const [newDuty, setNewDuty] = useState(initialNewDutyState)
   const [pnoInput, setPnoInput] = useState("")
   const [foundEmployee, setFoundEmployee] = useState<Employee | null>(null)
+  
+  const currentUserEmployee = allEmployees.find(e => e.id === user?.id);
 
   const handlePnoSearch = (pno: string) => {
     setPnoInput(pno)
@@ -630,6 +632,10 @@ export default function DutyPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t.serialNumber}</TableHead>
+                <TableHead>{t.rank}</TableHead>
+                <TableHead>{t.badgeNumber}</TableHead>
+                <TableHead>{t.pno}</TableHead>
+                <TableHead>{t.name}</TableHead>
                 <TableHead>{t.date}</TableHead>
                 <TableHead>{t.shift}</TableHead>
                 <TableHead>{t.location}</TableHead>
@@ -642,6 +648,10 @@ export default function DutyPage() {
                 return (
                   <TableRow key={duty.id}>
                     <TableCell>{index + 1}</TableCell>
+                    <TableCell>{currentUserEmployee ? t.ranks[currentUserEmployee.rank] : 'N/A'}</TableCell>
+                    <TableCell>{currentUserEmployee?.badgeNumber}</TableCell>
+                    <TableCell>{currentUserEmployee?.pno}</TableCell>
+                    <TableCell>{currentUserEmployee?.name}</TableCell>
                     <TableCell>{dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                     <TableCell>
                       <Badge
@@ -659,7 +669,7 @@ export default function DutyPage() {
               })}
               {employeeDuties.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={9} className="text-center">
                     {t.duty.noDutyAssignedYet}
                   </TableCell>
                 </TableRow>

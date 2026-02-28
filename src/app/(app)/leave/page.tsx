@@ -81,6 +81,8 @@ export default function LeavePage() {
   }
 
   const [newLeave, setNewLeave] = useState(initialNewLeaveState)
+  
+  const currentUserEmployee = allEmployees.find(e => e.id === user?.id);
 
   const handleNewLeaveInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -557,14 +559,10 @@ export default function LeavePage() {
           <TableHeader>
             <TableRow>
               <TableHead>{t.serialNumber}</TableHead>
-              {user?.role === "admin" && (
-                <>
-                  <TableHead>{t.rank}</TableHead>
-                  <TableHead>{t.badgeNumber}</TableHead>
-                  <TableHead>{t.pno}</TableHead>
-                  <TableHead>{t.name}</TableHead>
-                </>
-              )}
+              <TableHead>{t.rank}</TableHead>
+              <TableHead>{t.badgeNumber}</TableHead>
+              <TableHead>{t.pno}</TableHead>
+              <TableHead>{t.name}</TableHead>
               <TableHead>{t.leave.leaveType}</TableHead>
               <TableHead>{t.leave.startDate}</TableHead>
               <TableHead>{t.leave.endDate}</TableHead>
@@ -578,7 +576,7 @@ export default function LeavePage() {
             {(user?.role === "admin" ? leaves : employeeLeaves).map((leave, index) => {
               const startDateValid = leave.startDate && !isNaN(new Date(leave.startDate.replace(/-/g, '/')).getTime());
               const endDateValid = leave.endDate && !isNaN(new Date(leave.endDate.replace(/-/g, '/')).getTime());
-              const employee = user?.role === 'admin' ? allEmployees.find(e => e.id === leave.employeeId) : null;
+              const employee = allEmployees.find(e => e.id === leave.employeeId);
               const totalDays = startDateValid && endDateValid
                 ? differenceInCalendarDays(new Date(leave.endDate.replace(/-/g, '/')), new Date(leave.startDate.replace(/-/g, '/'))) + 1
                 : 0;
@@ -586,14 +584,10 @@ export default function LeavePage() {
               return (
                 <TableRow key={leave.id}>
                   <TableCell>{index + 1}</TableCell>
-                  {user?.role === "admin" && (
-                    <>
-                      <TableCell>{employee ? t.ranks[employee.rank] : 'N/A'}</TableCell>
-                      <TableCell>{employee?.badgeNumber || 'N/A'}</TableCell>
-                      <TableCell>{employee?.pno || 'N/A'}</TableCell>
-                      <TableCell>{leave.employeeName}</TableCell>
-                    </>
-                  )}
+                  <TableCell>{employee ? t.ranks[employee.rank] : 'N/A'}</TableCell>
+                  <TableCell>{employee?.badgeNumber || 'N/A'}</TableCell>
+                  <TableCell>{employee?.pno || 'N/A'}</TableCell>
+                  <TableCell>{leave.employeeName}</TableCell>
                   <TableCell>{t.leaveTypes[leave.type]}</TableCell>
                   <TableCell>{startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                   <TableCell>{endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
@@ -638,7 +632,7 @@ export default function LeavePage() {
             })}
             {user?.role === "employee" && employeeLeaves.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={11} className="text-center">
                   {t.leave.noLeaveRecords}
                 </TableCell>
               </TableRow>
