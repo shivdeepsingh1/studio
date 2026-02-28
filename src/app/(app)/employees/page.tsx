@@ -84,7 +84,10 @@ export default function EmployeesPage() {
     joiningDistrict: "",
     password: "",
     role: "employee" as "admin" | "employee",
-    status: "Active" as "Active" | "Suspended",
+    status: "Active" as "Active" | "Suspended" | "Transferred",
+    suspensionDate: "",
+    transferDate: "",
+    transferLocation: "",
   }
 
   const [newEmployee, setNewEmployee] = useState(initialNewEmployeeState)
@@ -229,7 +232,10 @@ export default function EmployeesPage() {
             avatarUrl,
             password: row.password?.toString() || '',
             role: row.role === 'admin' ? 'admin' : 'employee',
-            status: row.status === 'Suspended' ? 'Suspended' : 'Active',
+            status: row.status as Employee['status'] || 'Active',
+            suspensionDate: row.status === 'Suspended' ? formatDate(row.suspensionDate) : undefined,
+            transferDate: row.status === 'Transferred' ? formatDate(row.transferDate) : undefined,
+            transferLocation: row.status === 'Transferred' ? row.transferLocation : undefined,
           };
         });
 
@@ -287,7 +293,7 @@ export default function EmployeesPage() {
             joiningDateValid ? format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
             employee.joiningDistrict,
             employee.contact,
-            employee.status === 'Suspended' ? t.employees.suspended : t.employees.active
+            t.statusTypes[employee.status]
         ]
       }),
       styles: { font: 'Hind' },
@@ -454,9 +460,28 @@ export default function EmployeesPage() {
                     <SelectContent>
                       <SelectItem value="Active">{t.employees.active}</SelectItem>
                       <SelectItem value="Suspended">{t.employees.suspended}</SelectItem>
+                      <SelectItem value="Transferred">{t.employees.transferred}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+                {newEmployee.status === 'Suspended' && (
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="suspensionDate" className="text-right">{t.employees.suspensionDate}</Label>
+                    <Input id="suspensionDate" type="date" value={newEmployee.suspensionDate} onChange={handleNewInputChange} className="col-span-3" />
+                  </div>
+                )}
+                {newEmployee.status === 'Transferred' && (
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="transferDate" className="text-right">{t.employees.transferDate}</Label>
+                      <Input id="transferDate" type="date" value={newEmployee.transferDate} onChange={handleNewInputChange} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="transferLocation" className="text-right">{t.employees.transferLocation}</Label>
+                      <Input id="transferLocation" value={newEmployee.transferLocation} onChange={handleNewInputChange} className="col-span-3" />
+                    </div>
+                  </>
+                )}
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="badgeNumber" className="text-right">
                     {t.badgeNumber}
@@ -566,6 +591,15 @@ export default function EmployeesPage() {
               
               const canEditThisRow = canEdit;
 
+              const getStatusBadgeVariant = (status: Employee['status']) => {
+                switch (status) {
+                    case 'Active': return 'default';
+                    case 'Suspended': return 'destructive';
+                    case 'Transferred': return 'secondary';
+                    default: return 'outline';
+                }
+              };
+
               return (
                 <TableRow key={employee.id}>
                   <TableCell>{index + 1}</TableCell>
@@ -576,7 +610,7 @@ export default function EmployeesPage() {
                     <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>{employee.role === 'admin' ? t.employees.admin : t.employees.employee}</Badge>
                   </TableCell>
                    <TableCell>
-                    <Badge variant={employee.status === 'Suspended' ? 'destructive' : 'default'}>{employee.status === 'Suspended' ? t.employees.suspended : t.employees.active}</Badge>
+                    <Badge variant={getStatusBadgeVariant(employee.status)}>{t.statusTypes[employee.status]}</Badge>
                   </TableCell>
                   <TableCell>{employee.badgeNumber}</TableCell>
                   <TableCell>{employee.pno}</TableCell>
@@ -754,9 +788,28 @@ export default function EmployeesPage() {
                     <SelectContent>
                       <SelectItem value="Active">{t.employees.active}</SelectItem>
                       <SelectItem value="Suspended">{t.employees.suspended}</SelectItem>
+                      <SelectItem value="Transferred">{t.employees.transferred}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+                {editingEmployee.status === 'Suspended' && (
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="suspensionDate" className="text-right">{t.employees.suspensionDate}</Label>
+                    <Input id="suspensionDate" type="date" value={editingEmployee.suspensionDate ?? ''} onChange={handleEditInputChange} className="col-span-3" />
+                  </div>
+                )}
+                {editingEmployee.status === 'Transferred' && (
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="transferDate" className="text-right">{t.employees.transferDate}</Label>
+                      <Input id="transferDate" type="date" value={editingEmployee.transferDate ?? ''} onChange={handleEditInputChange} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="transferLocation" className="text-right">{t.employees.transferLocation}</Label>
+                      <Input id="transferLocation" value={editingEmployee.transferLocation ?? ''} onChange={handleEditInputChange} className="col-span-3" />
+                    </div>
+                  </>
+                )}
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="badgeNumber" className="text-right">
                     {t.badgeNumber}

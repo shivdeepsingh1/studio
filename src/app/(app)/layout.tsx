@@ -31,6 +31,9 @@ import {
   ClipboardCheck,
   ShieldHalf,
   CalendarCheck2,
+  Archive,
+  UserMinus,
+  Plane,
 } from 'lucide-react';
 import { SidebarLogo } from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -56,6 +59,9 @@ function MainSidebar() {
     { href: '/leave', label: t.sidebar.leave, icon: CalendarOff },
     { href: '/employees', label: t.sidebar.employees, icon: Users, adminOnly: true },
     { href: '/absent-employees', label: t.sidebar.absentEmployees, icon: UserX, adminOnly: true },
+    { href: '/absent-management', label: t.sidebar.absentManagement, icon: Archive, adminOnly: true },
+    { href: '/suspended-employees', label: t.sidebar.suspendedEmployees, icon: UserMinus, adminOnly: true },
+    { href: '/transferred-employees', label: t.sidebar.transferredEmployees, icon: Plane, adminOnly: true },
     { href: '/duty-report', label: t.sidebar.dutyReport, icon: BookCheck, adminOnly: true },
     { href: '/statement', label: t.sidebar.statement, icon: FileText, adminOnly: true },
     { href: '/today-on-duty', label: t.sidebar.todayOnDuty, icon: ClipboardCheck, adminOnly: true },

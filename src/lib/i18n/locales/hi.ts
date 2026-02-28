@@ -58,6 +58,9 @@ export const hi = {
     language: 'भाषा',
     english: 'English',
     hindi: 'हिंदी',
+    absentManagement: 'अनुपस्थिति प्रबंधन',
+    suspendedEmployees: 'निलंबित कर्मचारी',
+    transferredEmployees: 'स्थानांतरित कर्मचारी',
   },
   
   // Page Headers
@@ -116,9 +119,21 @@ export const hi = {
     },
     absentEmployees: {
       title: 'अनुपस्थित कर्मचारी',
-      description: 'दैनिक अनुपस्थिति का प्रबंधन करें और अनुपस्थित लोगों की सूची देखें।',
+      description: 'आज अनुपस्थित के रूप में चिह्नित कर्मचारियों की सूची देखें।',
     },
     permissionDenied: 'आपको यह पृष्ठ देखने की अनुमति नहीं है।',
+    absentManagement: {
+        title: 'अनुपस्थिति प्रबंधन',
+        description: 'सभी कर्मचारी अनुपस्थिति का एक ऐतिहासिक रिकॉर्ड देखें।',
+    },
+    suspendedEmployees: {
+        title: 'निलंबित कर्मचारी',
+        description: 'वर्तमान में निलंबित सभी कर्मचारियों को देखें।',
+    },
+    transferredEmployees: {
+        title: 'स्थानांतरित कर्मचारी',
+        description: 'बाहर स्थानांतरित किए गए सभी कर्मचारियों को देखें।',
+    },
   },
 
   // Dashboard
@@ -242,6 +257,10 @@ export const hi = {
     selectStatus: 'स्थिति चुनें',
     active: 'सक्रिय',
     suspended: 'निलंबित',
+    transferred: 'स्थानांतरित',
+    suspensionDate: 'निलंबन की तारीख',
+    transferDate: 'स्थानांतरण की तारीख',
+    transferLocation: 'स्थानांतरण का स्थान',
     dob: 'जन्म तिथि',
     contactNumber: 'मोबाइल नंबर',
     joiningDate: 'ज्वाइनिंग तिथि',
@@ -357,12 +376,34 @@ export const hi = {
     returnFromAbsent: 'अनुपस्थित से रिज़र्व करें',
   },
 
+  // Absent Management Page
+  absentManagement: {
+    noAbsences: 'कोई अनुपस्थिति रिकॉर्ड नहीं मिला।',
+  },
+
+  // Suspended Employees Page
+  suspendedEmployeesPage: {
+      noSuspended: 'वर्तमान में कोई भी कर्मचारी निलंबित नहीं है।',
+      suspensionDate: 'निलंबन की तारीख',
+      reserveFromSuspend: 'निलंबन से रिज़र्व करें',
+      unsuspendedTitle: 'कर्मचारी बहाल',
+      unsuspendedDescription: (name: string) => `${name} को बहाल कर दिया गया है और रिज़र्व में भेज दिया गया है।`,
+  },
+
+  // Transferred Employees Page
+  transferredEmployeesPage: {
+      noTransferred: 'किसी भी कर्मचारी को स्थानांतरित के रूप में चिह्नित नहीं किया गया है।',
+      transferLocation: 'स्थानांतरण का स्थान',
+      transferDate: 'स्थानांतरण की तारीख',
+  },
+
   statusTypes: {
     OnDuty: 'ड्यूटी पर',
     OnLeave: 'अवकाश पर',
     Absent: 'अनुपस्थित',
     Suspended: 'निलंबित',
     Available: 'उपलब्ध',
+    Transferred: 'स्थानांतरित',
   },
 
   // Translations for types

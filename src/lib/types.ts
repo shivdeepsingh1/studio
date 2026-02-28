@@ -7,7 +7,7 @@ export interface User {
   avatarUrl: string;
   email: string;
   role: 'admin' | 'employee';
-  status?: 'Active' | 'Suspended';
+  status?: 'Active' | 'Suspended' | 'Transferred';
 }
 
 export type EmployeeRank =
@@ -52,7 +52,10 @@ export interface Employee {
   avatarUrl: string;
   password?: string;
   role: 'admin' | 'employee';
-  status?: 'Active' | 'Suspended';
+  status: 'Active' | 'Suspended' | 'Transferred';
+  suspensionDate?: string;
+  transferDate?: string;
+  transferLocation?: string;
 }
 
 export type LeaveType = 'Casual' | 'Sick' | 'Earned' | 'Absent' | 'Medical' | 'CCL' | 'Other';

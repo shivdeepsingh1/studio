@@ -58,6 +58,9 @@ export const en = {
     language: 'Language',
     english: 'English',
     hindi: 'Hindi',
+    absentManagement: 'Absent Management',
+    suspendedEmployees: 'Suspended Employees',
+    transferredEmployees: 'Transferred Employees',
   },
 
   // Page Headers
@@ -116,9 +119,21 @@ export const en = {
     },
     absentEmployees: {
       title: 'Absent Employees',
-      description: 'Manage daily absences and view the list of absentees.',
+      description: 'View the list of employees marked absent today.',
     },
     permissionDenied: 'You do not have permission to view this page.',
+    absentManagement: {
+        title: 'Absent Management',
+        description: 'View a historical record of all employee absences.',
+    },
+    suspendedEmployees: {
+        title: 'Suspended Employees',
+        description: 'View all employees who are currently suspended.',
+    },
+    transferredEmployees: {
+        title: 'Transferred Employees',
+        description: 'View all employees who have been transferred out.',
+    },
   },
   
   // Dashboard
@@ -129,7 +144,7 @@ export const en = {
     absent: 'Absent',
     reserve: 'Reserve',
     onReserveDuty: 'On reserve duty today',
-    outOfDistrict: 'Today\'s On Duty',
+    outOfDistrict: "Today's On Duty",
     postedOutOfDistrict: 'On active duty today',
     casualLeave: 'Casual Leave',
     onCasualLeave: 'On casual leave today',
@@ -242,6 +257,10 @@ export const en = {
     selectStatus: 'Select Status',
     active: 'Active',
     suspended: 'Suspended',
+    transferred: 'Transferred',
+    suspensionDate: 'Suspension Date',
+    transferDate: 'Transfer Date',
+    transferLocation: 'Transfer Location',
     dob: 'Date of Birth',
     contactNumber: 'Mobile Number',
     joiningDate: 'Joining Date',
@@ -334,7 +353,7 @@ export const en = {
     searchForReport: 'Please search for an employee by PNO to see their duty report.',
     noDutiesFound: 'No duties found for the selected employee and date range.',
   },
-
+  
   // Absent Employees Page
   absentEmployeesPage: {
     title: "Today's Absentee List",
@@ -356,6 +375,27 @@ export const en = {
     contactNumber: 'Contact No.',
     returnFromAbsent: 'Reserve from Absent',
   },
+
+  // Absent Management Page
+  absentManagement: {
+    noAbsences: 'No absence records found.',
+  },
+  
+  // Suspended Employees Page
+  suspendedEmployeesPage: {
+      noSuspended: 'No employees are currently suspended.',
+      suspensionDate: 'Suspension Date',
+      reserveFromSuspend: 'Reserve from Suspend',
+      unsuspendedTitle: 'Employee Reinstated',
+      unsuspendedDescription: (name: string) => `${name} has been reinstated and moved to reserve.`,
+  },
+
+  // Transferred Employees Page
+  transferredEmployeesPage: {
+      noTransferred: 'No employees have been marked as transferred.',
+      transferLocation: 'Transfer Location',
+      transferDate: 'Transfer Date',
+  },
   
   statusTypes: {
     OnDuty: 'On Duty',
@@ -363,6 +403,7 @@ export const en = {
     Absent: 'Absent',
     Suspended: 'Suspended',
     Available: 'Available',
+    Transferred: 'Transferred',
   },
 
   // Translations for types

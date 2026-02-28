@@ -49,7 +49,7 @@ export default function StatementPage() {
 
     // Combine data for the table
     const statementData = displayRanks.map(rank => {
-        const employeesInRank = employees.filter(e => e.rank === rank);
+        const employeesInRank = employees.filter(e => e.rank === rank && e.status !== 'Transferred');
         const strength = employeesInRank.length;
         const suspended = employeesInRank.filter(e => e.status === 'Suspended').length;
         
@@ -61,14 +61,16 @@ export default function StatementPage() {
             return acc;
         }, {} as Record<string, LeaveType[]>);
 
+        let absentCount = 0;
+        const onLeaveEmployeeIds = new Set<string>();
         const leaveCounts: Record<string, number> = {};
         statementLeaveTypes.forEach(type => { leaveCounts[type] = 0; });
-        let absentCount = 0;
 
-        Object.values(leavesByEmployee).forEach(types => {
+        Object.entries(leavesByEmployee).forEach(([employeeId, types]) => {
             if (types.includes('Absent')) {
                 absentCount++;
             } else {
+                onLeaveEmployeeIds.add(employeeId);
                 let counted = false;
                 for (const type of statementLeaveTypes) {
                     if (types.includes(type)) {
@@ -79,16 +81,20 @@ export default function StatementPage() {
                 }
             }
         });
+        
+        const totalOnLeave = onLeaveEmployeeIds.size;
+        
+        const presentCount = strength - totalOnLeave - absentCount - suspended;
 
-        const totalOnLeave = Object.keys(leavesByEmployee).length - absentCount;
+        const presentEmployeeIdsInRank = new Set(employeesInRank.filter(e => 
+            e.status !== 'Suspended' && 
+            !onLeaveEmployeeIds.has(e.id) &&
+            !Object.keys(leavesByEmployee).some(id => leavesByEmployee[id].includes('Absent') && id === e.id)
+        ).map(e => e.id));
         
-        const present = strength - totalOnLeave - absentCount - suspended;
-
-        const presentEmployeeIdsInRank = new Set(employeesInRank.filter(e => e.status !== 'Suspended' && !Object.keys(leavesByEmployee).includes(e.id)).map(e => e.id));
+        const onDutyCount = dutiesToday.filter(d => presentEmployeeIdsInRank.has(d.employeeId)).length;
         
-        const onDuty = dutiesToday.filter(d => presentEmployeeIdsInRank.has(d.employeeId) && d.location.toLowerCase() !== 'reserve').length;
-        
-        const reserve = present - onDuty;
+        const reserve = presentCount - onDutyCount;
 
         return {
             rank,
@@ -97,9 +103,9 @@ export default function StatementPage() {
             totalOnLeave,
             absent: absentCount,
             suspended,
-            present,
-            onDuty,
-            reserve,
+            present: presentCount,
+            onDuty: onDutyCount,
+            reserve: reserve,
         };
     });
 
@@ -246,5 +252,3 @@ export default function StatementPage() {
         </>
     );
 }
-
-    

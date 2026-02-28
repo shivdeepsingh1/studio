@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -6,7 +7,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown, Search, UserCheck, UserX, MoreHorizontal } from "lucide-react";
+import { FileDown, MoreHorizontal } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -16,9 +17,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Employee, Leave, Duty } from "@/lib/types";
+import { Employee, Leave } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useToast } from "@/hooks/use-toast";
@@ -44,9 +44,7 @@ export default function AbsentEmployeesPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
 
-  const [pnoInput, setPnoInput] = useState<string>("");
   const [mainSearchQuery, setMainSearchQuery] = useState<string>("");
-  const [searchedEmployee, setSearchedEmployee] = useState<Employee | null>(null);
   const [employeesWithStatus, setEmployeesWithStatus] = useState<EmployeeWithStatus[]>([]);
 
   const todayString = useMemo(() => format(new Date(), "yyyy-MM-dd"), []);
@@ -89,52 +87,6 @@ export default function AbsentEmployeesPage() {
     setEmployeesWithStatus(statusList);
   }, [employees, leaves, duties, todayString, t]);
 
-  const handlePnoSearch = () => {
-    if (!pnoInput) {
-      setSearchedEmployee(null);
-      return;
-    }
-    const employee = employees.find(e => e.pno === pnoInput);
-    setSearchedEmployee(employee || null);
-    if (!employee) {
-        toast({
-            variant: 'destructive',
-            title: t.duty.employeeNotFound,
-        })
-    }
-  };
-
-  const handleMarkAbsent = () => {
-    if (!searchedEmployee) {
-      toast({ variant: 'destructive', title: t.duty.noEmployeeSelected, description: t.duty.noEmployeeSelectedDescription });
-      return;
-    }
-
-    const existingStatus = employeesWithStatus.find(e => e.employee.id === searchedEmployee.id)?.status;
-    if (existingStatus === 'Absent') {
-      toast({ variant: 'destructive', title: t.absentEmployeesPage.alreadyAbsentTitle, description: t.absentEmployeesPage.alreadyAbsentDescription(searchedEmployee.name) });
-      return;
-    }
-    if (existingStatus === 'On Leave' || existingStatus === 'On Duty' || existingStatus === 'Suspended') {
-      toast({ variant: 'destructive', title: t.duty.actionProhibited, description: t.absentEmployeesPage.actionProhibitedDescription(searchedEmployee.name, existingStatus || 'N/A') });
-      return;
-    }
-
-    const absentLeave: Leave = {
-      id: Date.now().toString(),
-      employeeId: searchedEmployee.id,
-      employeeName: searchedEmployee.name,
-      type: 'Absent',
-      startDate: todayString,
-      endDate: todayString,
-      reason: 'Marked absent from Absent Employees page.',
-      status: 'Approved'
-    };
-    updateLeaves(prevLeaves => [...prevLeaves, absentLeave]);
-    toast({ title: t.duty.employeeMarkedAbsent, description: t.duty.employeeMarkedAbsentDescription(searchedEmployee.name, format(new Date(), 'dd-MM-yyyy')) });
-    setSearchedEmployee(null);
-    setPnoInput("");
-  }
 
   const handleReturnFromAbsent = (employeeId: string, employeeName: string) => {
     const absentLeaveRecord = leaves.find(l => 
@@ -152,15 +104,6 @@ export default function AbsentEmployeesPage() {
     toast({ title: t.absentEmployeesPage.markedPresentTitle, description: t.absentEmployeesPage.markedPresentDescription(employeeName) });
   };
   
-  const handleMarkPresent = () => {
-    if (!searchedEmployee) {
-        toast({ variant: 'destructive', title: t.duty.noEmployeeSelected, description: t.duty.noEmployeeSelectedDescription });
-        return;
-    }
-    handleReturnFromAbsent(searchedEmployee.id, searchedEmployee.name);
-    setSearchedEmployee(null);
-    setPnoInput("");
-  }
 
   const absentEmployees = useMemo(() => {
     return employeesWithStatus.filter(e => e.status === 'Absent' && e.employee.rank !== 'Administrator');
@@ -214,64 +157,11 @@ export default function AbsentEmployeesPage() {
   return (
     <>
       <PageHeader
-        title={t.absentEmployeesPage.title}
-        description={t.absentEmployeesPage.description(format(new Date(), 'dd-MM-yyyy'))}
+        title={t.pageHeaders.absentEmployees.title}
+        description={t.pageHeaders.absentEmployees.description}
       />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t.absentEmployeesPage.updateAttendance}</CardTitle>
-                    <CardContent className="pt-4 px-0 pb-0">{t.absentEmployeesPage.updateAttendanceDescription}</CardContent>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                         <div className="space-y-2">
-                            <Label htmlFor="pno-search">{t.absentEmployeesPage.employeePno}</Label>
-                            <div className="flex items-center gap-2">
-                                <Input
-                                    id="pno-search"
-                                    placeholder={t.absentEmployeesPage.enterEmployeePno}
-                                    value={pnoInput}
-                                    onChange={(e) => setPnoInput(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handlePnoSearch()}
-                                />
-                                <Button onClick={handlePnoSearch}>
-                                    <Search className="mr-2 h-4 w-4" /> {t.search}
-                                </Button>
-                            </div>
-                        </div>
-                        {searchedEmployee && (
-                             <Card className="bg-muted">
-                                <CardContent className="pt-6">
-                                     <div className="flex items-center gap-4">
-                                        <Avatar>
-                                            <AvatarImage src={searchedEmployee.avatarUrl} alt={searchedEmployee.name} />
-                                            <AvatarFallback>{searchedEmployee.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="font-semibold">{searchedEmployee.name}</p>
-                                            <p className="text-sm text-muted-foreground">{t.ranks[searchedEmployee.rank]}</p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2 mt-4">
-                                      <Button className="w-full" onClick={handleMarkPresent} variant="secondary">
-                                          <UserCheck className="mr-2" /> {t.absentEmployeesPage.markAsPresentButton}
-                                      </Button>
-                                      <Button className="w-full" onClick={handleMarkAbsent}>
-                                          <UserX className="mr-2" /> {t.absentEmployeesPage.markAsAbsentButton}
-                                      </Button>
-                                    </div>
-                                </CardContent>
-                             </Card>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
         
-        <Card className="lg:col-span-2">
+        <Card>
             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
                   <CardTitle>{t.absentEmployeesPage.title}</CardTitle>
@@ -354,7 +244,6 @@ export default function AbsentEmployeesPage() {
                 </div>
             </CardContent>
         </Card>
-      </div>
     </>
   );
 }
