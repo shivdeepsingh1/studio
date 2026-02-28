@@ -78,6 +78,46 @@ export default function TodayOnLeavePage() {
       description: t.leave.employeeMarkedReserve(employeeName),
     });
   };
+  
+  const handleAbsentFromLeave = (employeeId: string, employeeName: string) => {
+    const todayString = format(new Date(), "yyyy-MM-dd");
+
+    const isAlreadyAbsent = leaves.some(
+      (l) =>
+        l.employeeId === employeeId &&
+        l.type === "Absent" &&
+        l.startDate === todayString
+    );
+
+    if (isAlreadyAbsent) {
+      toast({
+        variant: "destructive",
+        title: t.absentEmployeesPage.alreadyAbsentTitle,
+        description: t.absentEmployeesPage.alreadyAbsentDescription(employeeName),
+      });
+      return;
+    }
+
+    const absentLeave: Leave = {
+      id: Date.now().toString(),
+      employeeId: employeeId,
+      employeeName: employeeName,
+      type: "Absent",
+      startDate: todayString,
+      endDate: todayString,
+      reason: "Marked absent from leave.",
+      status: "Approved",
+    };
+
+    updateLeaves((prevLeaves) => [...prevLeaves, absentLeave]);
+    toast({
+      title: t.duty.employeeMarkedAbsent,
+      description: t.duty.employeeMarkedAbsentDescription(
+        employeeName,
+        format(new Date(), "dd-MM-yyyy")
+      ),
+    });
+  };
 
 
   const handleExportPdf = () => {
@@ -185,6 +225,9 @@ export default function TodayOnLeavePage() {
                                     <DropdownMenuItem onClick={() => handleReturnFromLeave(leave.id, employee.name)}>
                                       {t.leave.markAsReserve}
                                     </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-destructive" onClick={() => handleAbsentFromLeave(employee.id, employee.name)}>
+                                      {t.leave.absentFromLeave}
+                                    </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </TableCell>
@@ -205,3 +248,5 @@ export default function TodayOnLeavePage() {
     </>
   );
 }
+
+    

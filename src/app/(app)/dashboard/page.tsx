@@ -11,7 +11,7 @@ import { useAuth } from '@/lib/auth';
 import { PageHeader } from '@/components/page-header';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis } from 'recharts';
-import { employeeRanks, EmployeeRank } from '@/lib/types';
+import { employeeRanks, EmployeeRank, LeaveType } from '@/lib/types';
 import { useData } from '@/lib/data-provider';
 import { useLanguage } from '@/lib/i18n/language-provider';
 
@@ -48,13 +48,32 @@ export default function DashboardPage() {
       endDate.setHours(23,59,59,999);
       return today >= startDate && today <= endDate;
   });
-  const onLeaveTodayIds = new Set(onLeaveToday.map(l => l.employeeId));
-
+  
+  // Group leaves by employee to correctly categorize them, prioritizing 'Absent'.
+  const employeeLeaveCategories: { [id: string]: 'Absent' | 'Casual' | 'Earned' | 'Other' } = {};
+  for (const leave of onLeaveToday) {
+    if (leave.type === 'Absent') {
+      employeeLeaveCategories[leave.employeeId] = 'Absent';
+    }
+  }
+  for (const leave of onLeaveToday) {
+    if (!employeeLeaveCategories[leave.employeeId]) {
+      if (leave.type === 'Casual') {
+        employeeLeaveCategories[leave.employeeId] = 'Casual';
+      } else if (leave.type === 'Earned') {
+        employeeLeaveCategories[leave.employeeId] = 'Earned';
+      } else if (leave.type !== 'Absent') {
+        employeeLeaveCategories[leave.employeeId] = 'Other';
+      }
+    }
+  }
+  const onLeaveTodayIds = Object.keys(employeeLeaveCategories);
+  
   // 3. Duty sets
   const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
   
   // 4. Calculate stats for dashboard cards
-  const presentEmployees = activeEmployees.filter(e => e.status !== 'Suspended' && !onLeaveTodayIds.has(e.id));
+  const presentEmployees = activeEmployees.filter(e => e.status !== 'Suspended' && !onLeaveTodayIds.includes(e.id));
   const presentCount = presentEmployees.length;
 
   const onDutyNonReserveEmployees = presentEmployees.filter(e => 
@@ -64,15 +83,20 @@ export default function DashboardPage() {
   
   const reserveCount = presentCount - outOfDistrictCount;
 
+  const categoryCounts = Object.values(employeeLeaveCategories).reduce((acc, category) => {
+    acc[category] = (acc[category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   const stats = {
     totalEmployees: totalEmployeesCount,
     suspended: suspendedEmployeesCount,
-    absent: onLeaveToday.filter(l => l.type === 'Absent').length,
+    absent: categoryCounts['Absent'] || 0,
     reserve: reserveCount,
     outOfDistrict: outOfDistrictCount,
-    casualLeave: onLeaveToday.filter(l => l.type === 'Casual').length,
-    earnedLeave: onLeaveToday.filter(l => l.type === 'Earned').length,
-    otherLeave: onLeaveToday.filter(l => l.type !== 'Casual' && l.type !== 'Earned' && l.type !== 'Absent').length,
+    casualLeave: categoryCounts['Casual'] || 0,
+    earnedLeave: categoryCounts['Earned'] || 0,
+    otherLeave: categoryCounts['Other'] || 0,
   };
   
   const rankCounts = employeeRanks.reduce((acc, rank) => {
@@ -261,3 +285,5 @@ export default function DashboardPage() {
     </>
   );
 }
+
+    

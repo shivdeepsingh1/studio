@@ -280,6 +280,7 @@ export const en = {
     markAsReserve: 'Mark as Reserve',
     leaveEnded: 'Leave Ended',
     employeeMarkedReserve: (name: string) => `${name} has been marked as reserve.`,
+    absentFromLeave: 'Absent from Leave',
   },
 
   // Profile Page
@@ -391,3 +392,5 @@ export const en = {
     Night: 'Night',
   }
 };
+
+    

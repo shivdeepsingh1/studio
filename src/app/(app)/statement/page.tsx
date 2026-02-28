@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { useAuth } from '@/lib/auth';
-import { EmployeeRank, employeeRanks, leaveTypes } from '@/lib/types';
+import { EmployeeRank, employeeRanks, leaveTypes, LeaveType, Leave } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useData } from '@/lib/data-provider';
 import { Button } from "@/components/ui/button";
@@ -45,30 +45,48 @@ export default function StatementPage() {
          return today >= startDate && today <= endDate;
     });
 
-    const onLeaveTodayIds = new Set(allLeavesToday.map(l => l.employeeId));
     const dutiesToday = duties.filter(d => d.date === todayString && d.status !== 'Completed');
 
     // Combine data for the table
     const statementData = displayRanks.map(rank => {
         const employeesInRank = employees.filter(e => e.rank === rank);
         const strength = employeesInRank.length;
-
         const suspended = employeesInRank.filter(e => e.status === 'Suspended').length;
         
         const leavesForRank = allLeavesToday.filter(l => employeesInRank.some(e => e.id === l.employeeId));
         
+        const leavesByEmployee = leavesForRank.reduce((acc, leave) => {
+            if (!acc[leave.employeeId]) acc[leave.employeeId] = [];
+            acc[leave.employeeId].push(leave.type);
+            return acc;
+        }, {} as Record<string, LeaveType[]>);
+
         const leaveCounts: Record<string, number> = {};
-        statementLeaveTypes.forEach(type => {
-            leaveCounts[type] = leavesForRank.filter(l => l.type === type).length;
+        statementLeaveTypes.forEach(type => { leaveCounts[type] = 0; });
+        let absentCount = 0;
+
+        Object.values(leavesByEmployee).forEach(types => {
+            if (types.includes('Absent')) {
+                absentCount++;
+            } else {
+                let counted = false;
+                for (const type of statementLeaveTypes) {
+                    if (types.includes(type)) {
+                        leaveCounts[type]++;
+                        counted = true;
+                        break; 
+                    }
+                }
+            }
         });
-        const totalOnLeave = leavesForRank.filter(l => l.type !== 'Absent').length;
-        const absent = leavesForRank.filter(l => l.type === 'Absent').length;
 
-        const present = strength - totalOnLeave - absent - suspended;
-
-        const presentEmployeeIds = new Set(employeesInRank.filter(e => e.status !== 'Suspended' && !onLeaveTodayIds.has(e.id)).map(e => e.id));
+        const totalOnLeave = Object.keys(leavesByEmployee).length - absentCount;
         
-        const onDuty = dutiesToday.filter(d => presentEmployeeIds.has(d.employeeId) && d.location.toLowerCase() !== 'reserve').length;
+        const present = strength - totalOnLeave - absentCount - suspended;
+
+        const presentEmployeeIdsInRank = new Set(employeesInRank.filter(e => e.status !== 'Suspended' && !Object.keys(leavesByEmployee).includes(e.id)).map(e => e.id));
+        
+        const onDuty = dutiesToday.filter(d => presentEmployeeIdsInRank.has(d.employeeId) && d.location.toLowerCase() !== 'reserve').length;
         
         const reserve = present - onDuty;
 
@@ -77,7 +95,7 @@ export default function StatementPage() {
             strength,
             leaveCounts,
             totalOnLeave,
-            absent,
+            absent: absentCount,
             suspended,
             present,
             onDuty,
@@ -228,3 +246,5 @@ export default function StatementPage() {
         </>
     );
 }
+
+    

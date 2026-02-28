@@ -280,6 +280,7 @@ export const hi = {
     markAsReserve: 'रिज़र्व के रूप में चिह्नित करें',
     leaveEnded: 'अवकाश समाप्त',
     employeeMarkedReserve: (name: string) => `${name} को रिज़र्व के रूप में चिह्नित किया गया है।`,
+    absentFromLeave: 'अवकाश से अनुपस्थित',
   },
 
   // Profile Page
@@ -391,3 +392,5 @@ export const hi = {
     Night: 'रात',
   }
 };
+
+    
