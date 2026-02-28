@@ -273,6 +273,8 @@ export const en = {
     fillAllFields: 'Please fill all required fields.',
     employeeNotFound: 'Employee not found.',
     suspendedLeaveError: 'Leave cannot be processed for a suspended employee.',
+    actionProhibited: 'Action Prohibited',
+    absentLeaveError: 'Leave cannot be processed for an employee who is marked absent during the requested period.',
     // Table
     noLeaveRecords: 'No leave records found.',
     addLeaveEntry: 'Add Leave Entry',
@@ -395,3 +397,5 @@ export const en = {
     Night: 'Night',
   }
 };
+
+    

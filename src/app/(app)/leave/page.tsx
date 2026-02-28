@@ -105,6 +105,27 @@ export default function LeavePage() {
         return;
     }
 
+    const leaveStartDate = new Date(newLeave.startDate.replace(/-/g, '/'));
+    const leaveEndDate = new Date(newLeave.endDate.replace(/-/g, '/'));
+
+    const isAlreadyAbsent = leaves.some(l => 
+        l.employeeId === employeeId && 
+        l.type === 'Absent' &&
+        l.status === 'Approved' &&
+        new Date(l.startDate.replace(/-/g, '/')) <= leaveEndDate &&
+        new Date(l.endDate.replace(/-/g, '/')) >= leaveStartDate
+    );
+    
+    if (isAlreadyAbsent) {
+        toast({
+            variant: "destructive",
+            title: t.leave.actionProhibited,
+            description: t.leave.absentLeaveError,
+        });
+        setIsLeaveDialogOpen(false);
+        return;
+    }
+
     const leaveToAdd: Leave = {
       id: Date.now().toString(),
       employeeId: employeeId,
@@ -554,3 +575,5 @@ export default function LeavePage() {
     </>
   )
 }
+
+    

@@ -273,6 +273,8 @@ export const hi = {
     fillAllFields: 'कृपया सभी आवश्यक फ़ील्ड भरें।',
     employeeNotFound: 'कर्मचारी नहीं मिला।',
     suspendedLeaveError: 'निलंबित कर्मचारी के लिए अवकाश संसाधित नहीं किया जा सकता है।',
+    actionProhibited: 'कार्रवाई निषिद्ध',
+    absentLeaveError: 'अनुरोधित अवधि के दौरान अनुपस्थित के रूप में चिह्नित कर्मचारी के लिए अवकाश संसाधित नहीं किया जा सकता है।',
     // Table
     noLeaveRecords: 'कोई अवकाश रिकॉर्ड नहीं मिला।',
     addLeaveEntry: 'अवकाश प्रविष्टि जोड़ें',
@@ -395,3 +397,5 @@ export const hi = {
     Night: 'रात',
   }
 };
+
+    
