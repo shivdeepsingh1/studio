@@ -6,7 +6,7 @@ export const hi = {
   cancel: 'रद्द करें',
   edit: 'संपादित करें',
   delete: 'हटाएं',
-  exportPdf: 'PDF निर्यात करें',
+  exportPdf: 'प्रिंट रिपोर्ट',
   search: 'खोजें',
   actions: 'कार्रवाई',
   name: 'नाम',

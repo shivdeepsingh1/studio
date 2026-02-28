@@ -7,7 +7,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown, Search } from "lucide-react";
+import { Printer, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -111,7 +111,7 @@ export default function DutyReportPage() {
           onClick={handleExportPdf}
           disabled={!selectedEmployee || filteredDuties.length === 0 || !dateFrom || !dateTo}
         >
-          <FileDown className="mr-2" />
+          <Printer className="mr-2" />
           {t.exportPdf}
         </Button>
       </PageHeader>

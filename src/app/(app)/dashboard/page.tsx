@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Users, CalendarOff, Send, Plus, Anchor, Globe, Calendar, CalendarPlus, CalendarHeart, UserX, UserMinus, ClipboardCheck } from 'lucide-react';
+import { Users, CalendarOff, Send, Plus, Anchor, Printer, Calendar, CalendarPlus, CalendarHeart, UserX, UserMinus, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
@@ -120,7 +120,12 @@ export default function DashboardPage() {
       <PageHeader 
         title={user?.role === 'admin' ? t.pageHeaders.dashboardAdmin.title(user?.name?.split(' ')[0] ?? '') : t.pageHeaders.dashboardEmployee.title(user?.name?.split(' ')[0] ?? '')} 
         description={user?.role === 'admin' ? t.pageHeaders.dashboardAdmin.description : t.pageHeaders.dashboardEmployee.description} 
-      />
+      >
+        <Button variant="outline" onClick={() => window.print()} className="no-print">
+          <Printer className="mr-2" />
+          {t.exportPdf}
+        </Button>
+      </PageHeader>
 
       {user?.role === 'admin' ? (
         <div className="space-y-6">

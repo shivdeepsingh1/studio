@@ -86,3 +86,16 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  .peer, [data-sidebar="trigger"], [data-sidebar="sidebar"] {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

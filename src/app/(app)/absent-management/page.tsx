@@ -7,7 +7,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { Printer } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -76,7 +76,7 @@ export default function AbsentManagementPage() {
         description={t.pageHeaders.absentManagement.description}
       >
         <Button variant="outline" onClick={handleExportPdf} disabled={absenceRecords.length === 0}>
-            <FileDown className="mr-2" /> {t.exportPdf}
+            <Printer className="mr-2" /> {t.exportPdf}
         </Button>
       </PageHeader>
       

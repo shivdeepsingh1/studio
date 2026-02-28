@@ -7,7 +7,7 @@ import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { FileDown, PlusCircle, MoreHorizontal } from "lucide-react"
+import { Printer, PlusCircle, MoreHorizontal } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import {
   Table,
@@ -422,7 +422,7 @@ export default function LeavePage() {
           </DialogContent>
         </Dialog>
         <Button variant="outline" onClick={handleExport}>
-          <FileDown className="mr-2" />
+          <Printer className="mr-2" />
           {t.exportPdf}
         </Button>
       </PageHeader>

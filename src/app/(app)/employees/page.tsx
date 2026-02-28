@@ -8,7 +8,7 @@ import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp, FileDown } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp, Printer } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -347,7 +347,7 @@ export default function EmployeesPage() {
           </DialogContent>
         </Dialog>
         <Button variant="outline" onClick={handleExportPdf}>
-          <FileDown className="mr-2 h-4 w-4" />
+          <Printer className="mr-2 h-4 w-4" />
           {t.exportPdf}
         </Button>
         <Dialog open={isAddDialogOpen} onOpenChange={handleAddDialogChange}>

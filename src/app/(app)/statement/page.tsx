@@ -10,7 +10,7 @@ import { EmployeeRank, employeeRanks, leaveTypes, LeaveType, Leave } from '@/lib
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useData } from '@/lib/data-provider';
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { Printer } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useLanguage } from '@/lib/i18n/language-provider';
@@ -192,7 +192,7 @@ export default function StatementPage() {
         <>
             <PageHeader title={t.pageHeaders.statement.title} description={t.pageHeaders.statement.description(format(today, 'MMMM dd, yyyy'))} >
                 <Button onClick={handleExportPdf}>
-                    <FileDown className="mr-2" />
+                    <Printer className="mr-2" />
                     {t.exportPdf}
                 </Button>
             </PageHeader>

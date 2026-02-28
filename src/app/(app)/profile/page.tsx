@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 import { useAuth } from "@/lib/auth"
 import { PageHeader } from "@/components/page-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { LogOut, Pencil, Eye, EyeOff } from "lucide-react"
+import { LogOut, Pencil, Eye, EyeOff, Printer } from "lucide-react"
 import { Employee, User, EmployeeRank } from "@/lib/types"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -16,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useData } from "@/lib/data-provider"
 import { useLanguage } from "@/lib/i18n/language-provider"
+import { font } from "@/lib/fonts/Hind-Regular"
 
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth()
@@ -68,6 +71,40 @@ export default function ProfilePage() {
     
     setIsEditDialogOpen(false);
   };
+  
+  const handleExportPdf = () => {
+    if (!user || !employeeDetails) return;
+
+    const doc = new jsPDF();
+    const cleanFont = font.replace(/\s/g, '');
+    doc.addFileToVFS('Hind-Regular.ttf', cleanFont);
+    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
+    doc.setFont('Hind');
+
+    doc.text(`${t.pageHeaders.profile.title} - ${user.name}`, 14, 16);
+
+    const profileData = [
+      [t.pno, user.pno],
+      [t.name, user.name],
+      [t.rank, t.ranks[user.rank]],
+      [t.profile.emailAddress, user.email || 'N/A'],
+      [t.profile.dob, employeeDetails.dob ? format(new Date(employeeDetails.dob.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A'],
+      [t.profile.joiningDate, employeeDetails.joiningDate ? format(new Date(employeeDetails.joiningDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A'],
+      [t.profile.joiningBranchDistrict, employeeDetails.joiningDistrict || 'N/A'],
+      [t.profile.contactNumber, employeeDetails.contact || 'N/A'],
+      [t.status, t.statusTypes[user.status || 'Active']],
+    ];
+
+    autoTable(doc, {
+      startY: 22,
+      head: [[t.details, '']],
+      body: profileData,
+      styles: { font: 'Hind' },
+      headStyles: { font: 'Hind' },
+    });
+
+    doc.save(`profile_${user.pno}.pdf`);
+  };
 
 
   if (!user) {
@@ -76,7 +113,11 @@ export default function ProfilePage() {
 
   return (
     <>
-      <PageHeader title={t.pageHeaders.profile.title} description={t.pageHeaders.profile.description} />
+      <PageHeader title={t.pageHeaders.profile.title} description={t.pageHeaders.profile.description}>
+        <Button variant="outline" onClick={handleExportPdf}>
+          <Printer className="mr-2" /> {t.exportPdf}
+        </Button>
+      </PageHeader>
 
       <div className="max-w-4xl mx-auto">
         <Card>

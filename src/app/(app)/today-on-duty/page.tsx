@@ -6,7 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown, MoreHorizontal } from "lucide-react";
+import { Printer, MoreHorizontal } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -172,7 +172,7 @@ export default function TodayOnDutyPage() {
         description={t.pageHeaders.todayOnDuty.description(format(new Date(), 'dd-MM-yyyy'))}
       >
         <Button variant="outline" onClick={handleExportPdf} disabled={onDutyEmployees.length === 0}>
-            <FileDown className="mr-2" /> {t.exportPdf}
+            <Printer className="mr-2" /> {t.exportPdf}
         </Button>
       </PageHeader>
       

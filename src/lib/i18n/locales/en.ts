@@ -6,7 +6,7 @@ export const en = {
   cancel: 'Cancel',
   edit: 'Edit',
   delete: 'Delete',
-  exportPdf: 'Export PDF',
+  exportPdf: 'Print Report',
   search: 'Search',
   actions: 'Actions',
   name: 'Name',
