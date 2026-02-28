@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo } from "react";
@@ -42,13 +41,14 @@ export default function TransferredEmployeesPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.transferredEmployeesPage.transferDate, t.transferredEmployeesPage.transferLocation]],
+      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.absentEmployeesPage.contactNumber, t.transferredEmployeesPage.transferDate, t.transferredEmployeesPage.transferLocation]],
       body: transferredEmployees.map((employee, index) => [
         index + 1,
         employee.badgeNumber,
         employee.pno,
         employee.name,
         t.ranks[employee.rank],
+        employee.contact,
         employee.transferDate ? format(new Date(employee.transferDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A',
         employee.transferLocation,
       ]),
@@ -91,6 +91,7 @@ export default function TransferredEmployeesPage() {
                           <TableHead>{t.pno}</TableHead>
                           <TableHead>{t.name}</TableHead>
                           <TableHead>{t.rank}</TableHead>
+                          <TableHead>{t.absentEmployeesPage.contactNumber}</TableHead>
                           <TableHead>{t.transferredEmployeesPage.transferDate}</TableHead>
                           <TableHead>{t.transferredEmployeesPage.transferLocation}</TableHead>
                       </TableRow>
@@ -116,13 +117,14 @@ export default function TransferredEmployeesPage() {
                                 </div>
                               </TableCell>
                               <TableCell>{t.ranks[employee.rank]}</TableCell>
+                              <TableCell>{employee.contact}</TableCell>
                               <TableCell>{employee.transferDate ? format(new Date(employee.transferDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                               <TableCell>{employee.transferLocation}</TableCell>
                           </TableRow>
                       ))
                       ) : (
                       <TableRow>
-                          <TableCell colSpan={7} className="text-center h-24">
+                          <TableCell colSpan={8} className="text-center h-24">
                               {t.transferredEmployeesPage.noTransferred}
                           </TableCell>
                       </TableRow>
