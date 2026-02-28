@@ -122,8 +122,11 @@ export default function DutyPage() {
       return;
     }
 
-    if (foundEmployee.status === 'Suspended') {
-        toast({ variant: 'destructive', title: t.duty.actionProhibited, description: t.duty.actionProhibitedDescription });
+    if (foundEmployee.status === 'Suspended' || foundEmployee.status === 'Transferred') {
+        const description = foundEmployee.status === 'Suspended' 
+            ? t.duty.actionProhibitedDescription 
+            : t.duty.employeeTransferred;
+        toast({ variant: 'destructive', title: t.duty.actionProhibited, description: description });
         return;
     }
     
@@ -355,6 +358,11 @@ export default function DutyPage() {
                                {t.duty.employeeSuspended}
                            </p>
                         )}
+                        {foundEmployee.status === 'Transferred' && (
+                           <p className="text-sm text-white bg-destructive/80 p-2 rounded-md mt-2">
+                               {t.duty.employeeTransferred}
+                           </p>
+                        )}
                     </div>
                   </div>
                 ) : pnoInput && (
@@ -368,7 +376,7 @@ export default function DutyPage() {
                     <Select
                         onValueChange={(value) => setAttendanceStatus(value as 'Present' | 'Absent')}
                         value={attendanceStatus}
-                        disabled={!foundEmployee || foundEmployee.status === 'Suspended'}
+                        disabled={!foundEmployee || foundEmployee.status === 'Suspended' || foundEmployee.status === 'Transferred'}
                     >
                         <SelectTrigger className="col-span-3">
                             <SelectValue placeholder={t.duty.selectAttendance} />
@@ -390,7 +398,7 @@ export default function DutyPage() {
                     value={newDuty.date}
                     onChange={handleNewDutyInputChange}
                     className="col-span-3"
-                    disabled={!foundEmployee || foundEmployee.status === 'Suspended'}
+                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || foundEmployee.status === 'Transferred'}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -402,7 +410,7 @@ export default function DutyPage() {
                       handleNewDutySelectChange("shift", value)
                     }
                     value={newDuty.shift}
-                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}
+                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || foundEmployee.status === 'Transferred' || attendanceStatus === 'Absent'}
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder={t.duty.selectShift} />
@@ -423,7 +431,7 @@ export default function DutyPage() {
                     value={newDuty.location}
                     onChange={handleNewDutyInputChange}
                     className="col-span-3"
-                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}
+                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || foundEmployee.status === 'Transferred' || attendanceStatus === 'Absent'}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -435,7 +443,7 @@ export default function DutyPage() {
                     value={newDuty.details}
                     onChange={handleNewDutyInputChange}
                     className="col-span-3"
-                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || attendanceStatus === 'Absent'}
+                    disabled={!foundEmployee || foundEmployee.status === 'Suspended' || foundEmployee.status === 'Transferred' || attendanceStatus === 'Absent'}
                   />
                 </div>
               </div>
@@ -447,7 +455,7 @@ export default function DutyPage() {
                 >
                   {t.cancel}
                 </Button>
-                <Button onClick={handleAssignDuty} disabled={!foundEmployee || foundEmployee.status === 'Suspended'}>{t.save}</Button>
+                <Button onClick={handleAssignDuty} disabled={!foundEmployee || foundEmployee.status === 'Suspended' || foundEmployee.status === 'Transferred'}>{t.save}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -82,13 +83,11 @@ export default function TodayReservePage() {
         return today >= startDate && today <= endDate;
     }).map(l => l.employeeId));
 
-    const suspendedIds = new Set(employees.filter(e => e.status === 'Suspended').map(e => e.id));
-
     const onActiveDutyIds = new Set(duties.filter(d => d.date === todayString && d.status !== 'Completed').map(d => d.employeeId));
 
     const reserve = employees.filter(employee =>
+        employee.status === 'Active' &&
         employee.rank !== 'Administrator' &&
-        !suspendedIds.has(employee.id) &&
         !onLeaveTodayIds.has(employee.id) &&
         !onActiveDutyIds.has(employee.id)
     );

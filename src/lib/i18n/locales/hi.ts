@@ -190,6 +190,7 @@ export const hi = {
     pnoPlaceholder: 'कर्मचारी PNO दर्ज करें',
     employeeNotFound: 'कर्मचारी नहीं मिला।',
     employeeSuspended: 'यह कर्मचारी निलंबित है और उसे ड्यूटी नहीं सौंपी जा सकती।',
+    employeeTransferred: 'यह कर्मचारी स्थानांतरित हो गया है और उसे ड्यूटी नहीं सौंपी जा सकती।',
     attendance: 'उपस्थिति',
     selectAttendance: 'उपस्थिति चुनें',
     present: 'उपस्थित',
@@ -295,6 +296,7 @@ export const hi = {
     fillAllFields: 'कृपया सभी आवश्यक फ़ील्ड भरें।',
     employeeNotFound: 'कर्मचारी नहीं मिला।',
     suspendedLeaveError: 'निलंबित कर्मचारी के लिए अवकाश संसाधित नहीं किया जा सकता है।',
+    transferredLeaveError: 'स्थानांतरित कर्मचारी के लिए अवकाश संसाधित नहीं किया जा सकता।',
     actionProhibited: 'कार्रवाई निषिद्ध',
     absentLeaveError: 'अनुरोधित अवधि के दौरान अनुपस्थित के रूप में चिह्नित कर्मचारी के लिए अवकाश संसाधित नहीं किया जा सकता है।',
     // Table
@@ -395,8 +397,13 @@ export const hi = {
       noTransferred: 'किसी भी कर्मचारी को स्थानांतरित के रूप में चिह्नित नहीं किया गया है।',
       transferLocation: 'स्थानांतरण का स्थान',
       transferDate: 'स्थानांतरण की तारीख',
+      rejoin: 'ज्वाइन कराएँ',
+      rejoinTitle: 'कर्मचारी को ज्वाइन कराएँ',
+      rejoinDescription: 'कर्मचारी के लिए ज्वाइनिंग तिथि निर्धारित करें।',
+      rejoinedTitle: 'कर्मचारी ने पुनः ज्वाइन किया',
+      rejoinedDescription: (name: string) => `${name} को सक्रिय के रूप में चिह्नित किया गया है और रिज़र्व में भेज दिया गया है।`,
   },
-
+  
   statusTypes: {
     OnDuty: 'ड्यूटी पर',
     OnLeave: 'अवकाश पर',

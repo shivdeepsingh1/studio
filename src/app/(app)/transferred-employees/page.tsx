@@ -1,12 +1,13 @@
+
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, MoreHorizontal } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -21,15 +22,71 @@ import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
 import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { Employee } from "@/lib/types";
 
 export default function TransferredEmployeesPage() {
   const { user } = useAuth();
-  const { employees } = useData();
+  const { employees, updateEmployees } = useData();
   const { t } = useLanguage();
+  const { toast } = useToast();
+
+  const [isRejoinDialogOpen, setIsRejoinDialogOpen] = useState(false);
+  const [employeeToRejoin, setEmployeeToRejoin] = useState<Employee | null>(null);
+  const [rejoinDate, setRejoinDate] = useState('');
 
   const transferredEmployees = useMemo(() => {
     return employees.filter(e => e.status === 'Transferred');
   }, [employees]);
+
+  const handleOpenRejoinDialog = (employee: Employee) => {
+    setEmployeeToRejoin(employee);
+    setRejoinDate(format(new Date(), 'yyyy-MM-dd'));
+    setIsRejoinDialogOpen(true);
+  };
+
+  const handleRejoin = () => {
+    if (!employeeToRejoin || !rejoinDate) return;
+
+    updateEmployees(prev =>
+        prev.map(e =>
+            e.id === employeeToRejoin.id
+                ? {
+                    ...e,
+                    status: 'Active',
+                    transferDate: undefined,
+                    transferLocation: undefined,
+                    joiningDate: rejoinDate,
+                  }
+                : e
+        )
+    );
+
+    toast({
+        title: t.transferredEmployeesPage.rejoinedTitle,
+        description: t.transferredEmployeesPage.rejoinedDescription(employeeToRejoin.name),
+    });
+
+    setIsRejoinDialogOpen(false);
+    setEmployeeToRejoin(null);
+  };
+
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
@@ -41,7 +98,7 @@ export default function TransferredEmployeesPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.absentEmployeesPage.contactNumber, t.transferredEmployeesPage.transferDate, t.transferredEmployeesPage.transferLocation]],
+      head: [[t.serialNumber, t.badgeNumber, t.pno, t.name, t.rank, t.employees.contactNumber, t.transferredEmployeesPage.transferDate, t.transferredEmployeesPage.transferLocation]],
       body: transferredEmployees.map((employee, index) => [
         index + 1,
         employee.badgeNumber,
@@ -91,9 +148,10 @@ export default function TransferredEmployeesPage() {
                           <TableHead>{t.pno}</TableHead>
                           <TableHead>{t.name}</TableHead>
                           <TableHead>{t.rank}</TableHead>
-                          <TableHead>{t.absentEmployeesPage.contactNumber}</TableHead>
+                          <TableHead>{t.employees.contactNumber}</TableHead>
                           <TableHead>{t.transferredEmployeesPage.transferDate}</TableHead>
                           <TableHead>{t.transferredEmployeesPage.transferLocation}</TableHead>
+                          <TableHead className="text-right">{t.actions}</TableHead>
                       </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -120,11 +178,26 @@ export default function TransferredEmployeesPage() {
                               <TableCell>{employee.contact}</TableCell>
                               <TableCell>{employee.transferDate ? format(new Date(employee.transferDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                               <TableCell>{employee.transferLocation}</TableCell>
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                      <span className="sr-only">{t.employees.openMenu}</span>
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleOpenRejoinDialog(employee)}>
+                                      {t.transferredEmployeesPage.rejoin}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
                           </TableRow>
                       ))
                       ) : (
                       <TableRow>
-                          <TableCell colSpan={8} className="text-center h-24">
+                          <TableCell colSpan={9} className="text-center h-24">
                               {t.transferredEmployeesPage.noTransferred}
                           </TableCell>
                       </TableRow>
@@ -134,6 +207,45 @@ export default function TransferredEmployeesPage() {
               </div>
           </CardContent>
       </Card>
+
+      <Dialog open={isRejoinDialogOpen} onOpenChange={setIsRejoinDialogOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>{t.transferredEmployeesPage.rejoinTitle}</DialogTitle>
+                <DialogDescription>
+                    {t.transferredEmployeesPage.rejoinDescription}
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">{t.name}</Label>
+                    <Input
+                        value={employeeToRejoin?.name || ''}
+                        disabled
+                        className="col-span-3"
+                    />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="rejoin-date" className="text-right">
+                        {t.employees.joiningDate}
+                    </Label>
+                    <Input
+                        id="rejoin-date"
+                        type="date"
+                        value={rejoinDate}
+                        onChange={(e) => setRejoinDate(e.target.value)}
+                        className="col-span-3"
+                    />
+                </div>
+            </div>
+            <DialogFooter>
+                <Button variant="secondary" onClick={() => setIsRejoinDialogOpen(false)}>
+                    {t.cancel}
+                </Button>
+                <Button onClick={handleRejoin}>{t.save}</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -113,7 +113,13 @@ export default function LeavePage() {
     }
 
     if (employee.status === 'Suspended') {
-        toast({ variant: 'destructive', title: t.leave.suspendedLeaveError });
+        toast({ variant: 'destructive', title: t.leave.actionProhibited, description: t.leave.suspendedLeaveError });
+        setIsLeaveDialogOpen(false);
+        return;
+    }
+    
+    if (employee.status === 'Transferred') {
+        toast({ variant: 'destructive', title: t.leave.actionProhibited, description: t.leave.transferredLeaveError });
         setIsLeaveDialogOpen(false);
         return;
     }
@@ -315,7 +321,7 @@ export default function LeavePage() {
                       <SelectValue placeholder={t.leave.selectEmployee} />
                     </SelectTrigger>
                     <SelectContent>
-                      {allEmployees.filter(emp => emp.status !== 'Suspended').map((employee) => (
+                      {allEmployees.filter(emp => emp.status !== 'Suspended' && emp.status !== 'Transferred').map((employee) => (
                         <SelectItem key={employee.id} value={employee.id}>
                           {employee.name} ({employee.pno})
                         </SelectItem>

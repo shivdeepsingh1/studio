@@ -106,7 +106,7 @@ export const en = {
       description: (date: string) => `Status overview for ${date}`,
     },
     todayOnDuty: {
-      title: "Today's On Duty Employees",
+      title: "Today's On Duty",
       description: (date: string) => `Showing employees on active duty for ${date}`,
     },
     todayOnLeave: {
@@ -190,6 +190,7 @@ export const en = {
     pnoPlaceholder: 'Enter employee PNO',
     employeeNotFound: 'Employee not found.',
     employeeSuspended: 'This employee is suspended and cannot be assigned duty.',
+    employeeTransferred: 'This employee is transferred and cannot be assigned duty.',
     attendance: 'Attendance',
     selectAttendance: 'Select Attendance',
     present: 'Present',
@@ -295,6 +296,7 @@ export const en = {
     fillAllFields: 'Please fill all required fields.',
     employeeNotFound: 'Employee not found.',
     suspendedLeaveError: 'Leave cannot be processed for a suspended employee.',
+    transferredLeaveError: 'Leave cannot be processed for a transferred employee.',
     actionProhibited: 'Action Prohibited',
     absentLeaveError: 'Leave cannot be processed for an employee who is marked absent during the requested period.',
     // Table
@@ -395,6 +397,11 @@ export const en = {
       noTransferred: 'No employees have been marked as transferred.',
       transferLocation: 'Transfer Location',
       transferDate: 'Transfer Date',
+      rejoin: 'Join Office',
+      rejoinTitle: 'Rejoin Employee',
+      rejoinDescription: 'Set the joining date for the employee.',
+      rejoinedTitle: 'Employee Rejoined',
+      rejoinedDescription: (name: string) => `${name} has been marked as active and moved to reserve.`,
   },
   
   statusTypes: {
