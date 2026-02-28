@@ -299,6 +299,12 @@ export const en = {
     transferredLeaveError: 'Leave cannot be processed for a transferred employee.',
     actionProhibited: 'Action Prohibited',
     absentLeaveError: 'Leave cannot be processed for an employee who is marked absent during the requested period.',
+    invalidDateRange: 'Invalid Date Range',
+    invalidDateRangeDescription: 'The leave end date cannot be before the start date.',
+    limitExceededTitle: 'Leave Limit Exceeded',
+    limitExceededDescription: (type: string, limit: number, remaining: number) => `Cannot apply for more than ${limit} days of ${type} leave. Remaining days: ${remaining}.`,
+    genderRestrictedLeaveTitle: 'Leave Not Applicable',
+    genderRestrictedLeaveDescription: (type: string) => `${type} leave can only be availed by female employees.`,
     // Table
     noLeaveRecords: 'No leave records found.',
     addLeaveEntry: 'Add Leave Entry',

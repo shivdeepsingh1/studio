@@ -299,6 +299,12 @@ export const hi = {
     transferredLeaveError: 'स्थानांतरित कर्मचारी के लिए अवकाश संसाधित नहीं किया जा सकता।',
     actionProhibited: 'कार्रवाई निषिद्ध',
     absentLeaveError: 'अनुरोधित अवधि के दौरान अनुपस्थित के रूप में चिह्नित कर्मचारी के लिए अवकाश संसाधित नहीं किया जा सकता है।',
+    invalidDateRange: 'अमान्य दिनांक सीमा',
+    invalidDateRangeDescription: 'अवकाश की समाप्ति तिथि प्रारंभ तिथि से पहले नहीं हो सकती।',
+    limitExceededTitle: 'अवकाश सीमा पार हो गई',
+    limitExceededDescription: (type: string, limit: number, remaining: number) => `आप ${limit} दिनों से अधिक ${type} अवकाश के लिए आवेदन नहीं कर सकते। शेष दिन: ${remaining}।`,
+    genderRestrictedLeaveTitle: 'अवकाश लागू नहीं',
+    genderRestrictedLeaveDescription: (type: string) => `${type} अवकाश केवल महिला कर्मचारियों द्वारा ही लिया जा सकता है।`,
     // Table
     noLeaveRecords: 'कोई अवकाश रिकॉर्ड नहीं मिला।',
     addLeaveEntry: 'अवकाश प्रविष्टि जोड़ें',

@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { format } from "date-fns"
+import { format, differenceInCalendarDays, getYear } from "date-fns"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { PageHeader } from "@/components/page-header"
@@ -42,7 +42,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Leave, leaveTypes, leaveStatuses, LeaveType, LeaveStatus } from "@/lib/types"
+import { Leave, leaveTypes, leaveStatuses, LeaveType, LeaveStatus, EmployeeRank } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
@@ -127,6 +127,55 @@ export default function LeavePage() {
     const leaveStartDate = new Date(newLeave.startDate.replace(/-/g, '/'));
     const leaveEndDate = new Date(newLeave.endDate.replace(/-/g, '/'));
 
+    if (leaveEndDate < leaveStartDate) {
+        toast({ variant: 'destructive', title: t.leave.invalidDateRange, description: t.leave.invalidDateRangeDescription });
+        return;
+    }
+
+    const currentYear = getYear(leaveStartDate);
+    const newLeaveDuration = differenceInCalendarDays(leaveEndDate, leaveStartDate) + 1;
+
+    if (newLeave.type === 'Casual' || newLeave.type === 'Earned') {
+        const existingLeavesThisYear = leaves.filter(l =>
+            l.employeeId === employeeId &&
+            l.type === newLeave.type &&
+            l.status === 'Approved' &&
+            getYear(new Date(l.startDate.replace(/-/g, '/'))) === currentYear
+        );
+        
+        const totalDaysTaken = existingLeavesThisYear.reduce((acc, l) => {
+            const start = new Date(l.startDate.replace(/-/g, '/'));
+            const end = new Date(l.endDate.replace(/-/g, '/'));
+            if (start <= end) {
+                return acc + (differenceInCalendarDays(end, start) + 1);
+            }
+            return acc;
+        }, 0);
+        
+        const limit = 30;
+        if (totalDaysTaken + newLeaveDuration > limit) {
+            const remaining = limit - totalDaysTaken;
+            toast({
+                variant: 'destructive',
+                title: t.leave.limitExceededTitle,
+                description: t.leave.limitExceededDescription(t.leaveTypes[newLeave.type], limit, remaining > 0 ? remaining : 0),
+            });
+            return;
+        }
+    }
+    
+    const femaleOnlyLeaves: LeaveType[] = ['CCL', 'Medical', 'Sick', 'Other'];
+    const femaleRanks: EmployeeRank[] = ['Lady Inspector', 'Lady Sub Inspector', 'Lady Head Constable', 'Lady Constable'];
+    
+    if (femaleOnlyLeaves.includes(newLeave.type) && !femaleRanks.includes(employee.rank)) {
+        toast({
+            variant: 'destructive',
+            title: t.leave.genderRestrictedLeaveTitle,
+            description: t.leave.genderRestrictedLeaveDescription(t.leaveTypes[newLeave.type]),
+        });
+        return;
+    }
+
     const isAlreadyAbsent = leaves.some(l => 
         l.employeeId === employeeId && 
         l.type === 'Absent' &&
@@ -180,6 +229,66 @@ export default function LeavePage() {
 
   const handleUpdateLeave = () => {
     if (!editingLeave || user?.rank !== 'Administrator') return;
+
+    const employee = allEmployees.find(e => e.id === editingLeave.employeeId);
+    if (!employee) {
+        toast({ variant: 'destructive', title: t.leave.employeeNotFound });
+        return;
+    }
+
+    const leaveStartDate = new Date(editingLeave.startDate.replace(/-/g, '/'));
+    const leaveEndDate = new Date(editingLeave.endDate.replace(/-/g, '/'));
+
+    if (leaveEndDate < leaveStartDate) {
+        toast({ variant: 'destructive', title: t.leave.invalidDateRange, description: t.leave.invalidDateRangeDescription });
+        return;
+    }
+
+    const currentYear = getYear(leaveStartDate);
+    const updatedLeaveDuration = differenceInCalendarDays(leaveEndDate, leaveStartDate) + 1;
+
+    if (editingLeave.type === 'Casual' || editingLeave.type === 'Earned') {
+        const existingLeavesThisYear = leaves.filter(l =>
+            l.id !== editingLeave.id &&
+            l.employeeId === editingLeave.employeeId &&
+            l.type === editingLeave.type &&
+            l.status === 'Approved' &&
+            getYear(new Date(l.startDate.replace(/-/g, '/'))) === currentYear
+        );
+        
+        const totalDaysTaken = existingLeavesThisYear.reduce((acc, l) => {
+            const start = new Date(l.startDate.replace(/-/g, '/'));
+            const end = new Date(l.endDate.replace(/-/g, '/'));
+             if (start <= end) {
+                return acc + (differenceInCalendarDays(end, start) + 1);
+            }
+            return acc;
+        }, 0);
+        
+        const limit = 30;
+        if (totalDaysTaken + updatedLeaveDuration > limit) {
+            const remaining = limit - totalDaysTaken;
+            toast({
+                variant: 'destructive',
+                title: t.leave.limitExceededTitle,
+                description: t.leave.limitExceededDescription(t.leaveTypes[editingLeave.type], limit, remaining > 0 ? remaining : 0),
+            });
+            return;
+        }
+    }
+    
+    const femaleOnlyLeaves: LeaveType[] = ['CCL', 'Medical', 'Sick', 'Other'];
+    const femaleRanks: EmployeeRank[] = ['Lady Inspector', 'Lady Sub Inspector', 'Lady Head Constable', 'Lady Constable'];
+    
+    if (femaleOnlyLeaves.includes(editingLeave.type) && !femaleRanks.includes(employee.rank)) {
+        toast({
+            variant: 'destructive',
+            title: t.leave.genderRestrictedLeaveTitle,
+            description: t.leave.genderRestrictedLeaveDescription(t.leaveTypes[editingLeave.type]),
+        });
+        return;
+    }
+
     updateLeaves(prevLeaves => prevLeaves.map(l => (l.id === editingLeave!.id ? editingLeave! : l)));
     setIsEditDialogOpen(false);
     setEditingLeave(null);
