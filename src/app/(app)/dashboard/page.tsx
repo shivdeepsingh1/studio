@@ -1,9 +1,9 @@
 
 "use client";
 
-import { Users, CalendarOff, Send, Plus, Anchor, Printer, Calendar, CalendarPlus, CalendarHeart, UserX, UserMinus, ClipboardCheck } from 'lucide-react';
+import { Users, CalendarOff, Send, Plus, Anchor, Printer, Calendar, CalendarPlus, CalendarHeart, UserX, UserMinus, ClipboardCheck, Briefcase, HeartHandshake, Stethoscope, Baby, Umbrella } from 'lucide-react';
 import Link from 'next/link';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { Bar, BarChart as RechartsBarChart, XAxis, YAxis } from 'recharts';
 import { employeeRanks, EmployeeRank, LeaveType } from '@/lib/types';
 import { useData } from '@/lib/data-provider';
 import { useLanguage } from '@/lib/i18n/language-provider';
+import { useMemo } from 'react';
 
 const chartData = [
   { month: 'January', desktop: 186 },
@@ -106,7 +107,62 @@ export default function DashboardPage() {
   }, {} as Record<EmployeeRank, number>);
 
   const employeeDuty = duties.find(d => d.employeeId === user?.id && d.date === todayString && d.status !== 'Completed');
-  const employeeLeaveBalance = 12; // Mock data
+
+  const leaveBalanceDetails = useMemo(() => {
+    if (!user) return {};
+
+    const currentYear = new Date().getFullYear();
+    const employeeLeavesThisYear = leaves.filter(l =>
+        l.employeeId === user.id &&
+        l.status === 'Approved' &&
+        new Date(l.startDate.replace(/-/g, '/')).getFullYear() === currentYear
+    );
+
+    const consumed: Record<LeaveType, number> = {
+        Casual: 0,
+        Earned: 0,
+        Medical: 0,
+        CCL: 0,
+        Sick: 0,
+        Absent: 0,
+        Other: 0,
+    };
+
+    employeeLeavesThisYear.forEach(leave => {
+        const startDate = new Date(leave.startDate.replace(/-/g, '/'));
+        const endDate = new Date(leave.endDate.replace(/-/g, '/'));
+        if (startDate && endDate && startDate <= endDate) {
+            const duration = differenceInCalendarDays(endDate, startDate) + 1;
+            if (leave.type in consumed) {
+                consumed[leave.type] += duration;
+            }
+        }
+    });
+
+    return {
+        Casual: { consumed: consumed.Casual, total: 30, remaining: 30 - consumed.Casual },
+        Earned: { consumed: consumed.Earned, total: 30, remaining: 30 - consumed.Earned },
+        Medical: { consumed: consumed.Medical },
+        CCL: { consumed: consumed.CCL },
+        Sick: { consumed: consumed.Sick },
+        Other: { consumed: consumed.Other },
+    };
+}, [leaves, user]);
+
+  const isFemale = useMemo(() => {
+      if (!user) return false;
+      const femaleRanks: EmployeeRank[] = ['Lady Inspector', 'Lady Sub Inspector', 'Lady Head Constable', 'Lady Constable'];
+      return femaleRanks.includes(user.rank);
+  }, [user]);
+
+  const leaveCardsData = [
+      { type: 'Casual', icon: Briefcase, total: 30 },
+      { type: 'Earned', icon: HeartHandshake, total: 30 },
+      { type: 'Medical', icon: Stethoscope },
+      { type: 'CCL', icon: Baby, femaleOnly: true },
+      { type: 'Sick', icon: Stethoscope },
+      { type: 'Other', icon: Umbrella },
+  ];
 
   const chartConfig = {
     desktop: {
@@ -260,7 +316,7 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-6">
            <Card className="bg-primary text-primary-foreground">
               <CardHeader>
                 <CardTitle>{t.dashboard.todaysDuty}</CardTitle>
@@ -277,15 +333,39 @@ export default function DashboardPage() {
                 )}
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t.dashboard.leaveBalance}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{employeeLeaveBalance} {t.dashboard.days}</div>
-                <p className="text-sm text-muted-foreground">{t.dashboard.casualLeaveAvailable}</p>
-              </CardContent>
-            </Card>
+            
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">{t.dashboard.leaveBalance}</h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {leaveCardsData.map(({ type, icon: Icon, total, femaleOnly }) => {
+                  if (femaleOnly && !isFemale) return null;
+
+                  const balance = leaveBalanceDetails[type as keyof typeof leaveBalanceDetails];
+                  if (!balance) return null;
+
+                  return (
+                      <Card key={type}>
+                          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                              <CardTitle className="text-sm font-medium">{t.leaveTypes[type as LeaveType]}</CardTitle>
+                              <Icon className="h-4 w-4 text-muted-foreground" />
+                          </CardHeader>
+                          <CardContent>
+                              <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                      <p className="text-2xl font-bold">{balance.consumed}</p>
+                                      <p className="text-xs text-muted-foreground">{t.dashboard.consumedLeave}</p>
+                                  </div>
+                                  {total !== undefined && (
+                                      <div>
+                                          <p className="text-2xl font-bold">{(balance as any).remaining}</p>
+                                          <p className="text-xs text-muted-foreground">{t.dashboard.remainingLeave}</p>
+                                      </div>
+                                  )}
+                              </div>
+                          </CardContent>
+                      </Card>
+                  )
+              })}
+          </div>
         </div>
       )}
     </>

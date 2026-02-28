@@ -167,6 +167,8 @@ export const hi = {
     casualLeaveAvailable: 'आकस्मिक अवकाश उपलब्ध',
     suspendedEmployees: 'निलंबित कर्मचारी',
     absentToday: 'आज अनुपस्थित',
+    consumedLeave: 'अवकाश लिया',
+    remainingLeave: 'अवकाश शेष',
   },
 
   // Duty Page

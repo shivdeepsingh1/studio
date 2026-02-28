@@ -167,6 +167,8 @@ export const en = {
     casualLeaveAvailable: 'Casual leave available',
     suspendedEmployees: 'Employees suspended',
     absentToday: 'Absent today',
+    consumedLeave: 'Consumed',
+    remainingLeave: 'Remaining',
   },
 
   // Duty Page

@@ -575,15 +575,23 @@ export default function DutyPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>{t.serialNumber}</TableHead>
-                        <TableHead>{t.duty.employee}</TableHead>
+                        <TableHead>{t.rank}</TableHead>
+                        <TableHead>{t.badgeNumber}</TableHead>
+                        <TableHead>{t.pno}</TableHead>
+                        <TableHead>{t.name}</TableHead>
                         <TableHead>{t.duty.shift}</TableHead>
                         <TableHead>{t.duty.location}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {dutiesForSelectedDate.map((duty, index) => (
+                      {dutiesForSelectedDate.map((duty, index) => {
+                        const employee = allEmployees.find(e => e.id === duty.employeeId);
+                        return (
                         <TableRow key={duty.id}>
                           <TableCell>{index + 1}</TableCell>
+                          <TableCell>{employee ? t.ranks[employee.rank] : 'N/A'}</TableCell>
+                          <TableCell>{employee?.badgeNumber}</TableCell>
+                          <TableCell>{employee?.pno}</TableCell>
                           <TableCell>{duty.employeeName}</TableCell>
                           <TableCell>
                             <Badge
@@ -598,7 +606,8 @@ export default function DutyPage() {
                           </TableCell>
                           <TableCell>{duty.location}</TableCell>
                         </TableRow>
-                      ))}
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 ) : (
