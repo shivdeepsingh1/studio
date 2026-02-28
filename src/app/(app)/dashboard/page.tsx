@@ -35,9 +35,9 @@ export default function DashboardPage() {
   const todayString = format(today, "yyyy-MM-dd");
 
   // 1. Employee sets
-  const activeEmployees = employees.filter(e => e.rank !== 'Administrator' && e.status !== 'Transferred');
+  const activeEmployees = employees.filter(e => e.status === 'Active' && e.rank !== 'Administrator');
   const totalEmployeesCount = activeEmployees.length;
-  const suspendedEmployees = activeEmployees.filter(e => e.status === 'Suspended');
+  const suspendedEmployees = employees.filter(e => e.status === 'Suspended');
   const suspendedEmployeesCount = suspendedEmployees.length;
 
   // 2. Leave sets
@@ -75,7 +75,7 @@ export default function DashboardPage() {
   const onActiveDutyIds = new Set(dutiesToday.map(d => d.employeeId));
   
   // 4. Calculate stats for dashboard cards
-  const presentEmployees = activeEmployees.filter(e => e.status !== 'Suspended' && !onLeaveTodayIds.includes(e.id));
+  const presentEmployees = activeEmployees.filter(e => !onLeaveTodayIds.includes(e.id));
   const presentCount = presentEmployees.length;
 
   const onDutyNonReserveEmployees = presentEmployees.filter(e => 
@@ -102,7 +102,7 @@ export default function DashboardPage() {
   };
   
   const rankCounts = employeeRanks.reduce((acc, rank) => {
-    acc[rank] = employees.filter(e => e.rank === rank).length;
+    acc[rank] = employees.filter(e => e.rank === rank && e.status === 'Active').length;
     return acc;
   }, {} as Record<EmployeeRank, number>);
 
