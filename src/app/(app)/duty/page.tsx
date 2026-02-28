@@ -245,11 +245,16 @@ export default function DutyPage() {
     let body;
 
     if (isEmployee) {
-      head = [[t.serialNumber, t.date, t.shift, t.location, t.details]];
+      const currentUserEmployee = allEmployees.find(e => e.id === user?.id);
+      head = [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.date, t.shift, t.location, t.details]];
       body = employeeDuties.map((duty, index) => {
         const dutyDateValid = duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime());
         return [
             index + 1,
+            currentUserEmployee ? t.ranks[currentUserEmployee.rank] : 'N/A',
+            currentUserEmployee?.badgeNumber || 'N/A',
+            currentUserEmployee?.pno || 'N/A',
+            currentUserEmployee?.name || 'N/A',
             dutyDateValid ? format(new Date(duty.date.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
             t.shifts[duty.shift],
             duty.location,

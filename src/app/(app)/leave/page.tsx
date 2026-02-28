@@ -317,9 +317,10 @@ export default function LeavePage() {
     
     const isEmployeeView = user?.role !== "admin"
     const data = isEmployeeView ? employeeLeaves : leaves
+    const currentUserEmployee = allEmployees.find(e => e.id === user?.id);
     
     const head = isEmployeeView 
-      ? [[t.serialNumber, t.leave.leaveType, t.leave.startDate, t.leave.endDate, t.leave.totalDays, t.leave.reason, t.status]]
+      ? [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.leave.leaveType, t.leave.startDate, t.leave.endDate, t.leave.totalDays, t.leave.reason, t.status]]
       : [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.leave.leaveType, t.leave.startDate, t.leave.endDate, t.leave.totalDays, t.leave.reason, t.status]]
 
     const body = data.map((leave, index) => {
@@ -332,6 +333,10 @@ export default function LeavePage() {
         if (isEmployeeView) {
             return [
                 index + 1,
+                currentUserEmployee ? t.ranks[currentUserEmployee.rank] : 'N/A',
+                currentUserEmployee?.badgeNumber || 'N/A',
+                currentUserEmployee?.pno || 'N/A',
+                currentUserEmployee?.name || 'N/A',
                 t.leaveTypes[leave.type],
                 startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
                 endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
