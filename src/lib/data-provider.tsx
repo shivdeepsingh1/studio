@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
@@ -82,7 +83,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updateDuties,
       updateLeaves,
       loading
-  }), [employees, duties, leaves, loading, updateEmployees, updateDuties, updateLeaves]);
+  }), [employees, duties, leaves, loading]);
 
   return (
     <DataContext.Provider value={value}>

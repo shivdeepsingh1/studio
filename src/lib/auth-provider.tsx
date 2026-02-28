@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
@@ -55,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     _setUser(null);
   }, [_setUser]);
 
-  const value = useMemo(() => ({ user, logout, loading, updateUser, _setUser }), [user, loading, logout, updateUser, _setUser]);
+  const value = useMemo(() => ({ user, logout, loading, updateUser, _setUser }), [user, loading]);
 
   return (
     <AuthContext.Provider value={value}>
