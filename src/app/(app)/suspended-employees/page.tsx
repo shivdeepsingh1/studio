@@ -20,7 +20,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
-import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -51,9 +50,6 @@ export default function SuspendedEmployeesPage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
-    doc.setFont('Hind');
     
     doc.text(`${t.pageHeaders.suspendedEmployees.title}`, 14, 16);
 
@@ -69,8 +65,6 @@ export default function SuspendedEmployeesPage() {
         employee.contact,
         employee.suspensionDate ? format(new Date(employee.suspensionDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A',
       ]),
-      styles: { font: 'Hind' },
-      headStyles: { font: 'Hind' },
     });
     doc.save(`suspended_employees.pdf`);
   };

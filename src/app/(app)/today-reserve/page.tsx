@@ -21,7 +21,6 @@ import { Employee, Duty, Leave, LeaveType, leaveTypes, EmployeeRank } from "@/li
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
-import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -97,9 +96,6 @@ export default function TodayReservePage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
-    doc.setFont('Hind');
     
     doc.text(`${t.pageHeaders.todayReserve.title} - ${format(new Date(), 'dd-MM-yyyy')}`, 14, 16);
 
@@ -115,8 +111,6 @@ export default function TodayReservePage() {
         employee.contact,
         t.statement.reserve,
       ]),
-      styles: { font: 'Hind' },
-      headStyles: { font: 'Hind' },
     });
     doc.save(`reserve_employees_${todayString}.pdf`);
   };
@@ -523,5 +517,3 @@ export default function TodayReservePage() {
     </>
   );
 }
-
-    

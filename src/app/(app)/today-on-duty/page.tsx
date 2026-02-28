@@ -27,7 +27,6 @@ import { Employee, Duty, Leave } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
-import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 
@@ -133,9 +132,6 @@ export default function TodayOnDutyPage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
-    doc.setFont('Hind');
     
     doc.text(`${t.pageHeaders.todayOnDuty.title} - ${format(new Date(), 'dd-MM-yyyy')}`, 14, 16);
 
@@ -152,8 +148,6 @@ export default function TodayOnDutyPage() {
         duty.location,
         format(new Date(duty.date.replace(/-/g, '/')), 'dd-MM-yyyy'),
       ]),
-      styles: { font: 'Hind' },
-      headStyles: { font: 'Hind' },
     });
     doc.save(`on_duty_employees_${todayString}.pdf`);
   };

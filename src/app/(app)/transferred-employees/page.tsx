@@ -20,7 +20,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
-import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -90,9 +89,6 @@ export default function TransferredEmployeesPage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
-    doc.setFont('Hind');
     
     doc.text(`${t.pageHeaders.transferredEmployees.title}`, 14, 16);
 
@@ -109,8 +105,6 @@ export default function TransferredEmployeesPage() {
         employee.transferDate ? format(new Date(employee.transferDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A',
         employee.transferLocation,
       ]),
-      styles: { font: 'Hind' },
-      headStyles: { font: 'Hind' },
     });
     doc.save(`transferred_employees.pdf`);
   };

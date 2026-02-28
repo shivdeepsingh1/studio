@@ -19,7 +19,6 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useData } from "@/lib/data-provider"
 import { useLanguage } from "@/lib/i18n/language-provider"
-import { font } from "@/lib/fonts/Hind-Regular"
 
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth()
@@ -77,9 +76,6 @@ export default function ProfilePage() {
     if (!user || !employeeDetails) return;
 
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
-    doc.setFont('Hind');
 
     doc.text(`${t.pageHeaders.profile.title} - ${user.name}`, 14, 16);
 
@@ -99,8 +95,6 @@ export default function ProfilePage() {
       startY: 22,
       head: [[t.details, '']],
       body: profileData,
-      styles: { font: 'Hind' },
-      headStyles: { font: 'Hind' },
     });
 
     doc.save(`profile_${user.pno}.pdf`);

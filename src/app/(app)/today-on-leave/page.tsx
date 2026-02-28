@@ -21,7 +21,6 @@ import { Employee, Leave } from "@/lib/types";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
-import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -124,9 +123,6 @@ export default function TodayOnLeavePage() {
   const handleExportPdf = () => {
     const doc = new jsPDF();
     const todayString = format(new Date(), "yyyy-MM-dd");
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
-    doc.setFont('Hind');
     
     doc.text(`${t.pageHeaders.todayOnLeave.title} - ${format(new Date(), 'dd-MM-yyyy')}`, 14, 16);
 
@@ -143,8 +139,6 @@ export default function TodayOnLeavePage() {
         t.leaveTypes[leave.type],
         format(new Date(leave.endDate.replace(/-/g, '/')), 'dd-MM-yyyy'),
       ]),
-      styles: { font: 'Hind' },
-      headStyles: { font: 'Hind' },
     });
     doc.save(`on_leave_employees_${todayString}.pdf`);
   };

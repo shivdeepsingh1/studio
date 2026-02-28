@@ -23,7 +23,6 @@ import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/i18n/language-provider";
-import { font } from "@/lib/fonts/Hind-Regular";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -123,9 +122,6 @@ export default function AbsentManagementPage() {
 
   const handleExportPdf = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
-    doc.setFont('Hind');
     
     doc.text(`${t.absentEmployeesPage.title} - ${format(new Date(), 'dd-MM-yyyy')}`, 14, 16);
 
@@ -139,8 +135,6 @@ export default function AbsentManagementPage() {
         t.ranks[e.employee.rank],
         e.employee.contact,
       ]),
-      styles: { font: 'Hind' },
-      headStyles: { font: 'Hind' },
     });
     doc.save(`absent_employees_${todayString}.pdf`);
   };

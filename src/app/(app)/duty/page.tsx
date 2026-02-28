@@ -60,7 +60,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useData } from "@/lib/data-provider"
 import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from "@/lib/i18n/language-provider"
-import { font } from "@/lib/fonts/Hind-Regular";
 
 export default function DutyPage() {
   const { user } = useAuth()
@@ -231,9 +230,6 @@ export default function DutyPage() {
 
   const handleExport = () => {
     const doc = new jsPDF();
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal');
-    doc.setFont('Hind');
     
     doc.text(t.pageHeaders.dutyAdmin.title, 14, 16);
 
@@ -276,8 +272,6 @@ export default function DutyPage() {
       startY: 20,
       head: head,
       body: body as any,
-      styles: { font: 'Hind' },
-      headStyles: { font: 'Hind' },
     });
     doc.save("duty_roster.pdf");
   }

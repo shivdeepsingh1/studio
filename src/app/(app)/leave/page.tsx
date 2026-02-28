@@ -57,7 +57,6 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { useData } from "@/lib/data-provider"
 import { useLanguage } from "@/lib/i18n/language-provider"
-import { font } from "@/lib/fonts/Hind-Regular"
 import { useToast } from "@/hooks/use-toast"
 
 export default function LeavePage() {
@@ -307,9 +306,6 @@ export default function LeavePage() {
 
   const handleExport = () => {
     const doc = new jsPDF()
-    doc.addFileToVFS('Hind-Regular.ttf', font);
-    doc.addFont('Hind-Regular.ttf', 'Hind', 'normal')
-    doc.setFont('Hind')
 
     doc.text(t.sidebar.leave, 14, 16)
     
@@ -354,8 +350,6 @@ export default function LeavePage() {
       startY: 20,
       head: head,
       body: body as any,
-      styles: { font: 'Hind' },
-      headStyles: { font: 'Hind' },
     })
 
     doc.save("leave_records.pdf")
@@ -746,5 +740,3 @@ export default function LeavePage() {
     </>
   )
 }
-
-    
