@@ -317,6 +317,7 @@ export const en = {
     leaveEnded: 'Leave Ended',
     employeeMarkedReserve: (name: string) => `${name} has been marked as reserve.`,
     absentFromLeave: 'Absent from Leave',
+    totalDays: 'Total Days',
   },
 
   // Profile Page

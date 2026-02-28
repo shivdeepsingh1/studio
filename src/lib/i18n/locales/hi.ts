@@ -317,6 +317,7 @@ export const hi = {
     leaveEnded: 'अवकाश समाप्त',
     employeeMarkedReserve: (name: string) => `${name} को रिज़र्व के रूप में चिह्नित किया गया है।`,
     absentFromLeave: 'अवकाश से अनुपस्थित',
+    totalDays: 'कुल दिन',
   },
 
   // Profile Page

@@ -319,12 +319,15 @@ export default function LeavePage() {
     const data = isEmployeeView ? employeeLeaves : leaves
     
     const head = isEmployeeView 
-      ? [[t.serialNumber, t.leave.leaveType, t.leave.startDate, t.leave.endDate, t.leave.reason, t.status]]
-      : [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.leave.leaveType, t.leave.startDate, t.leave.endDate, t.leave.reason, t.status]]
+      ? [[t.serialNumber, t.leave.leaveType, t.leave.startDate, t.leave.endDate, t.leave.totalDays, t.leave.reason, t.status]]
+      : [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.leave.leaveType, t.leave.startDate, t.leave.endDate, t.leave.totalDays, t.leave.reason, t.status]]
 
     const body = data.map((leave, index) => {
         const startDateValid = leave.startDate && !isNaN(new Date(leave.startDate.replace(/-/g, '/')).getTime());
         const endDateValid = leave.endDate && !isNaN(new Date(leave.endDate.replace(/-/g, '/')).getTime());
+        const totalDays = startDateValid && endDateValid
+            ? differenceInCalendarDays(new Date(leave.endDate.replace(/-/g, '/')), new Date(leave.startDate.replace(/-/g, '/'))) + 1
+            : 0;
         
         if (isEmployeeView) {
             return [
@@ -332,6 +335,7 @@ export default function LeavePage() {
                 t.leaveTypes[leave.type],
                 startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
                 endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+                totalDays > 0 ? totalDays : 'N/A',
                 leave.reason,
                 t.leaveStatuses[leave.status]
             ];
@@ -347,6 +351,7 @@ export default function LeavePage() {
             t.leaveTypes[leave.type],
             startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
             endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+            totalDays > 0 ? totalDays : 'N/A',
             leave.reason,
             t.leaveStatuses[leave.status]
         ];
@@ -558,6 +563,7 @@ export default function LeavePage() {
               <TableHead>{t.leave.leaveType}</TableHead>
               <TableHead>{t.leave.startDate}</TableHead>
               <TableHead>{t.leave.endDate}</TableHead>
+              <TableHead>{t.leave.totalDays}</TableHead>
               <TableHead>{t.leave.reason}</TableHead>
               <TableHead>{t.status}</TableHead>
               {user?.rank === 'Administrator' && <TableHead className="text-right">{t.actions}</TableHead>}
@@ -568,7 +574,10 @@ export default function LeavePage() {
               const startDateValid = leave.startDate && !isNaN(new Date(leave.startDate.replace(/-/g, '/')).getTime());
               const endDateValid = leave.endDate && !isNaN(new Date(leave.endDate.replace(/-/g, '/')).getTime());
               const employee = user?.role === 'admin' ? allEmployees.find(e => e.id === leave.employeeId) : null;
-              
+              const totalDays = startDateValid && endDateValid
+                ? differenceInCalendarDays(new Date(leave.endDate.replace(/-/g, '/')), new Date(leave.startDate.replace(/-/g, '/'))) + 1
+                : 0;
+
               return (
                 <TableRow key={leave.id}>
                   <TableCell>{index + 1}</TableCell>
@@ -583,6 +592,7 @@ export default function LeavePage() {
                   <TableCell>{t.leaveTypes[leave.type]}</TableCell>
                   <TableCell>{startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
                   <TableCell>{endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                  <TableCell>{totalDays > 0 ? totalDays : 'N/A'}</TableCell>
                   <TableCell className="max-w-xs truncate">
                     {leave.reason}
                   </TableCell>
@@ -623,14 +633,14 @@ export default function LeavePage() {
             })}
             {user?.role === "employee" && employeeLeaves.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center">
+                <TableCell colSpan={7} className="text-center">
                   {t.leave.noLeaveRecords}
                 </TableCell>
               </TableRow>
             )}
              {user?.role === "admin" && leaves.length === 0 && (
               <TableRow>
-                <TableCell colSpan={11} className="text-center">
+                <TableCell colSpan={12} className="text-center">
                   {t.leave.noLeaveRecords}
                 </TableCell>
               </TableRow>
