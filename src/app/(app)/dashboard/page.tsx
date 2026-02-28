@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Users, CalendarOff, Send, Plus, Anchor, Globe, Calendar, CalendarPlus, CalendarHeart, UserX, UserMinus } from 'lucide-react';
+import { Users, CalendarOff, Send, Plus, Anchor, Globe, Calendar, CalendarPlus, CalendarHeart, UserX, UserMinus, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
@@ -143,7 +143,7 @@ export default function DashboardPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{t.dashboard.outOfDistrict}</CardTitle>
-                <Globe className="h-4 w-4 text-muted-foreground" />
+                <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.outOfDistrict}</div>
