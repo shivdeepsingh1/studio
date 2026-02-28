@@ -42,7 +42,7 @@ export const en = {
   sidebar: {
     dashboard: 'Dashboard',
     duty: 'Duty Management Roster',
-    leave: 'Leave',
+    leave: 'Leave Management',
     employees: 'Employees',
     absentEmployees: 'Absent Employees',
     dutyReport: 'Duty Report',
@@ -397,5 +397,3 @@ export const en = {
     Night: 'Night',
   }
 };
-
-    

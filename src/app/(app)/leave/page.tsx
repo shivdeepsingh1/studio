@@ -507,7 +507,6 @@ export default function LeavePage() {
                                 {leaveTypes.map((type) => (
                                     <SelectItem key={type} value={type}>{t.leaveTypes[type]}</SelectItem>
                                 ))}
-                                <SelectItem value="Absent">{t.leaveTypes.Absent}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -575,5 +574,3 @@ export default function LeavePage() {
     </>
   )
 }
-
-    

@@ -42,7 +42,7 @@ export const hi = {
   sidebar: {
     dashboard: 'डैशबोर्ड',
     duty: 'ड्यूटी प्रबंधन रोस्टर',
-    leave: 'अवकाश',
+    leave: 'अवकाश प्रबंधन',
     employees: 'कर्मचारी',
     absentEmployees: 'अनुपस्थित कर्मचारी',
     dutyReport: 'ड्यूटी रिपोर्ट',
@@ -397,5 +397,3 @@ export const hi = {
     Night: 'रात',
   }
 };
-
-    
