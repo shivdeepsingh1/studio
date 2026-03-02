@@ -58,6 +58,7 @@ export default function AbsentManagementPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingAbsence, setEditingAbsence] = useState<Leave | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -66,6 +67,22 @@ export default function AbsentManagementPage() {
   const absenceRecords = useMemo(() => {
     return leaves.filter(l => l.type === 'Absent');
   }, [leaves]);
+
+  const filteredAbsenceRecords = useMemo(() => {
+    if (!searchQuery) return absenceRecords;
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return absenceRecords.filter(absence => {
+        const employee = employees.find(e => e.id === absence.employeeId);
+        if (!employee) {
+            return absence.employeeName.toLowerCase().includes(lowerCaseQuery);
+        }
+        return (
+            absence.employeeName.toLowerCase().includes(lowerCaseQuery) ||
+            employee.pno.toLowerCase().includes(lowerCaseQuery) ||
+            employee.badgeNumber.toLowerCase().includes(lowerCaseQuery)
+        );
+    });
+  }, [absenceRecords, searchQuery, employees]);
 
   const openEditDialog = (absence: Leave) => {
     if (user?.rank !== 'Administrator') return;
@@ -122,7 +139,7 @@ export default function AbsentManagementPage() {
     autoTable(doc, {
       startY: 22,
       head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.leave.startDate, t.leave.endDate, t.leave.reason]],
-      body: absenceRecords.map((absence, index) => {
+      body: filteredAbsenceRecords.map((absence, index) => {
         const employee = employees.find(e => e.id === absence.employeeId);
         return [
           index + 1,
@@ -154,14 +171,22 @@ export default function AbsentManagementPage() {
         title={t.pageHeaders.absentManagement.title}
         description={t.pageHeaders.absentManagement.description}
       >
-        <Button variant="outline" onClick={handleExportPdf} disabled={absenceRecords.length === 0}>
+        <Button variant="outline" onClick={handleExportPdf} disabled={filteredAbsenceRecords.length === 0}>
             <Printer className="mr-2" /> {t.exportPdf}
         </Button>
       </PageHeader>
       
       <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <CardTitle>{t.pageHeaders.absentManagement.title}</CardTitle>
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <Input
+                  placeholder={t.employees.searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full md:w-64"
+                />
+              </div>
           </CardHeader>
           <CardContent>
               <div className="border rounded-lg">
@@ -180,8 +205,8 @@ export default function AbsentManagementPage() {
                       </TableRow>
                   </TableHeader>
                   <TableBody>
-                      {absenceRecords.length > 0 ? (
-                      absenceRecords.map((absence, index) => {
+                      {filteredAbsenceRecords.length > 0 ? (
+                      filteredAbsenceRecords.map((absence, index) => {
                         const employee = employees.find(e => e.id === absence.employeeId);
                         return (
                           <TableRow key={absence.id}>
@@ -318,3 +343,5 @@ export default function AbsentManagementPage() {
     </>
   );
 }
+
+    

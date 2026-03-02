@@ -75,6 +75,7 @@ export default function DutyPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [dutyToDelete, setDutyToDelete] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
 
   const initialNewDutyState = {
@@ -230,6 +231,22 @@ export default function DutyPage() {
     setDutyToDelete(null);
   };
 
+  const filteredDuties = duties.filter(duty => {
+    if (!searchQuery) {
+        return true;
+    }
+    const employee = allEmployees.find(e => e.id === duty.employeeId);
+    if (!employee) {
+        return duty.employeeName.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return (
+        employee.name.toLowerCase().includes(lowerCaseQuery) ||
+        employee.pno.toLowerCase().includes(lowerCaseQuery) ||
+        employee.badgeNumber.toLowerCase().includes(lowerCaseQuery)
+    );
+  });
+
 
   const handleExport = () => {
     const doc = new jsPDF();
@@ -265,7 +282,7 @@ export default function DutyPage() {
       });
     } else {
       head = [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.date, t.shift, t.location]];
-      body = duties.map((duty, index) => {
+      body = filteredDuties.map((duty, index) => {
         const employee = allEmployees.find(e => e.id === duty.employeeId);
         const dutyDateValid = duty.date && !isNaN(new Date(duty.date.replace(/-/g, '/')).getTime());
         return [
@@ -480,6 +497,14 @@ export default function DutyPage() {
             <TabsTrigger value="calendar">{t.duty.calendarView}</TabsTrigger>
           </TabsList>
           <TabsContent value="list">
+            <div className="flex justify-end py-4">
+              <Input
+                placeholder={t.employees.searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm"
+              />
+            </div>
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
@@ -496,7 +521,7 @@ export default function DutyPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {duties.map((duty, index) => {
+                  {filteredDuties.map((duty, index) => {
                     const employee = allEmployees.find(
                       (e) => e.id === duty.employeeId
                     )
@@ -547,6 +572,13 @@ export default function DutyPage() {
                       </TableRow>
                     )
                   })}
+                  {filteredDuties.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={user?.rank === 'Administrator' ? 9 : 8} className="text-center h-24">
+                        {t.leave.noLeaveRecords}
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -782,3 +814,5 @@ export default function DutyPage() {
     </>
   )
 }
+
+    

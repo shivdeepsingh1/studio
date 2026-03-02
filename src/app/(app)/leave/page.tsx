@@ -59,6 +59,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useData } from "@/lib/data-provider"
 import { useLanguage } from "@/lib/i18n/language-provider"
 import { useToast } from "@/hooks/use-toast"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function LeavePage() {
   const { user } = useAuth()
@@ -70,6 +71,7 @@ export default function LeavePage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [leaveToDelete, setLeaveToDelete] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('');
 
   const initialNewLeaveState = {
     employeeId: "",
@@ -318,7 +320,7 @@ export default function LeavePage() {
     doc.text(t.sidebar.leave, 14, 16)
     
     const isEmployeeView = user?.role !== "admin"
-    const data = isEmployeeView ? employeeLeaves : leaves
+    const data = isEmployeeView ? employeeLeaves : filteredLeaves
     const currentUserEmployee = allEmployees.find(e => e.id === user?.id);
     
     const head = isEmployeeView 
@@ -375,6 +377,22 @@ export default function LeavePage() {
   }
 
   const employeeLeaves = leaves.filter((l) => l.employeeId === user?.id)
+
+  const leavesToDisplay = user?.role === 'admin' ? leaves : employeeLeaves;
+
+  const filteredLeaves = leavesToDisplay.filter(leave => {
+    if (user?.role !== 'admin' || !searchQuery) return true;
+    const employee = allEmployees.find(e => e.id === leave.employeeId);
+    if (!employee) {
+        return leave.employeeName.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return (
+        employee.name.toLowerCase().includes(lowerCaseQuery) ||
+        employee.pno.toLowerCase().includes(lowerCaseQuery) ||
+        employee.badgeNumber.toLowerCase().includes(lowerCaseQuery)
+    );
+  });
 
   const getStatusBadgeVariant = (status: LeaveStatus) => {
     switch (status) {
@@ -554,99 +572,111 @@ export default function LeavePage() {
         </div>
       )}
 
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t.serialNumber}</TableHead>
-              <TableHead>{t.rank}</TableHead>
-              <TableHead>{t.badgeNumber}</TableHead>
-              <TableHead>{t.pno}</TableHead>
-              <TableHead>{t.name}</TableHead>
-              <TableHead>{t.leave.leaveType}</TableHead>
-              <TableHead>{t.leave.startDate}</TableHead>
-              <TableHead>{t.leave.endDate}</TableHead>
-              <TableHead>{t.leave.totalDays}</TableHead>
-              <TableHead>{t.leave.reason}</TableHead>
-              <TableHead>{t.status}</TableHead>
-              {user?.rank === 'Administrator' && <TableHead className="text-right">{t.actions}</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {(user?.role === "admin" ? leaves : employeeLeaves).map((leave, index) => {
-              const startDateValid = leave.startDate && !isNaN(new Date(leave.startDate.replace(/-/g, '/')).getTime());
-              const endDateValid = leave.endDate && !isNaN(new Date(leave.endDate.replace(/-/g, '/')).getTime());
-              const employee = allEmployees.find(e => e.id === leave.employeeId);
-              const totalDays = startDateValid && endDateValid
-                ? differenceInCalendarDays(new Date(leave.endDate.replace(/-/g, '/')), new Date(leave.startDate.replace(/-/g, '/'))) + 1
-                : 0;
-
-              return (
-                <TableRow key={leave.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{employee ? t.ranks[employee.rank] : 'N/A'}</TableCell>
-                  <TableCell>{employee?.badgeNumber || 'N/A'}</TableCell>
-                  <TableCell>{employee?.pno || 'N/A'}</TableCell>
-                  <TableCell>{leave.employeeName}</TableCell>
-                  <TableCell>{t.leaveTypes[leave.type]}</TableCell>
-                  <TableCell>{startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
-                  <TableCell>{endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
-                  <TableCell>{totalDays > 0 ? totalDays : 'N/A'}</TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {leave.reason}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={getStatusBadgeVariant(leave.status)}
-                      className={cn(leave.status === "Approved" && "bg-green-500")}
-                    >
-                      {t.leaveStatuses[leave.status]}
-                    </Badge>
-                  </TableCell>
-                  {user?.rank === 'Administrator' && (
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">{t.employees.openMenu}</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEditDialog(leave)}>
-                            {t.edit}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-red-500"
-                            onClick={() => handleDeleteLeave(leave.id)}
-                            disabled={!isChiefAdmin}
-                          >
-                            {t.delete}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  )}
+      <Card>
+        <CardHeader>
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <CardTitle>{t.sidebar.leave}</CardTitle>
+                {user?.role === 'admin' && (
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                        <Input
+                            placeholder={t.employees.searchPlaceholder}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full md:w-64"
+                        />
+                    </div>
+                )}
+            </div>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t.serialNumber}</TableHead>
+                  <TableHead>{t.rank}</TableHead>
+                  <TableHead>{t.badgeNumber}</TableHead>
+                  <TableHead>{t.pno}</TableHead>
+                  <TableHead>{t.name}</TableHead>
+                  <TableHead>{t.leave.leaveType}</TableHead>
+                  <TableHead>{t.leave.startDate}</TableHead>
+                  <TableHead>{t.leave.endDate}</TableHead>
+                  <TableHead>{t.leave.totalDays}</TableHead>
+                  <TableHead>{t.leave.reason}</TableHead>
+                  <TableHead>{t.status}</TableHead>
+                  {user?.rank === 'Administrator' && <TableHead className="text-right">{t.actions}</TableHead>}
                 </TableRow>
-              )
-            })}
-            {user?.role === "employee" && employeeLeaves.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={11} className="text-center">
-                  {t.leave.noLeaveRecords}
-                </TableCell>
-              </TableRow>
-            )}
-             {user?.role === "admin" && leaves.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={12} className="text-center">
-                  {t.leave.noLeaveRecords}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              </TableHeader>
+              <TableBody>
+                {filteredLeaves.map((leave, index) => {
+                  const startDateValid = leave.startDate && !isNaN(new Date(leave.startDate.replace(/-/g, '/')).getTime());
+                  const endDateValid = leave.endDate && !isNaN(new Date(leave.endDate.replace(/-/g, '/')).getTime());
+                  const employee = allEmployees.find(e => e.id === leave.employeeId);
+                  const totalDays = startDateValid && endDateValid
+                    ? differenceInCalendarDays(new Date(leave.endDate.replace(/-/g, '/')), new Date(leave.startDate.replace(/-/g, '/'))) + 1
+                    : 0;
+
+                  return (
+                    <TableRow key={leave.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{employee ? t.ranks[employee.rank] : 'N/A'}</TableCell>
+                      <TableCell>{employee?.badgeNumber || 'N/A'}</TableCell>
+                      <TableCell>{employee?.pno || 'N/A'}</TableCell>
+                      <TableCell>{leave.employeeName}</TableCell>
+                      <TableCell>{t.leaveTypes[leave.type]}</TableCell>
+                      <TableCell>{startDateValid ? format(new Date(leave.startDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                      <TableCell>{endDateValid ? format(new Date(leave.endDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                      <TableCell>{totalDays > 0 ? totalDays : 'N/A'}</TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {leave.reason}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={getStatusBadgeVariant(leave.status)}
+                          className={cn(leave.status === "Approved" && "bg-green-500")}
+                        >
+                          {t.leaveStatuses[leave.status]}
+                        </Badge>
+                      </TableCell>
+                      {user?.rank === 'Administrator' && (
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">{t.employees.openMenu}</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openEditDialog(leave)}>
+                                {t.edit}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-red-500"
+                                onClick={() => handleDeleteLeave(leave.id)}
+                                disabled={!isChiefAdmin}
+                              >
+                                {t.delete}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )
+                })}
+                {filteredLeaves.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={user?.rank === 'Administrator' ? 12 : 11} className="text-center h-24">
+                      {t.leave.noLeaveRecords}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
@@ -756,3 +786,5 @@ export default function LeavePage() {
     </>
   )
 }
+
+    
