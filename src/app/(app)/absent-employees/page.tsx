@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { font } from "@/lib/fonts/Hind-Regular";
@@ -89,18 +89,34 @@ export default function AbsentEmployeesPage() {
 
 
   const handleMarkAsReserve = (employeeId: string, employeeName: string) => {
-    const absentLeaveRecord = leaves.find(l => 
-      l.employeeId === employeeId && 
-      l.type === 'Absent' && 
-      l.startDate === todayString
-    );
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const absentLeaveRecord = leaves.find(l => {
+      if (l.employeeId !== employeeId || l.type !== 'Absent' || l.status !== 'Approved') {
+        return false;
+      }
+      const startDate = new Date(l.startDate.replace(/-/g, '/'));
+      const endDate = new Date(l.endDate.replace(/-/g, '/'));
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      return today >= startDate && today <= endDate;
+    });
 
     if (!absentLeaveRecord) {
         toast({ variant: 'default', title: t.absentEmployeesPage.alreadyPresentTitle, description: t.absentEmployeesPage.alreadyPresentDescription(employeeName) });
         return;
     }
 
-    updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== absentLeaveRecord.id));
+    const yesterday = subDays(new Date(), 1);
+    const yesterdayString = format(yesterday, "yyyy-MM-dd");
+
+    updateLeaves(prevLeaves => prevLeaves.map(l =>
+        l.id === absentLeaveRecord.id
+        ? { ...l, endDate: yesterdayString }
+        : l
+    ));
+
     toast({ title: t.absentEmployeesPage.markedPresentTitle, description: t.leave.employeeMarkedReserve(employeeName) });
   };
   
