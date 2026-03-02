@@ -88,7 +88,7 @@ export default function AbsentManagementPage() {
   }, [employees, leaves, duties, todayString, t]);
 
 
-  const handleReturnFromAbsent = (employeeId: string, employeeName: string) => {
+  const handleMarkAsReserve = (employeeId: string, employeeName: string) => {
     const absentLeaveRecord = leaves.find(l => 
       l.employeeId === employeeId && 
       l.type === 'Absent' && 
@@ -101,7 +101,7 @@ export default function AbsentManagementPage() {
     }
 
     updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== absentLeaveRecord.id));
-    toast({ title: t.absentEmployeesPage.markedPresentTitle, description: t.absentEmployeesPage.markedPresentDescription(employeeName) });
+    toast({ title: t.absentEmployeesPage.markedPresentTitle, description: t.leave.employeeMarkedReserve(employeeName) });
   };
   
 
@@ -224,8 +224,8 @@ export default function AbsentManagementPage() {
                                         </Button>
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => handleReturnFromAbsent(employee.id, employee.name)}>
-                                          {t.absentEmployeesPage.returnFromAbsent}
+                                        <DropdownMenuItem onClick={() => handleMarkAsReserve(employee.id, employee.name)}>
+                                          {t.leave.markAsReserve}
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
                                     </DropdownMenu>
