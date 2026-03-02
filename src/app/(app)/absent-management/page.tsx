@@ -121,7 +121,7 @@ export default function AbsentManagementPage() {
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.date, t.leave.reason]],
+      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.leave.startDate, t.leave.endDate, t.leave.reason]],
       body: absenceRecords.map((absence, index) => {
         const employee = employees.find(e => e.id === absence.employeeId);
         return [
@@ -131,6 +131,7 @@ export default function AbsentManagementPage() {
           employee?.pno || 'N/A',
           absence.employeeName,
           format(new Date(absence.startDate.replace(/-/g, '/')), 'dd-MM-yyyy'),
+          format(new Date(absence.endDate.replace(/-/g, '/')), 'dd-MM-yyyy'),
           absence.reason,
         ];
       }),
@@ -172,7 +173,8 @@ export default function AbsentManagementPage() {
                           <TableHead>{t.badgeNumber}</TableHead>
                           <TableHead>{t.pno}</TableHead>
                           <TableHead>{t.name}</TableHead>
-                          <TableHead>{t.date}</TableHead>
+                          <TableHead>{t.leave.startDate}</TableHead>
+                          <TableHead>{t.leave.endDate}</TableHead>
                           <TableHead>{t.leave.reason}</TableHead>
                           {user?.rank === 'Administrator' && <TableHead className="text-right">{t.actions}</TableHead>}
                       </TableRow>
@@ -201,6 +203,7 @@ export default function AbsentManagementPage() {
                                 </div>
                               </TableCell>
                               <TableCell>{format(new Date(absence.startDate.replace(/-/g, '/')), 'dd-MM-yyyy')}</TableCell>
+                              <TableCell>{format(new Date(absence.endDate.replace(/-/g, '/')), 'dd-MM-yyyy')}</TableCell>
                               <TableCell>{absence.reason}</TableCell>
                               {user?.rank === 'Administrator' && (
                                 <TableCell className="text-right">
@@ -230,7 +233,7 @@ export default function AbsentManagementPage() {
                       })
                       ) : (
                       <TableRow>
-                          <TableCell colSpan={user?.rank === 'Administrator' ? 8 : 7} className="text-center h-24">
+                          <TableCell colSpan={user?.rank === 'Administrator' ? 9 : 8} className="text-center h-24">
                               {t.absentManagement.noAbsences}
                           </TableCell>
                       </TableRow>
