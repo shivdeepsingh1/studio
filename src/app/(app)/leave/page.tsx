@@ -310,9 +310,9 @@ export default function LeavePage() {
   const handleExport = () => {
     const doc = new jsPDF()
     if (font) {
-      doc.addFileToVFS("Mangal.ttf", font);
-      doc.addFont("Mangal.ttf", "Mangal", "normal");
-      doc.setFont("Mangal");
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
     }
 
     doc.text(t.sidebar.leave, 14, 16)
@@ -368,7 +368,7 @@ export default function LeavePage() {
       startY: 20,
       head: head,
       body: body as any,
-      ...(font && { styles: { font: "Mangal" }, headStyles: {font: "Mangal"}, bodyStyles: {font: "Mangal"} })
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     })
 
     doc.save("leave_records.pdf")

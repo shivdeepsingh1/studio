@@ -91,9 +91,9 @@ export default function TransferredEmployeesPage() {
   const handleExportPdf = () => {
     const doc = new jsPDF();
     if (font) {
-      doc.addFileToVFS("Mangal.ttf", font);
-      doc.addFont("Mangal.ttf", "Mangal", "normal");
-      doc.setFont("Mangal");
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
     }
     
     doc.text(`${t.pageHeaders.transferredEmployees.title}`, 14, 16);
@@ -111,7 +111,7 @@ export default function TransferredEmployeesPage() {
         employee.transferDate ? format(new Date(employee.transferDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A',
         employee.transferLocation,
       ]),
-      ...(font && { styles: { font: "Mangal" }, headStyles: {font: "Mangal"}, bodyStyles: {font: "Mangal"} })
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
     doc.save(`transferred_employees.pdf`);
   };

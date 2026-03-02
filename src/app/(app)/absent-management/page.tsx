@@ -124,9 +124,9 @@ export default function AbsentManagementPage() {
   const handleExportPdf = () => {
     const doc = new jsPDF();
     if (font) {
-      doc.addFileToVFS("Mangal.ttf", font);
-      doc.addFont("Mangal.ttf", "Mangal", "normal");
-      doc.setFont("Mangal");
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
     }
     
     doc.text(`${t.absentEmployeesPage.title} - ${format(new Date(), 'dd-MM-yyyy')}`, 14, 16);
@@ -141,7 +141,7 @@ export default function AbsentManagementPage() {
         t.ranks[e.employee.rank],
         e.employee.contact,
       ]),
-      ...(font && { styles: { font: "Mangal" }, headStyles: {font: "Mangal"}, bodyStyles: {font: "Mangal"} })
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
     doc.save(`absent_employees_${todayString}.pdf`);
   };

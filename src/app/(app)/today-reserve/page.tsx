@@ -98,9 +98,9 @@ export default function TodayReservePage() {
   const handleExportPdf = () => {
     const doc = new jsPDF();
     if (font) {
-      doc.addFileToVFS("Mangal.ttf", font);
-      doc.addFont("Mangal.ttf", "Mangal", "normal");
-      doc.setFont("Mangal");
+      doc.addFileToVFS("Hind-Regular.ttf", font);
+      doc.addFont("Hind-Regular.ttf", "Hind", "normal");
+      doc.setFont("Hind");
     }
     
     doc.text(`${t.pageHeaders.todayReserve.title} - ${format(new Date(), 'dd-MM-yyyy')}`, 14, 16);
@@ -117,7 +117,7 @@ export default function TodayReservePage() {
         employee.contact,
         t.statement.reserve,
       ]),
-      ...(font && { styles: { font: "Mangal" }, headStyles: {font: "Mangal"}, bodyStyles: {font: "Mangal"} })
+      ...(font && { styles: { font: "Hind" }, headStyles: {font: "Hind"}, bodyStyles: {font: "Hind"} })
     });
     doc.save(`reserve_employees_${todayString}.pdf`);
   };
