@@ -318,6 +318,13 @@ export const en = {
     employeeMarkedReserve: (name: string) => `${name} has been marked as reserve.`,
     absentFromLeave: 'Absent from Leave',
     totalDays: 'Total Days',
+    suspendFromLeave: 'Suspend from Leave',
+    suspendEmployeeTitle: 'Suspend Employee',
+    suspendEmployeeDescription: (name: string) => `You are about to suspend ${name}. Please provide the suspension details.`,
+    suspensionLetterNumber: 'Suspension Letter No.',
+    suspensionDate: 'Suspension Date',
+    suspensionSuccessTitle: 'Employee Suspended',
+    suspensionSuccessDescription: (name: string) => `${name} has been suspended successfully.`,
   },
 
   // Profile Page

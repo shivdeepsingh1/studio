@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { format, subDays } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -30,6 +30,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 type OnLeaveEmployee = {
   employee: Employee;
@@ -38,11 +48,16 @@ type OnLeaveEmployee = {
 
 export default function TodayOnLeavePage() {
   const { user } = useAuth();
-  const { employees, leaves, updateLeaves } = useData();
+  const { employees, leaves, updateLeaves, updateEmployees } = useData();
   const { t } = useLanguage();
   const { toast } = useToast();
 
   const today = useMemo(() => new Date(), []);
+  
+  const [isSuspendDialogOpen, setIsSuspendDialogOpen] = useState(false);
+  const [employeeToSuspend, setEmployeeToSuspend] = useState<OnLeaveEmployee | null>(null);
+  const [suspensionDetails, setSuspensionDetails] = useState({ letterNumber: '', date: '' });
+
 
   const onLeaveEmployees = useMemo(() => {
     const todayStart = new Date(today);
@@ -118,6 +133,63 @@ export default function TodayOnLeavePage() {
         format(new Date(), "dd-MM-yyyy")
       ),
     });
+  };
+
+  const handleOpenSuspendDialog = (employeeData: OnLeaveEmployee) => {
+    setEmployeeToSuspend(employeeData);
+    setSuspensionDetails({ letterNumber: '', date: format(new Date(), 'yyyy-MM-dd') });
+    setIsSuspendDialogOpen(true);
+  };
+  
+  const handleConfirmSuspension = () => {
+    if (!employeeToSuspend || !suspensionDetails.date || !suspensionDetails.letterNumber) {
+      toast({
+        variant: "destructive",
+        title: t.leave.fillAllFields,
+      });
+      return;
+    }
+    
+    const { employee, leave } = employeeToSuspend;
+
+    // End the leave one day before suspension
+    const suspensionDate = new Date(suspensionDetails.date.replace(/-/g, '/'));
+    const leaveEndDate = subDays(suspensionDate, 1);
+    const leaveEndDateString = format(leaveEndDate, "yyyy-MM-dd");
+    
+    // Check if the new leave end date is valid
+    const leaveStartDate = new Date(leave.startDate.replace(/-/g, '/'));
+    if (leaveEndDate < leaveStartDate) {
+         updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== leave.id));
+    } else {
+        updateLeaves(prevLeaves =>
+          prevLeaves.map(l =>
+            l.id === leave.id ? { ...l, endDate: leaveEndDateString } : l
+          )
+        );
+    }
+    
+    // Update employee status to suspended
+    updateEmployees(prevEmployees =>
+      prevEmployees.map(e =>
+        e.id === employee.id
+          ? {
+              ...e,
+              status: 'Suspended',
+              suspensionDate: suspensionDetails.date,
+              suspensionLetterNumber: suspensionDetails.letterNumber,
+            }
+          : e
+      )
+    );
+
+    toast({
+      title: t.leave.suspensionSuccessTitle,
+      description: t.leave.suspensionSuccessDescription(employee.name),
+    });
+
+    setIsSuspendDialogOpen(false);
+    setEmployeeToSuspend(null);
   };
 
 
@@ -230,6 +302,9 @@ export default function TodayOnLeavePage() {
                                     <DropdownMenuItem className="text-destructive" onClick={() => handleAbsentFromLeave(employee.id, employee.name)}>
                                       {t.leave.absentFromLeave}
                                     </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-destructive" onClick={() => handleOpenSuspendDialog({ employee, leave })}>
+                                      {t.leave.suspendFromLeave}
+                                    </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </TableCell>
@@ -247,6 +322,52 @@ export default function TodayOnLeavePage() {
               </div>
           </CardContent>
       </Card>
+      
+      <Dialog open={isSuspendDialogOpen} onOpenChange={setIsSuspendDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.leave.suspendEmployeeTitle}</DialogTitle>
+            <DialogDescription>
+              {employeeToSuspend ? t.leave.suspendEmployeeDescription(employeeToSuspend.employee.name) : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="suspension-letter-number" className="text-right">
+                {t.leave.suspensionLetterNumber}
+              </Label>
+              <Input
+                id="suspension-letter-number"
+                value={suspensionDetails.letterNumber}
+                onChange={(e) => setSuspensionDetails(prev => ({...prev, letterNumber: e.target.value}))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="suspension-date" className="text-right">
+                {t.leave.suspensionDate}
+              </Label>
+              <Input
+                id="suspension-date"
+                type="date"
+                value={suspensionDetails.date}
+                onChange={(e) => setSuspensionDetails(prev => ({...prev, date: e.target.value}))}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsSuspendDialogOpen(false)}
+            >
+              {t.cancel}
+            </Button>
+            <Button onClick={handleConfirmSuspension} variant="destructive">{t.leave.suspendFromLeave}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

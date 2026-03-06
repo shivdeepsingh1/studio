@@ -318,6 +318,13 @@ export const hi = {
     employeeMarkedReserve: (name: string) => `${name} को रिज़र्व के रूप में चिह्नित किया गया है।`,
     absentFromLeave: 'अवकाश से अनुपस्थित',
     totalDays: 'कुल दिन',
+    suspendFromLeave: 'अवकाश से निलंबित करें',
+    suspendEmployeeTitle: 'कर्मचारी को निलंबित करें',
+    suspendEmployeeDescription: (name: string) => `आप ${name} को निलंबित करने वाले हैं। कृपया निलंबन का विवरण प्रदान करें।`,
+    suspensionLetterNumber: 'निलंबन पत्र संख्या',
+    suspensionDate: 'निलंबन तिथि',
+    suspensionSuccessTitle: 'कर्मचारी निलंबित',
+    suspensionSuccessDescription: (name: string) => `${name} को सफलतापूर्वक निलंबित कर दिया गया है।`,
   },
 
   // Profile Page

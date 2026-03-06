@@ -54,6 +54,7 @@ export interface Employee {
   role: 'admin' | 'employee';
   status: 'Active' | 'Suspended' | 'Transferred';
   suspensionDate?: string;
+  suspensionLetterNumber?: string;
   transferDate?: string;
   transferLocation?: string;
 }
