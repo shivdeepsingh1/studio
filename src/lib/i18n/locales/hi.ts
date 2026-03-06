@@ -1,4 +1,3 @@
-
 export const hi = {
   // Common
   loading: 'लोड हो रहा है...',
@@ -246,7 +245,8 @@ export const hi = {
     addEmployee: 'कर्मचारी जोड़ें',
     // Import Dialog
     importFromExcel: 'एक्सेल से कर्मचारी आयात करें',
-    importDescription: 'एक .xlsx या .csv फ़ाइल अपलोड करें। फ़ाइल में हेडर के साथ कॉलम होने चाहिए: `badgeNumber`, `pno`, `name`, `rank`, `dob`, `contact`, `joiningDate`, `joiningDistrict`, `password`, `role`, `status`.',
+    importDescription: 'एक .xlsx या .csv फ़ाइल अपलोड करें। सुनिश्चित करें कि कॉलम हेडर टेम्पलेट से मेल खाते हैं। आवश्यक प्रारूप देखने के लिए आप टेम्पलेट डाउनलोड कर सकते हैं।',
+    downloadTemplate: 'टेम्पलेट डाउनलोड करें',
     importSuccess: (count: number) => `${count} नए कर्मचारी सफलतापूर्वक आयात किए गए!`,
     noNewEmployees: 'आयात करने के लिए कोई नया अद्वितीय कर्मचारी नहीं।',
     importError: (error: string) => `फ़ाइल आयात करने में त्रुटि: ${error}`,

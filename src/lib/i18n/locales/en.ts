@@ -1,4 +1,3 @@
-
 export const en = {
   // Common
   loading: 'Loading...',
@@ -246,7 +245,8 @@ export const en = {
     addEmployee: 'Add Employee',
     // Import Dialog
     importFromExcel: 'Import Employees from Excel',
-    importDescription: 'Upload an .xlsx or .csv file. The file should have columns with headers: `badgeNumber`, `pno`, `name`, `rank`, `dob`, `contact`, `joiningDate`, `joiningDistrict`, `password`, `role`, `status`.',
+    importDescription: 'Upload an .xlsx or .csv file. Make sure the column headers match the template. You can download the template to see the required format.',
+    downloadTemplate: 'Download Template',
     importSuccess: (count: number) => `${count} new employees imported successfully!`,
     noNewEmployees: 'No new unique employees to import.',
     importError: (error: string) => `Error importing file: ${error}`,

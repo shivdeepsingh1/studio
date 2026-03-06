@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -209,12 +208,25 @@ export default function EmployeesPage() {
             throw new Error(`Row ${index + 2}: Missing required fields (pno, name, rank).`);
           }
           
-          const formatDate = (date: any): string => {
-             if (date instanceof Date && !isNaN(date.getTime())) {
-                const tempDate = new Date(date.valueOf() + date.getTimezoneOffset() * 60000);
+          const formatDate = (date: any): string | undefined => {
+             if (!date) return undefined;
+             let d: Date;
+             if (date instanceof Date) {
+                d = date;
+             } else if (typeof date === 'string') {
+                d = new Date(date.replace(/-/g, '/'));
+             } else if (typeof date === 'number') {
+                d = new Date(Math.round((date - 25569) * 86400 * 1000));
+             }
+             else {
+                return undefined;
+             }
+
+             if (d instanceof Date && !isNaN(d.getTime())) {
+                const tempDate = new Date(d.valueOf() + (d.getTimezoneOffset() * 60000));
                 return tempDate.toISOString().split('T')[0];
              }
-             return "";
+             return undefined;
           }
 
           const newId = Date.now().toString() + index;
@@ -226,17 +238,20 @@ export default function EmployeesPage() {
             pno: row.pno.toString(),
             name: row.name,
             rank: row.rank as EmployeeRank,
-            dob: formatDate(row.dob),
+            dob: formatDate(row.dob) || '',
             contact: row.contact?.toString() || '',
-            joiningDate: formatDate(row.joiningDate),
+            joiningDate: formatDate(row.joiningDate) || '',
             joiningDistrict: row.joiningDistrict || '',
             avatarUrl,
             password: row.password?.toString() || '',
             role: row.role === 'admin' ? 'admin' : 'employee',
             status: row.status as Employee['status'] || 'Active',
-            suspensionDate: row.status === 'Suspended' ? formatDate(row.suspensionDate) : undefined,
-            transferDate: row.status === 'Transferred' ? formatDate(row.transferDate) : undefined,
-            transferLocation: row.status === 'Transferred' ? row.transferLocation : undefined,
+            suspensionDate: formatDate(row.suspensionDate),
+            suspensionLetterNumber: row.suspensionLetterNumber?.toString(),
+            transferDate: formatDate(row.transferDate),
+            transferLocation: row.transferLocation?.toString(),
+            restorationDate: formatDate(row.restorationDate),
+            restorationLetterNumber: row.restorationLetterNumber?.toString(),
           };
         });
 
@@ -304,24 +319,40 @@ export default function EmployeesPage() {
   }
 
   const handleExportExcel = () => {
-    const dataToExport = filteredEmployees.map((employee, index) => ({
-      [t.serialNumber]: index + 1,
-      [t.rank]: t.ranks[employee.rank],
-      [t.role]: employee.role === 'admin' ? t.employees.admin : t.employees.employee,
-      [t.status]: t.statusTypes[employee.status],
-      [t.badgeNumber]: employee.badgeNumber,
-      [t.pno]: employee.pno,
-      [t.name]: employee.name,
-      [t.employees.dob]: employee.dob && !isNaN(new Date(employee.dob.replace(/-/g, '/')).getTime()) ? format(new Date(employee.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
-      [t.employees.joiningDate]: employee.joiningDate && !isNaN(new Date(employee.joiningDate.replace(/-/g, '/')).getTime()) ? format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
-      [t.employees.joiningBranchDistrict]: employee.joiningDistrict,
-      [t.employees.contactNumber]: employee.contact,
+    const dataToExport = filteredEmployees.map((employee) => ({
+      badgeNumber: employee.badgeNumber,
+      pno: employee.pno,
+      name: employee.name,
+      rank: employee.rank,
+      dob: employee.dob,
+      contact: employee.contact,
+      joiningDate: employee.joiningDate,
+      joiningDistrict: employee.joiningDistrict,
+      password: employee.password || '',
+      role: employee.role,
+      status: employee.status,
+      suspensionDate: employee.suspensionDate || '',
+      suspensionLetterNumber: employee.suspensionLetterNumber || '',
+      transferDate: employee.transferDate || '',
+      transferLocation: employee.transferLocation || '',
+      restorationDate: employee.restorationDate || '',
+      restorationLetterNumber: employee.restorationLetterNumber || '',
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Employees");
     XLSX.writeFile(workbook, "employees.xlsx");
+  };
+
+  const handleDownloadTemplate = () => {
+    const headers = [
+      'badgeNumber', 'pno', 'name', 'rank', 'dob', 'contact', 'joiningDate', 'joiningDistrict', 'password', 'role', 'status', 'suspensionDate', 'suspensionLetterNumber', 'transferDate', 'transferLocation', 'restorationDate', 'restorationLetterNumber'
+    ];
+    const ws = XLSX.utils.aoa_to_sheet([headers]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template');
+    XLSX.writeFile(wb, 'employees_template.xlsx');
   };
 
   const handleEmployeeAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -382,18 +413,24 @@ export default function EmployeesPage() {
                 onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
               />
             </div>
-            <DialogFooter>
-               <Button variant="secondary" onClick={() => {
-                  setIsImportDialogOpen(false);
-                  setImportFile(null);
-               }}>{t.cancel}</Button>
-               <Button onClick={() => {
-                  if (importFile) {
-                    handleFileImport(importFile);
-                  }
-               }} disabled={!importFile}>
-                {t.employees.importExcel}
-               </Button>
+            <DialogFooter className="sm:justify-between">
+              <Button variant="ghost" onClick={handleDownloadTemplate} type="button">
+                <Download className="mr-2 h-4 w-4" />
+                {t.employees.downloadTemplate}
+              </Button>
+              <div className="flex gap-2">
+                 <Button variant="secondary" onClick={() => {
+                    setIsImportDialogOpen(false);
+                    setImportFile(null);
+                 }}>{t.cancel}</Button>
+                 <Button onClick={() => {
+                    if (importFile) {
+                      handleFileImport(importFile);
+                    }
+                 }} disabled={!importFile}>
+                  {t.employees.importExcel}
+                 </Button>
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
