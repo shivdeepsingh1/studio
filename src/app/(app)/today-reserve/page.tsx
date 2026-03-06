@@ -414,7 +414,7 @@ export default function TodayReservePage() {
                                       {t.duty.absentFromReserve}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="text-destructive" onClick={() => handleOpenSuspendDialog(employee)}>
-                                      {t.leave.suspendFromLeave}
+                                      {t.duty.suspendFromReserve}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>

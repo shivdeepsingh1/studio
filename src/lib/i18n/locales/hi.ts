@@ -235,6 +235,7 @@ export const hi = {
     dutyEndedDescription: (name: string) => `${name} को रिज़र्व में भेज दिया गया है।`,
     absentFromDuty: 'ड्यूटी से अनुपस्थित',
     absentFromReserve: 'रिज़र्व से अनुपस्थित',
+    suspendFromReserve: 'रिज़र्व से निलंबित करें',
   },
 
   // Employees Page

@@ -235,6 +235,7 @@ export const en = {
     dutyEndedDescription: (name: string) => `${name} has been moved to reserve.`,
     absentFromDuty: 'Absent from Duty',
     absentFromReserve: 'Absent from Reserve',
+    suspendFromReserve: 'Suspend from Reserve',
   },
 
   // Employees Page
