@@ -479,6 +479,7 @@ export const en = {
     Pending: 'Pending',
     Approved: 'Approved',
     Rejected: 'Rejected',
+    Suspended: 'Suspended',
   },
   shifts: {
     Morning: 'Morning',

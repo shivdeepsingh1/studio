@@ -479,6 +479,7 @@ export const hi = {
     Pending: 'लंबित',
     Approved: 'स्वीकृत',
     Rejected: 'अस्वीकृत',
+    Suspended: 'निलंबित',
   },
   shifts: {
     Morning: 'सुबह',

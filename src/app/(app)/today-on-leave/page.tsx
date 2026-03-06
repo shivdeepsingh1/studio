@@ -152,24 +152,31 @@ export default function TodayOnLeavePage() {
     
     const { employee, leave } = employeeToSuspend;
 
-    // End the leave one day before suspension
     const suspensionDate = new Date(suspensionDetails.date.replace(/-/g, '/'));
     const leaveEndDate = subDays(suspensionDate, 1);
     const leaveEndDateString = format(leaveEndDate, "yyyy-MM-dd");
     
-    // Check if the new leave end date is valid
     const leaveStartDate = new Date(leave.startDate.replace(/-/g, '/'));
-    if (leaveEndDate < leaveStartDate) {
-         updateLeaves(prevLeaves => prevLeaves.filter(l => l.id !== leave.id));
-    } else {
-        updateLeaves(prevLeaves =>
-          prevLeaves.map(l =>
-            l.id === leave.id ? { ...l, endDate: leaveEndDateString } : l
-          )
-        );
-    }
     
-    // Update employee status to suspended
+    updateLeaves(prevLeaves =>
+      prevLeaves.map(l => {
+        if (l.id === leave.id) {
+          const updatedLeave = { ...l };
+          
+          if (leaveEndDate < leaveStartDate) {
+            updatedLeave.endDate = updatedLeave.startDate;
+          } else {
+            updatedLeave.endDate = leaveEndDateString;
+          }
+          
+          updatedLeave.status = 'Suspended';
+
+          return updatedLeave;
+        }
+        return l;
+      })
+    );
+    
     updateEmployees(prevEmployees =>
       prevEmployees.map(e =>
         e.id === employee.id

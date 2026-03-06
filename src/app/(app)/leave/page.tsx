@@ -402,6 +402,8 @@ export default function LeavePage() {
         return "secondary"
       case "Rejected":
         return "destructive"
+      case "Suspended":
+        return "destructive"
     }
   }
 
@@ -786,5 +788,3 @@ export default function LeavePage() {
     </>
   )
 }
-
-    

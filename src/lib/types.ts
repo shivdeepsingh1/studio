@@ -62,7 +62,7 @@ export interface Employee {
 }
 
 export type LeaveType = 'Casual' | 'Sick' | 'Earned' | 'Absent' | 'Medical' | 'CCL' | 'Other';
-export type LeaveStatus = 'Approved' | 'Pending' | 'Rejected';
+export type LeaveStatus = 'Approved' | 'Pending' | 'Rejected' | 'Suspended';
 
 export interface Leave {
   id: string;
@@ -77,7 +77,7 @@ export interface Leave {
 
 export const leaveTypes: LeaveType[] = ["Casual", "Earned", "CCL", "Medical", "Sick", "Other"];
 
-export const leaveStatuses: LeaveStatus[] = ["Pending", "Approved", "Rejected"];
+export const leaveStatuses: LeaveStatus[] = ["Pending", "Approved", "Rejected", "Suspended"];
 
 export interface Duty {
   id: string;
