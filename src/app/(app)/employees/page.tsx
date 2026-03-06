@@ -70,6 +70,7 @@ export default function EmployeesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
 
@@ -189,8 +190,7 @@ export default function EmployeesPage() {
   const canEdit = user?.role === 'admin';
   const isCurrentUserAdministrator = user?.rank === 'Administrator';
 
-  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileImport = (file: File) => {
     if (!file) return;
 
     const reader = new FileReader();
@@ -261,7 +261,7 @@ export default function EmployeesPage() {
         });
 
         setIsImportDialogOpen(false);
-        e.target.value = '';
+        setImportFile(null);
 
       } catch (error: any) {
         alert(t.employees.importError(error.message));
@@ -355,7 +355,12 @@ export default function EmployeesPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+        <Dialog open={isImportDialogOpen} onOpenChange={(isOpen) => {
+          setIsImportDialogOpen(isOpen);
+          if (!isOpen) {
+            setImportFile(null);
+          }
+        }}>
           <DialogTrigger asChild>
             <Button variant="outline" disabled={!canEdit}>
               <FileUp className="mr-2 h-4 w-4" />
@@ -371,14 +376,24 @@ export default function EmployeesPage() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <Input
-                id="file"
+                id="file-upload"
                 type="file"
                 accept=".xlsx, .csv"
-                onChange={handleFileImport}
+                onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
               />
             </div>
             <DialogFooter>
-               <Button variant="secondary" onClick={() => setIsImportDialogOpen(false)}>{t.cancel}</Button>
+               <Button variant="secondary" onClick={() => {
+                  setIsImportDialogOpen(false);
+                  setImportFile(null);
+               }}>{t.cancel}</Button>
+               <Button onClick={() => {
+                  if (importFile) {
+                    handleFileImport(importFile);
+                  }
+               }} disabled={!importFile}>
+                {t.employees.importExcel}
+               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
