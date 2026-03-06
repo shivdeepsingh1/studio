@@ -406,9 +406,15 @@ export const en = {
   suspendedEmployeesPage: {
       noSuspended: 'No employees are currently suspended.',
       suspensionDate: 'Suspension Date',
-      reserveFromSuspend: 'Reserve from Suspend',
-      unsuspendedTitle: 'Employee Reinstated',
-      unsuspendedDescription: (name: string) => `${name} has been reinstated and moved to reserve.`,
+      reserveFromSuspend: 'Restore from Suspend',
+      reinstatedTitle: 'Employee Reinstated',
+      reinstatedDescription: (name: string) => `${name} has been reinstated and is now in reserve.`,
+      suspensionTillDate: 'Suspension Till Date',
+      totalDays: 'Total Days',
+      restoreEmployeeTitle: 'Restore Employee',
+      restoreEmployeeDescription: 'Enter the restoration details to reinstate the employee.',
+      restorationLetterNumber: 'Restoration Letter No.',
+      restorationDate: 'Restoration Date',
   },
 
   // Transferred Employees Page

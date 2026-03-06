@@ -406,9 +406,15 @@ export const hi = {
   suspendedEmployeesPage: {
       noSuspended: 'वर्तमान में कोई भी कर्मचारी निलंबित नहीं है।',
       suspensionDate: 'निलंबन की तारीख',
-      reserveFromSuspend: 'निलंबन से रिज़र्व करें',
-      unsuspendedTitle: 'कर्मचारी बहाल',
-      unsuspendedDescription: (name: string) => `${name} को बहाल कर दिया गया है और रिज़र्व में भेज दिया गया है।`,
+      reserveFromSuspend: 'निलंबन से बहाल करें',
+      reinstatedTitle: 'कर्मचारी बहाल',
+      reinstatedDescription: (name: string) => `${name} को बहाल कर दिया गया है और अब वह रिज़र्व में है।`,
+      suspensionTillDate: 'निलंबन तक की तारीख',
+      totalDays: 'कुल दिन',
+      restoreEmployeeTitle: 'कर्मचारी को बहाल करें',
+      restoreEmployeeDescription: 'कर्मचारी को बहाल करने के लिए बहाली का विवरण दर्ज करें।',
+      restorationLetterNumber: 'बहाली पत्र संख्या',
+      restorationDate: 'बहाली की तारीख',
   },
 
   // Transferred Employees Page

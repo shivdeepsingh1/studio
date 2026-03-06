@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useMemo } from "react";
-import { format } from "date-fns";
+import { useMemo, useState } from "react";
+import { format, differenceInCalendarDays } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { font } from "@/lib/fonts/Hind-Regular";
@@ -17,7 +17,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
 import { useData } from "@/lib/data-provider";
 import { useLanguage } from "@/lib/i18n/language-provider";
@@ -37,16 +47,32 @@ export default function SuspendedEmployeesPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
 
+  const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
+  const [employeeToRestore, setEmployeeToRestore] = useState<Employee | null>(null);
+  const [restorationDetails, setRestorationDetails] = useState({ letterNumber: '', date: '' });
+
   const suspendedEmployees = useMemo(() => {
     return employees.filter(e => e.status === 'Suspended');
   }, [employees]);
 
-  const handleReserveFromSuspend = (employee: Employee) => {
-    updateEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, status: 'Active', suspensionDate: undefined } : e));
+  const handleOpenRestoreDialog = (employee: Employee) => {
+    setEmployeeToRestore(employee);
+    setRestorationDetails({ letterNumber: '', date: format(new Date(), 'yyyy-MM-dd') });
+    setIsRestoreDialogOpen(true);
+  };
+  
+  const handleConfirmRestoration = () => {
+    if (!employeeToRestore || !restorationDetails.letterNumber || !restorationDetails.date) {
+      toast({ variant: 'destructive', title: t.leave.fillAllFields });
+      return;
+    }
+    updateEmployees(prev => prev.map(e => e.id === employeeToRestore.id ? { ...e, status: 'Active' } : e));
     toast({
-        title: t.suspendedEmployeesPage.unsuspendedTitle,
-        description: t.suspendedEmployeesPage.unsuspendedDescription(employee.name),
+        title: t.suspendedEmployeesPage.reinstatedTitle,
+        description: t.suspendedEmployeesPage.reinstatedDescription(employeeToRestore.name),
     });
+    setIsRestoreDialogOpen(false);
+    setEmployeeToRestore(null);
   };
 
   const handleExportPdf = () => {
@@ -83,6 +109,8 @@ export default function SuspendedEmployeesPage() {
           </div>
       )
   }
+  
+  const today = new Date();
 
   return (
     <>
@@ -111,12 +139,17 @@ export default function SuspendedEmployeesPage() {
                           <TableHead>{t.name}</TableHead>
                           <TableHead>{t.employees.contactNumber}</TableHead>
                           <TableHead>{t.suspendedEmployeesPage.suspensionDate}</TableHead>
+                          <TableHead>{t.suspendedEmployeesPage.suspensionTillDate}</TableHead>
+                          <TableHead className="text-center">{t.suspendedEmployeesPage.totalDays}</TableHead>
                           <TableHead className="text-right">{t.actions}</TableHead>
                       </TableRow>
                   </TableHeader>
                   <TableBody>
                       {suspendedEmployees.length > 0 ? (
-                      suspendedEmployees.map((employee, index) => (
+                      suspendedEmployees.map((employee, index) => {
+                        const suspensionDate = employee.suspensionDate ? new Date(employee.suspensionDate.replace(/-/g, '/')) : null;
+                        const totalDays = suspensionDate ? differenceInCalendarDays(today, suspensionDate) + 1 : 'N/A';
+                        return (
                           <TableRow key={employee.id}>
                               <TableCell>{index + 1}</TableCell>
                               <TableCell>{t.ranks[employee.rank]}</TableCell>
@@ -137,6 +170,8 @@ export default function SuspendedEmployeesPage() {
                               </TableCell>
                               <TableCell>{employee.contact}</TableCell>
                               <TableCell>{employee.suspensionDate ? format(new Date(employee.suspensionDate.replace(/-/g, '/')), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                              <TableCell>{format(today, 'dd-MM-yyyy')}</TableCell>
+                              <TableCell className="text-center">{totalDays}</TableCell>
                               <TableCell className="text-right">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
@@ -146,17 +181,18 @@ export default function SuspendedEmployeesPage() {
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => handleReserveFromSuspend(employee)}>
+                                    <DropdownMenuItem onClick={() => handleOpenRestoreDialog(employee)}>
                                       {t.suspendedEmployeesPage.reserveFromSuspend}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </TableCell>
                           </TableRow>
-                      ))
+                        )
+                      })
                       ) : (
                       <TableRow>
-                          <TableCell colSpan={8} className="text-center h-24">
+                          <TableCell colSpan={10} className="text-center h-24">
                               {t.suspendedEmployeesPage.noSuspended}
                           </TableCell>
                       </TableRow>
@@ -166,6 +202,52 @@ export default function SuspendedEmployeesPage() {
               </div>
           </CardContent>
       </Card>
+      
+      <Dialog open={isRestoreDialogOpen} onOpenChange={setIsRestoreDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.suspendedEmployeesPage.restoreEmployeeTitle}</DialogTitle>
+            <DialogDescription>
+              {employeeToRestore ? t.suspendedEmployeesPage.restoreEmployeeDescription : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="restoration-letter-number" className="text-right">
+                {t.suspendedEmployeesPage.restorationLetterNumber}
+              </Label>
+              <Input
+                id="restoration-letter-number"
+                value={restorationDetails.letterNumber}
+                onChange={(e) => setRestorationDetails(prev => ({...prev, letterNumber: e.target.value}))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="restoration-date" className="text-right">
+                {t.suspendedEmployeesPage.restorationDate}
+              </Label>
+              <Input
+                id="restoration-date"
+                type="date"
+                value={restorationDetails.date}
+                onChange={(e) => setRestorationDetails(prev => ({...prev, date: e.target.value}))}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsRestoreDialogOpen(false)}
+            >
+              {t.cancel}
+            </Button>
+            <Button onClick={handleConfirmRestoration}>{t.save}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
