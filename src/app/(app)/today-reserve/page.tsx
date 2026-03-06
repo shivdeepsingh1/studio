@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -38,13 +37,17 @@ import {
 
 export default function TodayReservePage() {
   const { user } = useAuth();
-  const { employees, duties, leaves, updateDuties, updateLeaves } = useData();
+  const { employees, duties, leaves, updateDuties, updateLeaves, updateEmployees } = useData();
   const { t } = useLanguage();
   const { toast } = useToast();
 
   const [isAssignDutyDialogOpen, setIsAssignDutyDialogOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+
+  const [isSuspendDialogOpen, setIsSuspendDialogOpen] = useState(false);
+  const [employeeToSuspend, setEmployeeToSuspend] = useState<Employee | null>(null);
+  const [suspensionDetails, setSuspensionDetails] = useState({ letterNumber: '', date: '' });
 
   const [newDuty, setNewDuty] = useState<{
     shift: 'Morning' | 'Afternoon' | 'Night';
@@ -294,6 +297,43 @@ export default function TodayReservePage() {
     });
   };
 
+  const handleOpenSuspendDialog = (employee: Employee) => {
+    setEmployeeToSuspend(employee);
+    setSuspensionDetails({ letterNumber: '', date: format(new Date(), 'yyyy-MM-dd') });
+    setIsSuspendDialogOpen(true);
+  };
+  
+  const handleConfirmSuspension = () => {
+    if (!employeeToSuspend || !suspensionDetails.date || !suspensionDetails.letterNumber) {
+      toast({
+        variant: "destructive",
+        title: t.leave.fillAllFields,
+      });
+      return;
+    }
+    
+    updateEmployees(prevEmployees =>
+      prevEmployees.map(e =>
+        e.id === employeeToSuspend.id
+          ? {
+              ...e,
+              status: 'Suspended',
+              suspensionDate: suspensionDetails.date,
+              suspensionLetterNumber: suspensionDetails.letterNumber,
+            }
+          : e
+      )
+    );
+
+    toast({
+      title: t.leave.suspensionSuccessTitle,
+      description: t.leave.suspensionSuccessDescription(employeeToSuspend.name),
+    });
+
+    setIsSuspendDialogOpen(false);
+    setEmployeeToSuspend(null);
+  };
+
   if (user?.role !== 'admin') {
       return (
           <div className="flex items-center justify-center h-full">
@@ -372,6 +412,9 @@ export default function TodayReservePage() {
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="text-destructive" onClick={() => handleMarkAbsent(employee)}>
                                       {t.duty.absentFromReserve}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-destructive" onClick={() => handleOpenSuspendDialog(employee)}>
+                                      {t.leave.suspendFromLeave}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -519,6 +562,52 @@ export default function TodayReservePage() {
                 </Button>
                 <Button onClick={handleSaveLeave}>{t.save}</Button>
             </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSuspendDialogOpen} onOpenChange={setIsSuspendDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.leave.suspendEmployeeTitle}</DialogTitle>
+            <DialogDescription>
+              {employeeToSuspend ? t.leave.suspendEmployeeDescription(employeeToSuspend.name) : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="suspension-letter-number" className="text-right">
+                {t.leave.suspensionLetterNumber}
+              </Label>
+              <Input
+                id="suspension-letter-number"
+                value={suspensionDetails.letterNumber}
+                onChange={(e) => setSuspensionDetails(prev => ({...prev, letterNumber: e.target.value}))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="suspension-date" className="text-right">
+                {t.leave.suspensionDate}
+              </Label>
+              <Input
+                id="suspension-date"
+                type="date"
+                value={suspensionDetails.date}
+                onChange={(e) => setSuspensionDetails(prev => ({...prev, date: e.target.value}))}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsSuspendDialogOpen(false)}
+            >
+              {t.cancel}
+            </Button>
+            <Button onClick={handleConfirmSuspension} variant="destructive">{t.leave.suspendFromLeave}</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
