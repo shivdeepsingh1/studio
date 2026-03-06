@@ -9,7 +9,7 @@ import autoTable from "jspdf-autotable"
 import { font } from "@/lib/fonts/Hind-Regular";
 import { PageHeader } from "@/components/page-header"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp, Printer, Pencil } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Search, Eye, EyeOff, RotateCcw, FileUp, Printer, Pencil, Download } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -303,6 +303,27 @@ export default function EmployeesPage() {
     doc.save("employees.pdf")
   }
 
+  const handleExportExcel = () => {
+    const dataToExport = filteredEmployees.map((employee, index) => ({
+      [t.serialNumber]: index + 1,
+      [t.rank]: t.ranks[employee.rank],
+      [t.role]: employee.role === 'admin' ? t.employees.admin : t.employees.employee,
+      [t.status]: t.statusTypes[employee.status],
+      [t.badgeNumber]: employee.badgeNumber,
+      [t.pno]: employee.pno,
+      [t.name]: employee.name,
+      [t.employees.dob]: employee.dob && !isNaN(new Date(employee.dob.replace(/-/g, '/')).getTime()) ? format(new Date(employee.dob.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+      [t.employees.joiningDate]: employee.joiningDate && !isNaN(new Date(employee.joiningDate.replace(/-/g, '/')).getTime()) ? format(new Date(employee.joiningDate.replace(/-/g, '\/')), 'dd-MM-yyyy') : 'N/A',
+      [t.employees.joiningBranchDistrict]: employee.joiningDistrict,
+      [t.employees.contactNumber]: employee.contact,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Employees");
+    XLSX.writeFile(workbook, "employees.xlsx");
+  };
+
   const handleEmployeeAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0] && editingEmployee) {
       const file = e.target.files[0];
@@ -361,6 +382,10 @@ export default function EmployeesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        <Button variant="outline" onClick={handleExportExcel}>
+          <Download className="mr-2 h-4 w-4" />
+          {t.employees.exportExcel}
+        </Button>
         <Button variant="outline" onClick={handleExportPdf}>
           <Printer className="mr-2 h-4 w-4" />
           {t.exportPdf}

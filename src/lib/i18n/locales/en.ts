@@ -242,6 +242,7 @@ export const en = {
   employees: {
     searchPlaceholder: 'Search by PNO, Badge No. or Name...',
     importExcel: 'Import Excel',
+    exportExcel: 'Export Excel',
     addEmployee: 'Add Employee',
     // Import Dialog
     importFromExcel: 'Import Employees from Excel',

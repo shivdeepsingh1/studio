@@ -242,6 +242,7 @@ export const hi = {
   employees: {
     searchPlaceholder: 'PNO, बैज नंबर या नाम से खोजें...',
     importExcel: 'एक्सेल आयात करें',
+    exportExcel: 'एक्सेल निर्यात करें',
     addEmployee: 'कर्मचारी जोड़ें',
     // Import Dialog
     importFromExcel: 'एक्सेल से कर्मचारी आयात करें',
