@@ -66,10 +66,15 @@ export default function SuspendedEmployeesPage() {
       toast({ variant: 'destructive', title: t.leave.fillAllFields });
       return;
     }
-    updateEmployees(prev => prev.map(e => e.id === employeeToRestore.id ? { ...e, status: 'Active' } : e));
+    updateEmployees(prev => prev.map(e => e.id === employeeToRestore.id ? { 
+        ...e, 
+        status: 'Active',
+        restorationLetterNumber: restorationDetails.letterNumber,
+        restorationDate: restorationDetails.date,
+    } : e));
     toast({
-        title: t.suspendedEmployeesPage.reinstatedTitle,
-        description: t.suspendedEmployeesPage.reinstatedDescription(employeeToRestore.name),
+        title: t.todaySuspendedEmployeesPage.reinstatedTitle,
+        description: t.todaySuspendedEmployeesPage.reinstatedDescription(employeeToRestore.name),
     });
     setIsRestoreDialogOpen(false);
     setEmployeeToRestore(null);
@@ -83,11 +88,11 @@ export default function SuspendedEmployeesPage() {
       doc.setFont("Hind");
     }
     
-    doc.text(`${t.pageHeaders.suspendedEmployees.title}`, 14, 16);
+    doc.text(`${t.pageHeaders.todaySuspendedEmployees.title}`, 14, 16);
 
     autoTable(doc, {
       startY: 22,
-      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.employees.contactNumber, t.suspendedEmployeesPage.suspensionDate]],
+      head: [[t.serialNumber, t.rank, t.badgeNumber, t.pno, t.name, t.employees.contactNumber, t.todaySuspendedEmployeesPage.suspensionDate]],
       body: suspendedEmployees.map((employee, index) => [
         index + 1,
         t.ranks[employee.rank],
@@ -115,8 +120,8 @@ export default function SuspendedEmployeesPage() {
   return (
     <>
       <PageHeader
-        title={t.pageHeaders.suspendedEmployees.title}
-        description={t.pageHeaders.suspendedEmployees.description}
+        title={t.pageHeaders.todaySuspendedEmployees.title}
+        description={t.pageHeaders.todaySuspendedEmployees.description}
       >
         <Button variant="outline" onClick={handleExportPdf} disabled={suspendedEmployees.length === 0}>
             <Printer className="mr-2" /> {t.exportPdf}
@@ -125,7 +130,7 @@ export default function SuspendedEmployeesPage() {
       
       <Card>
           <CardHeader>
-              <CardTitle>{t.pageHeaders.suspendedEmployees.title}</CardTitle>
+              <CardTitle>{t.pageHeaders.todaySuspendedEmployees.title}</CardTitle>
           </CardHeader>
           <CardContent>
               <div className="border rounded-lg">
@@ -138,9 +143,9 @@ export default function SuspendedEmployeesPage() {
                           <TableHead>{t.pno}</TableHead>
                           <TableHead>{t.name}</TableHead>
                           <TableHead>{t.employees.contactNumber}</TableHead>
-                          <TableHead>{t.suspendedEmployeesPage.suspensionDate}</TableHead>
-                          <TableHead>{t.suspendedEmployeesPage.suspensionTillDate}</TableHead>
-                          <TableHead className="text-center">{t.suspendedEmployeesPage.totalDays}</TableHead>
+                          <TableHead>{t.todaySuspendedEmployeesPage.suspensionDate}</TableHead>
+                          <TableHead>{t.todaySuspendedEmployeesPage.suspensionTillDate}</TableHead>
+                          <TableHead className="text-center">{t.todaySuspendedEmployeesPage.totalDays}</TableHead>
                           <TableHead className="text-right">{t.actions}</TableHead>
                       </TableRow>
                   </TableHeader>
@@ -182,7 +187,7 @@ export default function SuspendedEmployeesPage() {
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={() => handleOpenRestoreDialog(employee)}>
-                                      {t.suspendedEmployeesPage.reserveFromSuspend}
+                                      {t.todaySuspendedEmployeesPage.reserveFromSuspend}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -193,7 +198,7 @@ export default function SuspendedEmployeesPage() {
                       ) : (
                       <TableRow>
                           <TableCell colSpan={10} className="text-center h-24">
-                              {t.suspendedEmployeesPage.noSuspended}
+                              {t.todaySuspendedEmployeesPage.noSuspended}
                           </TableCell>
                       </TableRow>
                       )}
@@ -206,15 +211,15 @@ export default function SuspendedEmployeesPage() {
       <Dialog open={isRestoreDialogOpen} onOpenChange={setIsRestoreDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t.suspendedEmployeesPage.restoreEmployeeTitle}</DialogTitle>
+            <DialogTitle>{t.todaySuspendedEmployeesPage.restoreEmployeeTitle}</DialogTitle>
             <DialogDescription>
-              {employeeToRestore ? t.suspendedEmployeesPage.restoreEmployeeDescription : ''}
+              {employeeToRestore ? t.todaySuspendedEmployeesPage.restoreEmployeeDescription : ''}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="restoration-letter-number" className="text-right">
-                {t.suspendedEmployeesPage.restorationLetterNumber}
+                {t.todaySuspendedEmployeesPage.restorationLetterNumber}
               </Label>
               <Input
                 id="restoration-letter-number"
@@ -225,7 +230,7 @@ export default function SuspendedEmployeesPage() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="restoration-date" className="text-right">
-                {t.suspendedEmployeesPage.restorationDate}
+                {t.todaySuspendedEmployeesPage.restorationDate}
               </Label>
               <Input
                 id="restoration-date"

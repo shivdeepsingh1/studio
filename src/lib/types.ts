@@ -57,6 +57,8 @@ export interface Employee {
   suspensionLetterNumber?: string;
   transferDate?: string;
   transferLocation?: string;
+  restorationLetterNumber?: string;
+  restorationDate?: string;
 }
 
 export type LeaveType = 'Casual' | 'Sick' | 'Earned' | 'Absent' | 'Medical' | 'CCL' | 'Other';

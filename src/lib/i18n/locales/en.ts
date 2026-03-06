@@ -59,7 +59,8 @@ export const en = {
     english: 'English',
     hindi: 'Hindi',
     absentManagement: 'Absent Management',
-    suspendedEmployees: 'Suspended Employees',
+    suspendedManagement: 'Suspended Management',
+    todaySuspendedEmployees: "Today's Suspended",
     transferredEmployees: 'Transferred Employees',
   },
 
@@ -126,8 +127,12 @@ export const en = {
         title: 'Absent Management',
         description: 'View a historical record of all employee absences.',
     },
-    suspendedEmployees: {
-        title: 'Suspended Employees',
+    suspendedManagement: {
+        title: 'Suspended Employees Log',
+        description: 'View a historical record of all employee suspensions.',
+    },
+    todaySuspendedEmployees: {
+        title: "Today's Suspended Employees",
         description: 'View all employees who are currently suspended.',
     },
     transferredEmployees: {
@@ -403,7 +408,7 @@ export const en = {
   },
   
   // Suspended Employees Page
-  suspendedEmployeesPage: {
+  todaySuspendedEmployeesPage: {
       noSuspended: 'No employees are currently suspended.',
       suspensionDate: 'Suspension Date',
       reserveFromSuspend: 'Restore from Suspend',
@@ -415,6 +420,13 @@ export const en = {
       restoreEmployeeDescription: 'Enter the restoration details to reinstate the employee.',
       restorationLetterNumber: 'Restoration Letter No.',
       restorationDate: 'Restoration Date',
+  },
+  
+  suspendedManagementPage: {
+      suspensionOrderNumber: 'Suspension Order No.',
+      restorationOrderNumber: 'Restoration Order No.',
+      restorationDate: 'Restoration Date',
+      noSuspensionRecords: 'No suspension records found.',
   },
 
   // Transferred Employees Page
@@ -436,6 +448,7 @@ export const en = {
     Suspended: 'Suspended',
     Available: 'Available',
     Transferred: 'Transferred',
+    Active: 'Active',
   },
 
   // Translations for types

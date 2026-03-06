@@ -59,7 +59,8 @@ export const hi = {
     english: 'English',
     hindi: 'हिंदी',
     absentManagement: 'अनुपस्थिति प्रबंधन',
-    suspendedEmployees: 'निलंबित कर्मचारी',
+    suspendedManagement: 'निलंबन प्रबंधन',
+    todaySuspendedEmployees: 'आज के निलंबित',
     transferredEmployees: 'स्थानांतरित कर्मचारी',
   },
   
@@ -126,8 +127,12 @@ export const hi = {
         title: 'अनुपस्थिति प्रबंधन',
         description: 'सभी कर्मचारी अनुपस्थिति का एक ऐतिहासिक रिकॉर्ड देखें।',
     },
-    suspendedEmployees: {
-        title: 'निलंबित कर्मचारी',
+    suspendedManagement: {
+        title: 'निलंबित कर्मचारी लॉग',
+        description: 'सभी कर्मचारी निलंबन का एक ऐतिहासिक रिकॉर्ड देखें।',
+    },
+    todaySuspendedEmployees: {
+        title: 'आज के निलंबित कर्मचारी',
         description: 'वर्तमान में निलंबित सभी कर्मचारियों को देखें।',
     },
     transferredEmployees: {
@@ -403,7 +408,7 @@ export const hi = {
   },
 
   // Suspended Employees Page
-  suspendedEmployeesPage: {
+  todaySuspendedEmployeesPage: {
       noSuspended: 'वर्तमान में कोई भी कर्मचारी निलंबित नहीं है।',
       suspensionDate: 'निलंबन की तारीख',
       reserveFromSuspend: 'निलंबन से बहाल करें',
@@ -415,6 +420,13 @@ export const hi = {
       restoreEmployeeDescription: 'कर्मचारी को बहाल करने के लिए बहाली का विवरण दर्ज करें।',
       restorationLetterNumber: 'बहाली पत्र संख्या',
       restorationDate: 'बहाली की तारीख',
+  },
+
+  suspendedManagementPage: {
+      suspensionOrderNumber: 'निलंबन आदेश संख्या',
+      restorationOrderNumber: 'बहाली आदेश संख्या',
+      restorationDate: 'बहाली की तारीख',
+      noSuspensionRecords: 'कोई निलंबन रिकॉर्ड नहीं मिला।',
   },
 
   // Transferred Employees Page
@@ -436,6 +448,7 @@ export const hi = {
     Suspended: 'निलंबित',
     Available: 'उपलब्ध',
     Transferred: 'स्थानांतरित',
+    Active: 'सक्रिय',
   },
 
   // Translations for types
