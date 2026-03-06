@@ -606,7 +606,7 @@ export default function TodayReservePage() {
             >
               {t.cancel}
             </Button>
-            <Button onClick={handleConfirmSuspension} variant="destructive">{t.leave.suspendFromLeave}</Button>
+            <Button onClick={handleConfirmSuspension} variant="destructive">{t.duty.suspendFromReserve}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
