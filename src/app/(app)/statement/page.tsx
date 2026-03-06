@@ -34,7 +34,7 @@ export default function StatementPage() {
     const todayString = format(today, "yyyy-MM-dd");
     
     const displayRanks = employeeRanks.filter(rank => rank !== 'Administrator');
-    const statementLeaveTypes: (keyof typeof t.leaveTypes)[] = ['Casual', 'Earned', 'CCL', 'Medical'];
+    const statementLeaveTypes: (keyof typeof t.leaveTypes)[] = ['Casual', 'Earned', 'CCL', 'Medical', 'Sick', 'Other'];
 
     const allLeavesToday = leaves.filter(l => {
          if (l.status !== 'Approved' || !l.startDate || !l.endDate) return false;
